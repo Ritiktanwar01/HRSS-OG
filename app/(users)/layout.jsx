@@ -9,7 +9,7 @@ const inter = Inter({ subsets: ["latin"] })
 export const metadata = {
   title: "HRSS - Hindu Rashtriya Sevak Sangh",
   description: "Official website of Hindu Rashtriya Sevak Sangh Charitable Trust",
-  generator: "v0.dev",
+  generator: "Ritik Tanwar",
 }
 
 export default function UserLayout({ children }) {

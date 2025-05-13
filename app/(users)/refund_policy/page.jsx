@@ -15,7 +15,7 @@ export default function RefundPolicyPage() {
 
             <ol className="list-decimal pl-6 space-y-2">
               <li>
-                We appreciate your generous contributions to our cause. Please note that all donations made to [Charity Name] are non-refundable. As a nonprofit organization, we allocate funds immediately toward our mission to create meaningful impact. If you have any concerns or questions, feel free to reach out to us at [Contact Information].
+                We appreciate your generous contributions to our cause. Please note that all donations made to Hindu Rashtriya Sevak Sangh Charitable Trust are non-refundable. As a nonprofit organization, we allocate funds immediately toward our mission to create meaningful impact. If you have any concerns or questions, feel free to reach out to us at hrsscharity@gmail.com.
 
                 This ensures transparency while maintaining a warm and appreciative tone toward your donors. Would you like me to tweak it further based on your preferences?
               </li>
