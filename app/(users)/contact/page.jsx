@@ -11,6 +11,7 @@ import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { toast } from "@/components/ui/use-toast"
 import { Mail, Phone, MapPin, Clock } from "lucide-react"
+import Map from "../../../lib/Map"
 
 const contactFormSchema = z.object({
   name: z.string().min(2, { message: "Name must be at least 2 characters." }),
@@ -289,7 +290,8 @@ export default function ContactPage() {
       <div className="mt-16 max-w-5xl mx-auto">
         <h2 className="text-2xl font-semibold text-bhagva-700 mb-6 text-center">Find Us</h2>
         <div className="bg-gray-100 h-[400px] w-full rounded-lg shadow-md flex items-center justify-center">
-          <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3526.686287682272!2d77.3858726!3d27.880905599999995!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x39733bd5aa89f1f3%3A0x668eb0956dd0709!2sHindu%20Rastra%20Sevak%20Sang%20Charitable%20trust!5e0!3m2!1sen!2sin!4v1747140246156!5m2!1sen!2sin" width="600" height="450" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+          <Map />
+          {/* <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3526.686287682272!2d77.3858726!3d27.880905599999995!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x39733bd5aa89f1f3%3A0x668eb0956dd0709!2sHindu%20Rastra%20Sevak%20Sang%20Charitable%20trust!5e0!3m2!1sen!2sin!4v1747140246156!5m2!1sen!2sin" width="600" height="450" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe> */}
         </div>
       </div>
     </div>
