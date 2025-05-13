@@ -99,7 +99,7 @@ export default function AdminAboutPage() {
         const token = getAuthToken()
         const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/team-members`, {
           headers: {
-            Authorization: `Bearer ${token}`,
+            Authorization: `Bearer ${localStorage.getItem('access_token')}`,
           },
         })
 
@@ -129,7 +129,7 @@ export default function AdminAboutPage() {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
+          Authorization: `Bearer ${localStorage.getItem('access_token')}`,
         },
         body: JSON.stringify(data),
       })
@@ -182,7 +182,7 @@ export default function AdminAboutPage() {
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/team-members/${id}`, {
         method: "DELETE",
         headers: {
-          Authorization: `Bearer ${token}`,
+          Authorization: `Bearer ${localStorage.getItem('access_token')}`,
         },
       })
 
@@ -217,7 +217,7 @@ export default function AdminAboutPage() {
           method: "PUT",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
+            Authorization: `Bearer ${localStorage.getItem('access_token')}`,
           },
           body: JSON.stringify(data),
         })
@@ -452,7 +452,7 @@ export default function AdminAboutPage() {
                                         const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/upload`, {
                                           method: "POST",
                                           headers: {
-                                            Authorization: `Bearer ${token}`,
+                                            Authorization: `Bearer ${localStorage.getItem('access_token')}`,
                                           },
                                           body: formData,
                                         })

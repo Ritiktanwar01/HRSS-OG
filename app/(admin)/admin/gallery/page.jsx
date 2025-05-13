@@ -101,7 +101,7 @@ export default function AdminGalleryPage() {
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/gallery/${id}`, {
         method: "DELETE",
         headers: {
-          Authorization: `Bearer ${token}`,
+          Authorization: `Bearer ${localStorage.getItem('access_token')}`,
         },
       })
 
@@ -149,7 +149,7 @@ export default function AdminGalleryPage() {
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/upload`, {
         method: "POST",
         headers: {
-          Authorization: `Bearer ${token}`,
+          Authorization: `Bearer ${localStorage.getItem('access_token')}`,
         },
         body: formData,
       })
@@ -197,7 +197,7 @@ export default function AdminGalleryPage() {
           method: "PUT",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
+            Authorization: `Bearer ${localStorage.getItem('access_token')}`,
           },
           body: JSON.stringify(newItem),
         })
