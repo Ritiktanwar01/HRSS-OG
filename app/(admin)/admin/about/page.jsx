@@ -70,10 +70,9 @@ export default function AdminAboutPage() {
   useEffect(() => {
     const fetchAboutData = async () => {
       try {
-        const token = getAuthToken()
         const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/about`, {
           headers: {
-            Authorization: `Bearer ${token}`,
+            Authorization: `Bearer ${localStorage.getItem('access_token')}`,
           },
         })
 

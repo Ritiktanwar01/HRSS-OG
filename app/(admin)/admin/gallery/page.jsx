@@ -45,7 +45,7 @@ export default function AdminGalleryPage() {
         const token = getAuthToken()
         const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/gallery`, {
           headers: {
-            Authorization: `Bearer ${token}`,
+            Authorization: `Bearer ${localStorage.getItem('access_token')}`,
           },
         })
 
