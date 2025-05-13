@@ -96,7 +96,7 @@ export default function AdminAboutPage() {
 
     const fetchTeamMembers = async () => {
       try {
-        const token = getAuthToken()
+      
         const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/team-members`, {
           headers: {
             Authorization: `Bearer ${localStorage.getItem('access_token')}`,
@@ -124,7 +124,7 @@ export default function AdminAboutPage() {
   async function onAboutSubmit(data) {
     setIsLoading(true)
     try {
-      const token = getAuthToken()
+    
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/about`, {
         method: "PUT",
         headers: {
@@ -178,7 +178,7 @@ export default function AdminAboutPage() {
 
   async function handleDeleteMember(id) {
     try {
-      const token = getAuthToken()
+    
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/team-members/${id}`, {
         method: "DELETE",
         headers: {
@@ -208,7 +208,7 @@ export default function AdminAboutPage() {
   async function onMemberSubmit(data) {
     setIsLoading(true)
     try {
-      const token = getAuthToken()
+    
       let response
 
       if (editingMember) {
@@ -448,7 +448,7 @@ export default function AdminAboutPage() {
                                         formData.append("file", file)
                                         formData.append("type", "image")
 
-                                        const token = getAuthToken()
+                                      
                                         const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/upload`, {
                                           method: "POST",
                                           headers: {
