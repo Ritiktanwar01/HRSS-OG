@@ -38,7 +38,7 @@ export default function Home() {
       <section className="relative bg-bhagva-800 text-white">
         <div className="container mx-auto px-4 py-20 lg:py-32 flex flex-col lg:flex-row items-center gap-12">
           <div className="lg:w-1/2 space-y-6">
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight">Hindu Rashtriya Sevak Sangh</h1>
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight">Hindu Rashtra Sevak Sangh Charitable Trust</h1>
             <h2 className="text-xl md:text-2xl">Dedicated to serving humanity with compassion and integrity</h2>
             <p className="text-white/80 max-w-xl">
               HRSS is committed to uplifting the underprivileged, preserving cultural heritage, and creating a better
