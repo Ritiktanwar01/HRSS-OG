@@ -11,7 +11,8 @@ import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { toast } from "@/components/ui/use-toast"
 import { Mail, Phone, MapPin, Clock } from "lucide-react"
-import Map from "../../../lib/Map"
+import dynamic from "next/dynamic"
+const Map = dynamic(() => import('../components/Map'), { ssr: false });
 
 const contactFormSchema = z.object({
   name: z.string().min(2, { message: "Name must be at least 2 characters." }),
