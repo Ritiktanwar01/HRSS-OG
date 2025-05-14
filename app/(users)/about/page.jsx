@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Clock, MapPin, Users } from "lucide-react"
+import Image from "next/image"
 
 export default function AboutPage() {
   const [aboutData, setAboutData] = useState({
@@ -59,13 +60,7 @@ export default function AboutPage() {
         <div className="h-1 w-20 bg-bhagva-600 mb-8"></div>
 
         <div className="mb-12">
-          <img
-            src="/placeholder.svg?height=400&width=800"
-            alt="HRSS Members"
-            className="w-full rounded-lg shadow-md mb-6"
-            width={800}
-            height={400}
-          />
+          <Image height={400} width={800} src="/Ganesh visarjan.jfif" alt="About HRSS (Hindu Rashtra Sevak Sangh Charitable Trust)"/>
 
           <h2 className="text-2xl font-semibold text-bhagva-700 mb-4">Our Story</h2>
           <p className="text-gray-700 mb-4">{aboutData.story}</p>
