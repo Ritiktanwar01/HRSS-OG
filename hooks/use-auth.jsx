@@ -25,8 +25,9 @@ export function AuthProvider({ children }) {
           const userData = await response.json()
           setUser(userData)
         } else {
-          // router.replace("/admin/login")
-          setUser(null)
+          const NewToken =  await refreshToken()
+          return NewToken
+
         }
       } catch (error) {
         console.error("Auth check error:", error)
@@ -98,7 +99,7 @@ export function AuthProvider({ children }) {
   // Refresh token function
   const refreshToken = async () => {
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/refresh`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/refresh-token`, {
         method: "POST",
         credentials: "include",
          headers: {
@@ -108,6 +109,10 @@ export function AuthProvider({ children }) {
       })
 
       if (response.ok) {
+        localStorage.clear()
+        const userData = await response.json()
+        localStorage.setItem("access_token", userData.tokens.access_token)
+        localStorage.setItem("refresh_token", userData.tokens.refresh_token)
         return true
       } else {
         setUser(null)
