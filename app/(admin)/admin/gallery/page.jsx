@@ -42,9 +42,14 @@ export default function AdminGalleryPage() {
   useEffect(() => {
     const fetchGalleryItems = async () => {
       try {
+        const token = await getAuthToken()
+        if (!token) {
+          throw new Error("Authentication failed")
+        }
+
         const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/gallery`, {
           headers: {
-            Authorization: `Bearer ${localStorage.getItem('access_token')}`,
+            Authorization: `Bearer ${token}`,
           },
         })
 
@@ -96,11 +101,15 @@ export default function AdminGalleryPage() {
 
   const handleDeleteItem = async (id, type) => {
     try {
-      const token = getAuthToken()
+      const token = await getAuthToken()
+      if (!token) {
+        throw new Error("Authentication failed")
+      }
+
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/gallery/${id}`, {
         method: "DELETE",
         headers: {
-          Authorization: `Bearer ${localStorage.getItem('access_token')}`,
+          Authorization: `Bearer ${token}`,
         },
       })
 
@@ -144,11 +153,15 @@ export default function AdminGalleryPage() {
     formData.append("type", fileType)
 
     try {
-      const token = getAuthToken()
+      const token = await getAuthToken()
+      if (!token) {
+        throw new Error("Authentication failed")
+      }
+
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/upload`, {
         method: "POST",
         headers: {
-          Authorization: `Bearer ${localStorage.getItem('access_token')}`,
+          Authorization: `Bearer ${token}`,
         },
         body: formData,
       })
@@ -187,7 +200,11 @@ export default function AdminGalleryPage() {
     setIsLoading(true)
 
     try {
-      const token = getAuthToken()
+      const token = await getAuthToken()
+      if (!token) {
+        throw new Error("Authentication failed")
+      }
+
       let response
 
       if (editingItem) {
@@ -196,7 +213,7 @@ export default function AdminGalleryPage() {
           method: "PUT",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${localStorage.getItem('access_token')}`,
+            Authorization: `Bearer ${token}`,
           },
           body: JSON.stringify(newItem),
         })
@@ -206,7 +223,7 @@ export default function AdminGalleryPage() {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${localStorage.getItem('access_token')}`,
+            Authorization: `Bearer ${token}`,
           },
           body: JSON.stringify(newItem),
         })
@@ -302,7 +319,7 @@ export default function AdminGalleryPage() {
                     <Plus className="mr-2 h-4 w-4" /> Add Image
                   </Button>
                 </DialogTrigger>
-                <DialogContent className="sm:max-w-[500px]">
+                <DialogContent className="sm:max-w-[500px] max-h-[80vh] overflow-y-auto">
                   <DialogHeader>
                     <DialogTitle>{isAddingItem ? "Add New Image" : "Edit Image"}</DialogTitle>
                     <DialogDescription>
@@ -394,7 +411,7 @@ export default function AdminGalleryPage() {
                       </div>
                     </div>
 
-                    <DialogFooter>
+                    <DialogFooter className="sticky bottom-0 right-0 pt-2 bg-white">
                       <Button type="submit" className="bg-bhagva-700 hover:bg-bhagva-800" disabled={isLoading}>
                         {isLoading ? "Saving..." : isAddingItem ? "Add Image" : "Save Changes"}
                       </Button>
@@ -454,7 +471,7 @@ export default function AdminGalleryPage() {
                     <Plus className="mr-2 h-4 w-4" /> Add Video
                   </Button>
                 </DialogTrigger>
-                <DialogContent className="sm:max-w-[500px]">
+                <DialogContent className="sm:max-w-[500px] max-h-[80vh] overflow-y-auto">
                   <DialogHeader>
                     <DialogTitle>{isAddingItem ? "Add New Video" : "Edit Video"}</DialogTitle>
                     <DialogDescription>
@@ -564,7 +581,7 @@ export default function AdminGalleryPage() {
                       </div>
                     </div>
 
-                    <DialogFooter>
+                    <DialogFooter className="sticky bottom-0 right-0 pt-2 bg-white">
                       <Button type="submit" className="bg-bhagva-700 hover:bg-bhagva-800" disabled={isLoading}>
                         {isLoading ? "Saving..." : isAddingItem ? "Add Video" : "Save Changes"}
                       </Button>

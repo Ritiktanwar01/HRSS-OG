@@ -143,11 +143,11 @@ export default function AboutPage() {
             </div>
             <div className="flex items-center">
               <Users className="h-6 w-6 text-bhagva-600 mr-2" />
-              <span className="text-gray-700">5,000+ Active Volunteers</span>
+              <span className="text-gray-700">5,00+ Active Volunteers</span>
             </div>
             <div className="flex items-center">
               <Clock className="h-6 w-6 text-bhagva-600 mr-2" />
-              <span className="text-gray-700">18+ Years of Service</span>
+              <span className="text-gray-700">3+ Years of Service</span>
             </div>
           </div>
         </div>

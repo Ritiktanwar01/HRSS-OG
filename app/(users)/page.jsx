@@ -152,17 +152,17 @@ export default function Home() {
             </div>
 
             <div className="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow">
-              <div className="text-4xl font-bold text-bhagva-700 mb-2">10K+</div>
+              <div className="text-4xl font-bold text-bhagva-700 mb-2">5K+</div>
               <div className="text-gray-600">Meals Distributed</div>
             </div>
 
             <div className="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow">
-              <div className="text-4xl font-bold text-bhagva-700 mb-2">5,000+</div>
+              <div className="text-4xl font-bold text-bhagva-700 mb-2">2,000+</div>
               <div className="text-gray-600">Medical Consultations</div>
             </div>
 
             <div className="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow">
-              <div className="text-4xl font-bold text-bhagva-700 mb-2">200+</div>
+              <div className="text-4xl font-bold text-bhagva-700 mb-2">100+</div>
               <div className="text-gray-600">Cultural Events</div>
             </div>
           </div>
