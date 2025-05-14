@@ -133,9 +133,6 @@ export default function AdminLoginPage() {
             </form>
           </Form>
         </CardContent>
-        <CardFooter className="flex justify-center">
-          <p className="text-sm text-muted-foreground">For demo purposes, use: admin@hrss.org / password123</p>
-        </CardFooter>
       </Card>
     </div>
   )

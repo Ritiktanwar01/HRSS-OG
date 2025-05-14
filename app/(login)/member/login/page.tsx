@@ -119,9 +119,6 @@ export default function AdminLoginPage() {
             </form>
           </Form>
         </CardContent>
-        <CardFooter className="flex justify-center">
-          <p className="text-sm text-muted-foreground">For demo purposes, use: admin / password</p>
-        </CardFooter>
       </Card>
     </div>
   )
