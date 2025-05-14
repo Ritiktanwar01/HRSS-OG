@@ -42,14 +42,15 @@ export default function AdminGalleryPage() {
   useEffect(() => {
     const fetchGalleryItems = async () => {
       try {
-        const token = await getAuthToken()
-        if (!token) {
-          throw new Error("Authentication failed")
-        }
+        // const token = await getAuthToken()
+        // if (!token) {
+        //   throw new Error("Authentication failed")
+        // }
 
         const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/gallery`, {
           headers: {
-            Authorization: `Bearer ${token}`,
+            Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+            "Content-Type": "application/json",
           },
         })
 
