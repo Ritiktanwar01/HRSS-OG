@@ -29,8 +29,8 @@ export function AuthProvider({ children }) {
 
         }
       } catch (error) {
-        console.error("Auth check error:", error)
-        setUser(null)
+        const NewToken =  await refreshToken()
+        console.log("Login:",NewToken )
       } finally {
         setLoading(false)
       }
