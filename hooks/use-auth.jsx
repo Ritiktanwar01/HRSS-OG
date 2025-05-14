@@ -11,8 +11,7 @@ export function AuthProvider({ children }) {
   const router = useRouter()
 
   // Check if user is logged in on initial load
-  useEffect(() => {
-    const checkAuth = async () => {
+  const checkAuth = async () => {
       try {
         const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/me`, {
           credentials: "include",
@@ -36,7 +35,7 @@ export function AuthProvider({ children }) {
         setLoading(false)
       }
     }
-
+  useEffect(() => {
     checkAuth()
   }, [])
 
@@ -112,7 +111,8 @@ export function AuthProvider({ children }) {
         localStorage.clear()
         const userData = await response.json()
         localStorage.setItem("access_token", userData.tokens.access_token)
-        localStorage.setItem("refresh_token", userData.tokens.refresh_token)
+        localStorage.setItem("refresh_token", userData.tokens.refresh_token);
+        checkAuth()
         return true
       } else {
         setUser(null)
