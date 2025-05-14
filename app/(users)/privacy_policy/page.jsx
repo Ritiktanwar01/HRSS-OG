@@ -131,16 +131,6 @@ export default function PrivacyPage() {
               changes to our information practices. We may alert / notify you about the significant changes to the
               Privacy Policy, in the manner as may be required under applicable laws.
             </p>
-
-            <h2 className="text-2xl font-semibold text-bhagva-600 mt-6 mb-4">Grievance Officer</h2>
-            <p>
-              Insert Name of the Office:
-              <br />
-              Designation:
-              <br />
-              Insert Name and Address of the Company:
-            </p>
-
             <h2 className="text-2xl font-semibold text-bhagva-600 mt-6 mb-4">Contact us:</h2>
             <p>Phone: Time: Monday - Friday(9:00 - 18:00)</p>
           </div>
