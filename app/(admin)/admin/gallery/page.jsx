@@ -102,15 +102,15 @@ export default function AdminGalleryPage() {
 
   const handleDeleteItem = async (id, type) => {
     try {
-      const token = await getAuthToken()
-      if (!token) {
-        throw new Error("Authentication failed")
-      }
+      // const token = await getAuthToken()
+      // if (!token) {
+      //   throw new Error("Authentication failed")
+      // }
 
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/gallery/${id}`, {
         method: "DELETE",
         headers: {
-          Authorization: `Bearer ${token}`,
+          Authorization: `Bearer ${localStorage.getItem("access_token")}`,
         },
       })
 
@@ -154,15 +154,15 @@ export default function AdminGalleryPage() {
     formData.append("type", fileType)
 
     try {
-      const token = await getAuthToken()
-      if (!token) {
-        throw new Error("Authentication failed")
-      }
+      // const token = await getAuthToken()
+      // if (!token) {
+      //   throw new Error("Authentication failed")
+      // }
 
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/upload`, {
         method: "POST",
         headers: {
-          Authorization: `Bearer ${token}`,
+          Authorization: `Bearer ${localStorage.getItem("access_token")}`,
         },
         body: formData,
       })
@@ -201,10 +201,10 @@ export default function AdminGalleryPage() {
     setIsLoading(true)
 
     try {
-      const token = await getAuthToken()
-      if (!token) {
-        throw new Error("Authentication failed")
-      }
+      // const token = await getAuthToken()
+      // if (!token) {
+      //   throw new Error("Authentication failed")
+      // }
 
       let response
 
@@ -214,7 +214,7 @@ export default function AdminGalleryPage() {
           method: "PUT",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
+            Authorization: `Bearer ${localStorage.getItem("access_token")}`,
           },
           body: JSON.stringify(newItem),
         })
@@ -224,7 +224,7 @@ export default function AdminGalleryPage() {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
+            Authorization: `Bearer ${localStorage.getItem("access_token")}`,
           },
           body: JSON.stringify(newItem),
         })
