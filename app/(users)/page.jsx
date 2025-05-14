@@ -56,7 +56,7 @@ export default function Home() {
           <div className="lg:w-1/2">
             <div className="rounded-lg overflow-hidden shadow-lg">
               <Image
-                src={Work}
+                src={"/hero-image.jpg"}
                 width={600}
                 height={400}
                 alt="HRSS volunteers serving the community"
@@ -183,7 +183,7 @@ export default function Home() {
             <Button asChild size="lg" className="bg-white text-bhagva-800 hover:bg-white/90">
               <Link href="/donate">Donate Now</Link>
             </Button>
-            <Button asChild variant="outline" size="lg" className="border-white text-white hover:bg-white/10">
+            <Button asChild size="lg" className="bg-white text-bhagva-800 hover:bg-white/90">
               <Link href="/contact">Volunteer With Us</Link>
             </Button>
           </div>

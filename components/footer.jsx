@@ -2,6 +2,33 @@ import Link from "next/link"
 import { Facebook, Twitter, Instagram, Youtube, Mail, Phone, MapPin } from "lucide-react"
 
 const Footer = () => {
+  const fetchData = async () => {
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/contact/public`)
+      if (!response.ok) {
+        throw new Error("Network response was not ok")
+      }
+      const data = await response.json()
+      return data
+    } catch (error) {
+      console.error("Error fetching footer data:", error)
+    }
+  }
+  const [footerData, setFooterData] = useState({
+    address: "",
+    phone1: "",
+    phone2: "",
+    email1: "",
+    email2: "",
+    officeHours: "",
+  })
+  useEffect(() => {
+    const getData = async () => {
+      const data = await fetchData()
+      setFooterData(data)
+    }
+    getData()
+  }, [])
   return (
     <footer className="bg-gray-900 text-white">
       <div className="container mx-auto px-4 py-12">
@@ -73,15 +100,15 @@ const Footer = () => {
             <ul className="space-y-3">
               <li className="flex items-start">
                 <MapPin className="h-5 w-5 text-bhagva-500 mr-2 mt-0.5" />
-                <span className="text-gray-400">123 Main Street, Mumbai, Maharashtra 400001, India</span>
+                <span className="text-gray-400">{footerData.address}</span>
               </li>
               <li className="flex items-center">
                 <Phone className="h-5 w-5 text-bhagva-500 mr-2" />
-                <span className="text-gray-400">+91 98765 43210</span>
+                <span className="text-gray-400">{footerData.phone1}</span>
               </li>
               <li className="flex items-center">
                 <Mail className="h-5 w-5 text-bhagva-500 mr-2" />
-                <span className="text-gray-400">info@hrss.org</span>
+                <span className="text-gray-400">{footerData.email1}</span>
               </li>
             </ul>
           </div>

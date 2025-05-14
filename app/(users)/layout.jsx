@@ -12,6 +12,25 @@ export const metadata = {
   title: "HRSS - Hindu Rashtriya Sevak Sangh",
   description: "Official website of Hindu Rashtriya Sevak Sangh Charitable Trust",
   generator: "Ritik Tanwar",
+  favicon: "/favicon.ico",
+  keywords: [
+    "Hindu",
+    "Rashtriya",
+    "Sevak",
+    "Sangh",
+    "Charitable",
+    "Trust",
+    "HRSS",
+    "India",
+    "Seva",
+    "Service",
+  ],
+  authors: [
+    {
+      name: "Laptech Solutions",
+      url: "https://laptech.solutions"
+}],
+
 }
 
 export default function UserLayout({ children }) {
