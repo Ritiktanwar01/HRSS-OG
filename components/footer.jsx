@@ -1,5 +1,7 @@
+"use client"
 import Link from "next/link"
 import { Facebook, Twitter, Instagram, Youtube, Mail, Phone, MapPin } from "lucide-react"
+import { useEffect, useState } from "react"
 
 const Footer = () => {
   const fetchData = async () => {
