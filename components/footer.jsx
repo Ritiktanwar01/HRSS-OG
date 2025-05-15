@@ -137,7 +137,7 @@ const Footer = () => {
         </div>
 
         <div className="border-t border-gray-800 mt-12 pt-6 text-center text-gray-400">
-          <p>&copy; {new Date().getFullYear()} Hindu Rashtriya Sevak Sangh. All rights reserved.</p>
+          <p>&copy; {new Date().getFullYear()} Hindu Rashtra Sevak Sangh Charitable Trust. All rights reserved.</p>
         </div>
       </div>
     </footer>
