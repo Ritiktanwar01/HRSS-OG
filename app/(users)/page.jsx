@@ -157,8 +157,8 @@ export default function Home() {
             </div>
 
             <div className="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow">
-              <div className="text-4xl font-bold text-bhagva-700 mb-2">2,000+</div>
-              <div className="text-gray-600">Medical Consultations</div>
+              <div className="text-4xl font-bold text-bhagva-700 mb-2">500+</div>
+              <div className="text-gray-600">Animal resued</div>
             </div>
 
             <div className="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow">
