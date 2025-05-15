@@ -54,7 +54,7 @@ export default function Home() {
           <div className="lg:w-1/2">
             <div className="rounded-lg overflow-hidden shadow-lg">
               <Image
-                src={"/hero-image.jpg"}
+                src={"/hero-image.png"}
                 width={600}
                 height={400}
                 alt="HRSS volunteers serving the community"
