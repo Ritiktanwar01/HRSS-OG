@@ -12,6 +12,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Textarea } from "@/components/ui/textarea"
 import { toast } from "@/components/ui/use-toast"
 import { Heart, CheckCircle2 } from "lucide-react"
+import { userInfo } from "os"
 
 const donationFormSchema = z.object({
   name: z.string().min(2, { message: "Name must be at least 2 characters." }),
@@ -51,15 +52,32 @@ export default function DonatePage() {
   async function onSubmit(data) {
     setIsSubmitting(true)
     try {
-      // In a real application, this would call your payment gateway API
-      // For demo purposes, we'll simulate a successful payment
-      await new Promise((resolve) => setTimeout(resolve, 2000))
-
-      setIsSuccess(true)
-      toast({
-        title: "Donation Successful",
-        description: "Thank you for your generous contribution!",
+      const UserInfo = data
+      console.log("User Info:", UserInfo)
+      const request = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/donations/`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ data: UserInfo }),
       })
+      if (!request.ok) {
+        throw new Error("Network response was not ok")
+      } else {
+        const response = await request.json()
+        if (!response.success) {
+          throw new Error("Failed to process donation")
+        } else {
+          setIsSuccess(true)
+          window.location.href = `${response.data.paymentUrl}`
+          toast({
+            title: "Donation Successful",
+            description: "Thank you for your generous contribution!",
+          })
+        }
+      }
+
+
     } catch (error) {
       console.error("Error processing donation:", error)
       toast({
