@@ -4,8 +4,11 @@ import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { LayoutDashboard, FileText, ImageIcon, MessageSquare, Settings, LogOut, X, Users, Tag, IndianRupee } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { useState } from "react"
 
 const AdminSidebar = ({ isOpen }) => {
+  const [open,setOpen] = useState(isOpen)
+
   const pathname = usePathname()
 
   const navigation = [
@@ -23,7 +26,7 @@ const AdminSidebar = ({ isOpen }) => {
     <aside
       className={cn(
         "fixed inset-y-0 left-0 z-10 w-64 bg-white shadow-md transform transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static",
-        isOpen ? "translate-x-0" : "-translate-x-full",
+        open ? "translate-x-0" : "-translate-x-full",
       )}
     >
       <div className="flex flex-col h-full">
@@ -43,7 +46,7 @@ const AdminSidebar = ({ isOpen }) => {
           {navigation.map((item) => {
             const isActive = pathname === item.href
             return (
-              <Link
+              <Link onClick={() => {setOpen(false)}}
                 key={item.name}
                 href={item.href}
                 className={cn(
