@@ -153,14 +153,14 @@ export default function GalleryPage() {
                             </div>
                           )
                         )}
-                        <Button
+                        { /*<Button
                           variant="ghost"
                           size="icon"
                           className="absolute top-2 right-2 rounded-full bg-black/40 hover:bg-black/60 text-white"
                           onClick={() => document.querySelector("[data-radix-dialog-close]")?.click()}
                         >
                           <X className="h-5 w-5" />
-                        </Button>
+                        </Button>*/}
                         <div className="bg-white p-4">
                           <h3 className="font-semibold text-xl text-bhagva-800">{selectedItem?.title}</h3>
                           <p className="text-gray-700">{selectedItem?.description}</p>
