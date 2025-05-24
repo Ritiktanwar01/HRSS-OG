@@ -28,9 +28,9 @@ export default function DonationsPage() {
         })
 
         if (!response.ok) {
-          throw new Error("Failed to fetch donations",data)
+          throw new Error("Failed to fetch donations")
         }
-
+        const data = await response.json()
         setDonations(data.donations || [])
       } catch (error) {
         console.error("Error fetching donations:", error)
