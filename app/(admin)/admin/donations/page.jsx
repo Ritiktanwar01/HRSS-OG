@@ -22,11 +22,11 @@ export default function DonationsPage() {
     const fetchDonations = async () => {
       try {
         const response = await fetch(`${`${process.env.NEXT_PUBLIC_API_URL}/api` || "/api"}/donations`, {
-          Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+          },
         })
 
-        const data = await response.json()
-        console.log("Response data:", data)
         if (!response.ok) {
           throw new Error("Failed to fetch donations",data)
         }

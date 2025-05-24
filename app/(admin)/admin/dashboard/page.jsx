@@ -21,7 +21,6 @@ export default function AdminDashboardPage() {
   useEffect(() => {
     const fetchDashboardData = async () => {
       try {
-        const token = getAuthToken()
         const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/dashboard`, {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("access_token")}`,
