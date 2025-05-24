@@ -19,8 +19,10 @@ export default function DonationDetailPage() {
 
   const fetchDonation = async () => {
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "/api"}/donations/${params.id}`, {
-        credentials: "include",
+      const response = await fetch(`${`${process.env.NEXT_PUBLIC_API_URL}/api` || "/api"}/donations/${params.id}`, {
+        headers: {
+            Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+          },
       })
 
       if (!response.ok) {
