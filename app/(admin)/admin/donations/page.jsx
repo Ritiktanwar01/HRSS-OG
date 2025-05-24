@@ -23,6 +23,7 @@ export default function DonationsPage() {
       try {
         const response = await fetch(`${`${process.env.NEXT_PUBLIC_API_URL}/api` || "/api"}/donations`, {
           credentials: "include",
+          Authorization: `Bearer ${localStorage.getItem("access_token")}`,
         })
 
         if (!response.ok) {
