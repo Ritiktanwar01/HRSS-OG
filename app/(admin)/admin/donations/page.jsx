@@ -25,13 +25,12 @@ export default function DonationsPage() {
           Authorization: `Bearer ${localStorage.getItem("access_token")}`,
         })
 
+        const data = await response.json()
+        console.log("Response data:", data)
         if (!response.ok) {
-          const data = await response.json()
           throw new Error("Failed to fetch donations",data)
         }
 
-        const data = await response.json()
-        console.log("Fetched donations:", data)
         setDonations(data.donations || [])
       } catch (error) {
         console.error("Error fetching donations:", error)
