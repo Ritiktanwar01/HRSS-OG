@@ -21,7 +21,7 @@ export default function DonationsPage() {
   useEffect(() => {
     const fetchDonations = async () => {
       try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "/api"}/donations`, {
+        const response = await fetch(`${`${process.env.NEXT_PUBLIC_API_URL}/api` || "/api"}/donations`, {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("access_token")}`,
           },
