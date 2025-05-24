@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { LayoutDashboard, FileText, ImageIcon, MessageSquare, Settings, LogOut, X, Users, Tag } from "lucide-react"
+import { LayoutDashboard, FileText, ImageIcon, MessageSquare, Settings, LogOut, X, Users, Tag, IndianRupee } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 const AdminSidebar = ({ isOpen }) => {
@@ -12,6 +12,7 @@ const AdminSidebar = ({ isOpen }) => {
     { name: "Dashboard", href: "/admin/dashboard", icon: LayoutDashboard },
     { name: "About", href: "/admin/about", icon: FileText },
     { name: "Gallery", href: "/admin/gallery", icon: ImageIcon },
+    { name: "Donations", href: "/admin/donations", icon: IndianRupee },
     { name: "Contact", href: "/admin/contact", icon: MessageSquare },
     { name: "Members", href: "/admin/members", icon: Users },
     { name: "Designations", href: "/admin/designations", icon: Tag },

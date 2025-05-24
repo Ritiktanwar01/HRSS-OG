@@ -1,0 +1,283 @@
+"use client"
+
+import { useState, useEffect } from "react"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { toast } from "@/components/ui/use-toast"
+import { Download, Search, Filter, Eye, Edit } from "lucide-react"
+import { format } from "date-fns"
+
+export default function DonationsPage() {
+  const [donations, setDonations] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [searchTerm, setSearchTerm] = useState("")
+  const [statusFilter, setStatusFilter] = useState("all")
+  const [sortBy, setSortBy] = useState("date-desc")
+
+  useEffect(() => {
+    const fetchDonations = async () => {
+      try {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "/api"}/donations`, {
+          credentials: "include",
+        })
+
+        if (!response.ok) {
+          throw new Error("Failed to fetch donations")
+        }
+
+        const data = await response.json()
+        setDonations(data.donations || [])
+      } catch (error) {
+        console.error("Error fetching donations:", error)
+        toast({
+          title: "Error",
+          description: "Failed to load donations. Please try again.",
+          variant: "destructive",
+        })
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchDonations()
+  }, [])
+
+  // Filter and sort donations
+  const filteredDonations = donations.filter((donation) => {
+    const matchesSearch =
+      donation.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      donation.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      donation.transactionId?.toLowerCase().includes(searchTerm.toLowerCase())
+
+    const matchesStatus = statusFilter === "all" || donation.paymentStatus === statusFilter
+
+    return matchesSearch && matchesStatus
+  })
+
+  // Sort donations
+  const sortedDonations = [...filteredDonations].sort((a, b) => {
+    if (sortBy === "date-desc") {
+      return new Date(b.createdAt) - new Date(a.createdAt)
+    } else if (sortBy === "date-asc") {
+      return new Date(a.createdAt) - new Date(b.createdAt)
+    } else if (sortBy === "amount-desc") {
+      return b.amount - a.amount
+    } else if (sortBy === "amount-asc") {
+      return a.amount - b.amount
+    }
+    return 0
+  })
+
+  // Export donations as CSV
+  const exportToCSV = () => {
+    const headers = ["Name", "Email", "Phone", "Amount", "Type", "Status", "Transaction ID", "Date"]
+
+    const csvData = sortedDonations.map((donation) => [
+      donation.name,
+      donation.email,
+      donation.phone,
+      donation.amount,
+      donation.donationType === "oneTime" ? "One-time" : "Monthly",
+      donation.paymentStatus,
+      donation.transactionId || "N/A",
+      new Date(donation.createdAt).toLocaleDateString(),
+    ])
+
+    const csvContent = [headers.join(","), ...csvData.map((row) => row.join(","))].join("\n")
+
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" })
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement("a")
+    link.setAttribute("href", url)
+    link.setAttribute("download", `donations-${new Date().toISOString().split("T")[0]}.csv`)
+    link.style.visibility = "hidden"
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+  }
+
+  // Get status badge color
+  const getStatusBadge = (status) => {
+    switch (status) {
+      case "success":
+        return <Badge className="bg-green-500">Success</Badge>
+      case "failed":
+        return <Badge variant="destructive">Failed</Badge>
+      case "pending":
+        return (
+          <Badge variant="outline" className="text-yellow-600 border-yellow-300 bg-yellow-50">
+            Pending
+          </Badge>
+        )
+      default:
+        return <Badge variant="secondary">Unknown</Badge>
+    }
+  }
+
+  // Calculate total donations
+  const totalSuccessfulDonations = donations
+    .filter((d) => d.paymentStatus === "success")
+    .reduce((sum, donation) => sum + donation.amount, 0)
+
+  return (
+    <div className="p-6">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
+        <div>
+          <h1 className="text-2xl font-bold text-bhagva-800">Donations</h1>
+          <p className="text-gray-500">Manage and track all donations</p>
+        </div>
+        <Button onClick={exportToCSV} className="mt-4 md:mt-0 bg-bhagva-700 hover:bg-bhagva-800">
+          <Download className="mr-2 h-4 w-4" /> Export CSV
+        </Button>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-lg">Total Donations</CardTitle>
+            <CardDescription>All time donations</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <p className="text-3xl font-bold text-bhagva-800">₹{totalSuccessfulDonations.toLocaleString()}</p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-lg">Successful Transactions</CardTitle>
+            <CardDescription>Completed donations</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <p className="text-3xl font-bold text-green-600">
+              {donations.filter((d) => d.paymentStatus === "success").length}
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-lg">Failed Transactions</CardTitle>
+            <CardDescription>Unsuccessful attempts</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <p className="text-3xl font-bold text-red-600">
+              {donations.filter((d) => d.paymentStatus === "failed").length}
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Donation Records</CardTitle>
+          <CardDescription>View and manage all donation transactions</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="flex flex-col md:flex-row gap-4 mb-6">
+            <div className="relative flex-1">
+              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-500" />
+              <Input
+                placeholder="Search by name, email or transaction ID"
+                className="pl-8"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+            </div>
+
+            <div className="flex gap-4">
+              <Select value={statusFilter} onValueChange={setStatusFilter}>
+                <SelectTrigger className="w-[180px]">
+                  <Filter className="mr-2 h-4 w-4" />
+                  <SelectValue placeholder="Filter by status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Statuses</SelectItem>
+                  <SelectItem value="success">Successful</SelectItem>
+                  <SelectItem value="pending">Pending</SelectItem>
+                  <SelectItem value="failed">Failed</SelectItem>
+                </SelectContent>
+              </Select>
+
+              <Select value={sortBy} onValueChange={setSortBy}>
+                <SelectTrigger className="w-[180px]">
+                  <SelectValue placeholder="Sort by" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="date-desc">Newest First</SelectItem>
+                  <SelectItem value="date-asc">Oldest First</SelectItem>
+                  <SelectItem value="amount-desc">Highest Amount</SelectItem>
+                  <SelectItem value="amount-asc">Lowest Amount</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          {loading ? (
+            <div className="text-center py-8">
+              <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-bhagva-600 border-r-transparent"></div>
+              <p className="mt-4 text-gray-500">Loading donations...</p>
+            </div>
+          ) : sortedDonations.length === 0 ? (
+            <div className="text-center py-12 border rounded-lg">
+              <p className="text-gray-500">No donations found</p>
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Name</TableHead>
+                    <TableHead>Email</TableHead>
+                    <TableHead>Amount</TableHead>
+                    <TableHead>Type</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead>Transaction ID</TableHead>
+                    <TableHead>Date</TableHead>
+                    <TableHead>Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {sortedDonations.map((donation) => (
+                    <TableRow key={donation._id}>
+                      <TableCell className="font-medium">{donation.name}</TableCell>
+                      <TableCell>{donation.email}</TableCell>
+                      <TableCell>₹{donation.amount}</TableCell>
+                      <TableCell>{donation.donationType === "oneTime" ? "One-time" : "Monthly"}</TableCell>
+                      <TableCell>{getStatusBadge(donation.paymentStatus)}</TableCell>
+                      <TableCell className="font-mono text-xs">{donation.transactionId || "N/A"}</TableCell>
+                      <TableCell>
+                        {donation.createdAt ? format(new Date(donation.createdAt), "dd MMM yyyy, HH:mm") : "N/A"}
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex gap-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => (window.location.href = `/admin/donations/view/${donation._id}`)}
+                          >
+                            <Eye className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => (window.location.href = `/admin/donations/edit/${donation._id}`)}
+                          >
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    </div>
+  )
+}
