@@ -26,7 +26,7 @@ const AdminSidebar = ({ isOpen }) => {
     <aside
       className={cn(
         "fixed inset-y-0 left-0 z-10 w-64 bg-white shadow-md transform transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static",
-        open ? "translate-x-0" : "-translate-x-full",
+        isOpen ? "translate-x-0" : "-translate-x-full",
       )}
     >
       <div className="flex flex-col h-full">
@@ -46,7 +46,7 @@ const AdminSidebar = ({ isOpen }) => {
           {navigation.map((item) => {
             const isActive = pathname === item.href
             return (
-              <Link onClick={() => {setOpen(false)}}
+              <Link 
                 key={item.name}
                 href={item.href}
                 className={cn(
