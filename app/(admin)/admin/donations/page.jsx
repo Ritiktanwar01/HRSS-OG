@@ -22,7 +22,6 @@ export default function DonationsPage() {
     const fetchDonations = async () => {
       try {
         const response = await fetch(`${`${process.env.NEXT_PUBLIC_API_URL}/api` || "/api"}/donations`, {
-          credentials: "include",
           Authorization: `Bearer ${localStorage.getItem("access_token")}`,
         })
 
