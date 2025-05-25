@@ -89,42 +89,48 @@ export default function AdminDashboardPage() {
   ]
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight">Admin Dashboard</h1>
-        <p className="text-muted-foreground">Overview of your website statistics and recent activities.</p>
+    <div className="space-y-4 sm:space-y-6">
+      {/* Header */}
+      <div className="space-y-2">
+        <h1 className="text-xl sm:text-2xl font-bold tracking-tight">Admin Dashboard</h1>
+        <p className="text-sm sm:text-base text-muted-foreground">
+          Overview of your website statistics and recent activities.
+        </p>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      {/* Stats Cards */}
+      <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
         {statsData.map((stat, index) => (
-          <Card key={index}>
+          <Card key={index} className="hover:shadow-md transition-shadow">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">{stat.title}</CardTitle>
+              <CardTitle className="text-xs sm:text-sm font-medium text-gray-600">{stat.title}</CardTitle>
               {stat.icon}
             </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{isLoading ? "Loading..." : stat.value}</div>
-              <p className="text-xs text-muted-foreground flex items-center mt-1">
+            <CardContent className="space-y-1">
+              <div className="text-lg sm:text-2xl font-bold">{isLoading ? "Loading..." : stat.value}</div>
+              <p className="text-xs text-muted-foreground flex items-center">
                 <TrendingUp className="mr-1 h-3 w-3 text-green-500" />
-                <span className="text-green-500">{isLoading ? "0%" : stat.change}</span> from last month
+                <span className="text-green-500">{isLoading ? "0%" : stat.change}</span>
+                <span className="ml-1">from last month</span>
               </p>
             </CardContent>
           </Card>
         ))}
       </div>
 
+      {/* Tabs Section */}
       <Tabs defaultValue="activities" className="space-y-4">
-        <TabsList>
-          <TabsTrigger value="activities" className="flex items-center">
-            <FileText className="mr-2 h-4 w-4" />
-            Recent Activities
+        <TabsList className="grid w-full grid-cols-3 lg:w-auto lg:grid-cols-3">
+          <TabsTrigger value="activities" className="flex items-center text-xs sm:text-sm">
+            <FileText className="mr-1 sm:mr-2 h-3 w-3 sm:h-4 sm:w-4" />
+            <span className="hidden sm:inline">Recent </span>Activities
           </TabsTrigger>
-          <TabsTrigger value="events" className="flex items-center">
-            <Calendar className="mr-2 h-4 w-4" />
-            Upcoming Events
+          <TabsTrigger value="events" className="flex items-center text-xs sm:text-sm">
+            <Calendar className="mr-1 sm:mr-2 h-3 w-3 sm:h-4 sm:w-4" />
+            <span className="hidden sm:inline">Upcoming </span>Events
           </TabsTrigger>
-          <TabsTrigger value="analytics" className="flex items-center">
-            <BarChart3 className="mr-2 h-4 w-4" />
+          <TabsTrigger value="analytics" className="flex items-center text-xs sm:text-sm">
+            <BarChart3 className="mr-1 sm:mr-2 h-3 w-3 sm:h-4 sm:w-4" />
             Analytics
           </TabsTrigger>
         </TabsList>
@@ -132,29 +138,41 @@ export default function AdminDashboardPage() {
         <TabsContent value="activities" className="space-y-4">
           <Card>
             <CardHeader>
-              <CardTitle>Recent Activities</CardTitle>
-              <CardDescription>Latest actions and updates on your website</CardDescription>
+              <CardTitle className="text-lg sm:text-xl">Recent Activities</CardTitle>
+              <CardDescription className="text-sm">Latest actions and updates on your website</CardDescription>
             </CardHeader>
             <CardContent>
               {isLoading ? (
-                <div className="text-center py-4">Loading activities...</div>
+                <div className="text-center py-8">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-bhagva-600 mx-auto"></div>
+                  <p className="mt-2 text-sm text-muted-foreground">Loading activities...</p>
+                </div>
               ) : (
                 <div className="space-y-4">
-                  {recentActivities.map((activity) => (
-                    <div key={activity._id} className="flex items-start pb-4 border-b last:border-0 last:pb-0">
-                      <div className="w-2 h-2 rounded-full bg-bhagva-500 mt-2 mr-3"></div>
-                      <div className="flex-1">
-                        <div className="flex justify-between">
-                          <p className="font-medium">{activity.action}</p>
-                          <span className="text-xs text-muted-foreground">{activity.timeAgo}</span>
-                        </div>
-                        <div className="text-sm text-muted-foreground mt-1">
-                          {activity.amount && <span className="font-medium text-bhagva-600">{activity.amount} - </span>}
-                          {activity.name}
+                  {recentActivities.length > 0 ? (
+                    recentActivities.map((activity) => (
+                      <div key={activity._id} className="flex items-start pb-4 border-b last:border-0 last:pb-0">
+                        <div className="w-2 h-2 rounded-full bg-bhagva-500 mt-2 mr-3 flex-shrink-0"></div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-1">
+                            <p className="font-medium text-sm sm:text-base truncate">{activity.action}</p>
+                            <span className="text-xs text-muted-foreground flex-shrink-0">{activity.timeAgo}</span>
+                          </div>
+                          <div className="text-xs sm:text-sm text-muted-foreground mt-1">
+                            {activity.amount && (
+                              <span className="font-medium text-bhagva-600">{activity.amount} - </span>
+                            )}
+                            <span className="break-words">{activity.name}</span>
+                          </div>
                         </div>
                       </div>
+                    ))
+                  ) : (
+                    <div className="text-center py-8 text-muted-foreground">
+                      <FileText className="h-12 w-12 mx-auto mb-2 opacity-50" />
+                      <p>No recent activities</p>
                     </div>
-                  ))}
+                  )}
                 </div>
               )}
             </CardContent>
@@ -164,27 +182,37 @@ export default function AdminDashboardPage() {
         <TabsContent value="events" className="space-y-4">
           <Card>
             <CardHeader>
-              <CardTitle>Upcoming Events</CardTitle>
-              <CardDescription>Events scheduled in the coming days</CardDescription>
+              <CardTitle className="text-lg sm:text-xl">Upcoming Events</CardTitle>
+              <CardDescription className="text-sm">Events scheduled in the coming days</CardDescription>
             </CardHeader>
             <CardContent>
               {isLoading ? (
-                <div className="text-center py-4">Loading events...</div>
+                <div className="text-center py-8">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-bhagva-600 mx-auto"></div>
+                  <p className="mt-2 text-sm text-muted-foreground">Loading events...</p>
+                </div>
               ) : (
                 <div className="space-y-4">
-                  {upcomingEvents.map((event) => (
-                    <div key={event._id} className="flex items-start pb-4 border-b last:border-0 last:pb-0">
-                      <div className="bg-bhagva-100 text-bhagva-700 p-2 rounded mr-3">
-                        <Calendar className="h-5 w-5" />
-                      </div>
-                      <div className="flex-1">
-                        <p className="font-medium">{event.title}</p>
-                        <div className="text-sm text-muted-foreground mt-1">
-                          {event.date} - {event.location}
+                  {upcomingEvents.length > 0 ? (
+                    upcomingEvents.map((event) => (
+                      <div key={event._id} className="flex items-start pb-4 border-b last:border-0 last:pb-0">
+                        <div className="bg-bhagva-100 text-bhagva-700 p-2 rounded mr-3 flex-shrink-0">
+                          <Calendar className="h-4 w-4 sm:h-5 sm:w-5" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="font-medium text-sm sm:text-base">{event.title}</p>
+                          <div className="text-xs sm:text-sm text-muted-foreground mt-1 break-words">
+                            {event.date} - {event.location}
+                          </div>
                         </div>
                       </div>
+                    ))
+                  ) : (
+                    <div className="text-center py-8 text-muted-foreground">
+                      <Calendar className="h-12 w-12 mx-auto mb-2 opacity-50" />
+                      <p>No upcoming events</p>
                     </div>
-                  ))}
+                  )}
                 </div>
               )}
             </CardContent>
@@ -194,12 +222,15 @@ export default function AdminDashboardPage() {
         <TabsContent value="analytics" className="space-y-4">
           <Card>
             <CardHeader>
-              <CardTitle>Website Analytics</CardTitle>
-              <CardDescription>Visitor statistics and engagement metrics</CardDescription>
+              <CardTitle className="text-lg sm:text-xl">Website Analytics</CardTitle>
+              <CardDescription className="text-sm">Visitor statistics and engagement metrics</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="h-[300px] flex items-center justify-center bg-muted rounded-md">
-                <p className="text-muted-foreground">Analytics charts will be displayed here</p>
+              <div className="h-[200px] sm:h-[300px] flex items-center justify-center bg-muted rounded-md">
+                <div className="text-center">
+                  <BarChart3 className="h-12 w-12 mx-auto mb-2 text-muted-foreground opacity-50" />
+                  <p className="text-sm text-muted-foreground">Analytics charts will be displayed here</p>
+                </div>
               </div>
             </CardContent>
           </Card>

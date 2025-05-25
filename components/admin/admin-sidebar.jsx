@@ -2,77 +2,161 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { LayoutDashboard, FileText, ImageIcon, MessageSquare, Settings, LogOut, X, Users, Tag, IndianRupee } from "lucide-react"
-import { cn } from "@/lib/utils"
-import { useState } from "react"
+import { useEffect } from "react"
+import {
+  BarChart3,
+  Users,
+  Settings,
+  LogOut,
+  Home,
+  Info,
+  Phone,
+  FileImage,
+  Award,
+  Heart,
+  FileText,
+  X,
+} from "lucide-react"
 
-const AdminSidebar = ({ isOpen }) => {
-  const [open,setOpen] = useState(isOpen)
-
+export default function AdminSidebar({ isOpen, onLinkClick }) {
   const pathname = usePathname()
 
-  const navigation = [
-    { name: "Dashboard", href: "/admin/dashboard", icon: LayoutDashboard },
-    { name: "About", href: "/admin/about", icon: FileText },
-    { name: "Gallery", href: "/admin/gallery", icon: ImageIcon },
-    { name: "Donations", href: "/admin/donations", icon: IndianRupee },
-    { name: "Contact", href: "/admin/contact", icon: MessageSquare },
-    { name: "Members", href: "/admin/members", icon: Users },
-    { name: "Designations", href: "/admin/designations", icon: Tag },
-    { name: "Settings", href: "/admin/settings", icon: Settings },
+  const isActive = (path) => {
+    return pathname === path
+  }
+
+  const handleLinkClick = () => {
+    if (onLinkClick) {
+      onLinkClick()
+    }
+  }
+
+  // Close sidebar when clicking outside on mobile
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (isOpen && window.innerWidth < 1024) {
+        const sidebar = document.getElementById("admin-sidebar")
+        const header = document.getElementById("admin-header")
+        if (sidebar && !sidebar.contains(event.target) && !header.contains(event.target)) {
+          onLinkClick()
+        }
+      }
+    }
+
+    document.addEventListener("mousedown", handleClickOutside)
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside)
+    }
+  }, [isOpen, onLinkClick])
+
+  const menuItems = [
+    {
+      name: "Dashboard",
+      href: "/admin/dashboard",
+      icon: <BarChart3 className="h-5 w-5" />,
+    },
+    {
+      name: "Members",
+      href: "/admin/members",
+      icon: <Users className="h-5 w-5" />,
+    },
+    {
+      name: "Designations",
+      href: "/admin/designations",
+      icon: <Award className="h-5 w-5" />,
+    },
+    {
+      name: "About",
+      href: "/admin/about",
+      icon: <Info className="h-5 w-5" />,
+    },
+    {
+      name: "Certificates",
+      href: "/admin/certificates",
+      icon: <FileText className="h-5 w-5" />,
+    },
+    {
+      name: "Contact",
+      href: "/admin/contact",
+      icon: <Phone className="h-5 w-5" />,
+    },
+    {
+      name: "Gallery",
+      href: "/admin/gallery",
+      icon: <FileImage className="h-5 w-5" />,
+    },
+    {
+      name: "Donations",
+      href: "/admin/donations",
+      icon: <Heart className="h-5 w-5" />,
+    },
+    {
+      name: "Settings",
+      href: "/admin/settings",
+      icon: <Settings className="h-5 w-5" />,
+    },
   ]
 
   return (
-    <aside
-      className={cn(
-        "fixed inset-y-0 left-0 z-10 w-64 bg-white shadow-md transform transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static",
-        isOpen ? "translate-x-0" : "-translate-x-full",
-      )}
-    >
-      <div className="flex flex-col h-full">
-        <div className="flex items-center justify-between h-16 px-4 border-b">
-          <Link href="/admin/dashboard" className="flex items-center space-x-2">
-            <div className="h-8 w-8 rounded-full bg-bhagva-700 flex items-center justify-center text-white font-bold">
-              H
-            </div>
-            <span className="font-semibold text-gray-900">HRSS Admin</span>
-          </Link>
-          <button className="lg:hidden" onClick={() => {}}>
-            <X className="h-5 w-5 text-gray-500" />
-          </button>
-        </div>
+    <>
+      {/* Mobile Overlay */}
+      {isOpen && <div className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden" onClick={handleLinkClick} />}
 
-        <nav className="flex-1 px-2 py-4 space-y-1 overflow-y-auto">
-          {navigation.map((item) => {
-            const isActive = pathname === item.href
-            return (
-              <Link 
-                key={item.name}
-                href={item.href}
-                className={cn(
-                  "flex items-center px-4 py-2 text-sm font-medium rounded-md transition-colors",
-                  isActive ? "bg-bhagva-50 text-bhagva-700" : "text-gray-700 hover:bg-gray-100 hover:text-gray-900",
-                )}
-              >
-                <item.icon className={cn("mr-3 h-5 w-5", isActive ? "text-bhagva-700" : "text-gray-400")} />
-                {item.name}
-              </Link>
-            )
-          })}
-        </nav>
+      {/* Sidebar */}
+      <div
+        id="admin-sidebar"
+        className={`fixed top-0 left-0 z-50 h-full w-64 transform bg-white border-r shadow-lg transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:z-auto lg:shadow-none ${
+          isOpen ? "translate-x-0" : "-translate-x-full"
+        }`}
+      >
+        <div className="flex h-full flex-col">
+          {/* Header */}
+          <div className="flex h-16 items-center justify-between border-b px-4">
+            <Link href="/admin/dashboard" className="flex items-center font-semibold text-lg">
+              <Home className="mr-2 h-5 w-5 text-bhagva-600" />
+              <span className="text-gray-900">Admin Panel</span>
+            </Link>
+            {/* Close button for mobile */}
+            <button onClick={handleLinkClick} className="lg:hidden p-1 rounded-md hover:bg-gray-100">
+              <X className="h-5 w-5 text-gray-500" />
+            </button>
+          </div>
 
-        <div className="p-4 border-t">
-          <Link onClick={() => {localStorage.clear(); window.location.href = "/admin/login"}}
-            href="#"
-            className="flex items-center px-4 py-2 text-sm font-medium text-gray-700 rounded-md hover:bg-gray-100 hover:text-gray-900"
-          >
-            <LogOut className="mr-3 h-5 w-5 text-gray-400" />
-            Logout
-          </Link>
+          {/* Navigation */}
+          <nav className="flex-1 overflow-auto py-4">
+            <ul className="space-y-1 px-2">
+              {menuItems.map((item) => (
+                <li key={item.name}>
+                  <Link
+                    href={item.href}
+                    onClick={handleLinkClick}
+                    className={`flex items-center rounded-md px-3 py-2 text-sm font-medium transition-colors ${
+                      isActive(item.href)
+                        ? "bg-bhagva-100 text-bhagva-900"
+                        : "text-gray-700 hover:bg-gray-100 hover:text-gray-900"
+                    }`}
+                  >
+                    {item.icon}
+                    <span className="ml-3">{item.name}</span>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </nav>
+
+          {/* Footer */}
+          <div className="border-t p-4">
+            <Link
+              href="/admin/login"
+              onClick={handleLinkClick}
+              className="flex w-full items-center justify-center rounded-md bg-red-100 px-3 py-2 text-sm font-medium text-red-700 hover:bg-red-200 transition-colors"
+            >
+              <LogOut className="mr-2 h-5 w-5" />
+              <span>Logout</span>
+            </Link>
+          </div>
         </div>
       </div>
-    </aside>
+    </>
   )
 }
-
-export default AdminSidebar
