@@ -26,8 +26,9 @@ export default function AdminSidebar({ isOpen, onLinkClick }) {
   }
 
   const handleLinkClick = () => {
-    localStorage.clear()
-    window.location.href = "/admin/login"
+    if (onLinkClick) {
+      onLinkClick()
+    }
   }
 
   // Close sidebar when clicking outside on mobile
@@ -147,7 +148,7 @@ export default function AdminSidebar({ isOpen, onLinkClick }) {
           <div className="border-t p-4">
             <Link
               href="#"
-              onClick={handleLinkClick}
+              onClick={() => {localStorage.clear(); window.location.href = "/admin/login"}}
               className="flex w-full items-center justify-center rounded-md bg-red-100 px-3 py-2 text-sm font-medium text-red-700 hover:bg-red-200 transition-colors"
             >
               <LogOut className="mr-2 h-5 w-5" />
