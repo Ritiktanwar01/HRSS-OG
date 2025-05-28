@@ -1,24 +1,21 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { useSearchParams, useRouter } from "next/navigation"
+import { useSearchParams, useRouter, useParams } from "next/navigation"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Loader2, CheckCircle2, XCircle, Home, RefreshCw, Heart, Download } from "lucide-react"
 import Link from "next/link"
 import confetti from "canvas-confetti"
 
-export default function DonationStatusPage() {
-  const searchParams = useSearchParams()
+export default function DonationStatusPage({params}) {
+  const { merchantTransactionId } = useParams(params)
   const router = useRouter()
   const [status, setStatus] = useState("loading") // loading, success, failed, error
   const [donation, setDonation] = useState(null)
   const [error, setError] = useState("")
   const [isRefreshing, setIsRefreshing] = useState(false)
 
-  const transactionId = searchParams.get("transactionId")
-  const merchantTransactionId = searchParams.get("merchantTransactionId")
-  const code = searchParams.get("code")
 
   // Function to trigger confetti for successful payments
   const triggerConfetti = () => {
@@ -61,7 +58,7 @@ export default function DonationStatusPage() {
     if (showLoading) setIsRefreshing(true)
 
     try {
-      const txnId = transactionId || merchantTransactionId
+      const txnId =  merchantTransactionId
 
       if (!txnId) {
         setStatus("error")
@@ -132,41 +129,7 @@ For any queries, please contact us at support@hrssog.org
     window.URL.revokeObjectURL(url)
   }
 
-  useEffect(() => {
-    // If PhonePe returns a code directly, we can use it
-    if (code === "PAYMENT_SUCCESS") {
-      setStatus("success")
-      setTimeout(triggerConfetti, 500)
-      return
-    } else if (code === "PAYMENT_ERROR" || code === "PAYMENT_FAILED") {
-      setStatus("failed")
-      return
-    }
-
-    // Otherwise, check payment status via API
-    checkPaymentStatus()
-
-    // Poll for status updates every 5 seconds for pending payments
-    const intervalId = setInterval(() => {
-      if (status === "loading" || status === "pending") {
-        checkPaymentStatus(false)
-      }
-    }, 5000)
-
-    // Clear interval after 60 seconds
-    const timeoutId = setTimeout(() => {
-      clearInterval(intervalId)
-      if (status === "loading") {
-        setStatus("error")
-        setError("Payment verification timed out. Please contact support if payment was deducted.")
-      }
-    }, 60000)
-
-    return () => {
-      clearInterval(intervalId)
-      clearTimeout(timeoutId)
-    }
-  }, [transactionId, merchantTransactionId, code])
+  
 
   // Render loading state
   if (status === "loading") {
