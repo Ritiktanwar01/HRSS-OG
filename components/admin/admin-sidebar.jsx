@@ -55,26 +55,26 @@ export default function AdminSidebar({ isOpen, onLinkClick }) {
       href: "/admin/dashboard",
       icon: <BarChart3 className="h-5 w-5" />,
     },
-    {
-      name: "Members",
-      href: "/admin/members",
-      icon: <Users className="h-5 w-5" />,
-    },
-    {
-      name: "Designations",
-      href: "/admin/designations",
-      icon: <Award className="h-5 w-5" />,
-    },
+    // {
+    //   name: "Members",
+    //   href: "/admin/members",
+    //   icon: <Users className="h-5 w-5" />,
+    // },
+    // {
+    //   name: "Designations",
+    //   href: "/admin/designations",
+    //   icon: <Award className="h-5 w-5" />,
+    // },
     {
       name: "About",
       href: "/admin/about",
       icon: <Info className="h-5 w-5" />,
     },
-    {
-      name: "Certificates",
-      href: "/admin/certificates",
-      icon: <FileText className="h-5 w-5" />,
-    },
+    // {
+    //   name: "Certificates",
+    //   href: "/admin/certificates",
+    //   icon: <FileText className="h-5 w-5" />,
+    // },
     {
       name: "Contact",
       href: "/admin/contact",
