@@ -48,7 +48,7 @@ export default function AdminHeader({ toggleSidebar }) {
             <Button variant="ghost" className="relative h-8 w-8 rounded-full">
               <Avatar className="h-8 w-8">
                 <AvatarFallback className="bg-bhagva-100 text-bhagva-700">
-                  {user?.name?.charAt(0) || "A"}
+                  {user?.name?.charAt(0) || "B"}
                 </AvatarFallback>
               </Avatar>
             </Button>
@@ -63,7 +63,7 @@ export default function AdminHeader({ toggleSidebar }) {
             <DropdownMenuSeparator />
             <DropdownMenuItem>
               <User className="mr-2 h-4 w-4" />
-              <span>Profile</span>
+              <span onClick={()=>window.location.href = "/admin/settings"}>Profile</span>
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={logout}>
