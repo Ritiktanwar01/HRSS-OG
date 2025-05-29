@@ -316,7 +316,7 @@ export default function DonationsPage() {
                         </div>
                       )}
 
-                      <div className="flex gap-2 pt-2">
+                      {/* <div className="flex gap-2 pt-2">
                         <Button
                           variant="outline"
                           size="sm"
@@ -335,7 +335,7 @@ export default function DonationsPage() {
                           <Edit className="h-4 w-4 mr-2" />
                           Edit
                         </Button>
-                      </div>
+                      </div> */}
                     </div>
                   </Card>
                 ))}
