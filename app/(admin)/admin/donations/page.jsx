@@ -241,7 +241,7 @@ export default function DonationsPage() {
                       <TableHead>Status</TableHead>
                       <TableHead>Transaction ID</TableHead>
                       <TableHead>Date</TableHead>
-                      <TableHead>Actions</TableHead>
+                      {/* <TableHead>Actions</TableHead> */}
                     </TableRow>
                   </TableHeader>
                   <TableBody>
