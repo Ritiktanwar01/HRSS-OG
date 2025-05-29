@@ -257,7 +257,7 @@ export default function DonationsPage() {
                           {donation.createdAt ? format(new Date(donation.createdAt), "dd MMM yyyy, HH:mm") : "N/A"}
                         </TableCell>
                         <TableCell>
-                          <div className="flex gap-2">
+                          {/* <div className="flex gap-2">
                             <Button
                               variant="outline"
                               size="sm"
@@ -272,7 +272,7 @@ export default function DonationsPage() {
                             >
                               <Edit className="h-4 w-4" />
                             </Button>
-                          </div>
+                          </div> */}
                         </TableCell>
                       </TableRow>
                     ))}
