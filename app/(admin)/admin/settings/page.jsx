@@ -64,7 +64,6 @@ export default function AdminSettingsPage() {
   useEffect(() => {
     const fetchUserProfile = async () => {
       try {
-        const token = getAuthToken()
         const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/me`, {
           headers: {
             Authorization: `Bearer ${localStorage.getItem('access_token')}`,
@@ -96,7 +95,7 @@ export default function AdminSettingsPage() {
     setIsLoading(true)
     try {
       const token = getAuthToken()
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/users/profile`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/update-profile`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
