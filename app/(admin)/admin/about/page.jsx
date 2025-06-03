@@ -519,6 +519,141 @@ export default function AdminAboutPage() {
                             Edit
                           </Button>
                         </DialogTrigger>
+                        <DialogContent className="sm:max-w-[500px]">
+                  <DialogHeader>
+                    <DialogTitle>{isAddingMember ? "Add New Team Member" : "Edit Team Member"}</DialogTitle>
+                    <DialogDescription>
+                      {isAddingMember
+                        ? "Add details for the new team member."
+                        : "Update the details of the team member."}
+                    </DialogDescription>
+                  </DialogHeader>
+                  <Form {...memberForm}>
+                    <form onSubmit={memberForm.handleSubmit(onMemberSubmit)} className="space-y-4">
+                      <FormField
+                        control={memberForm.control}
+                        name="name"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Name</FormLabel>
+                            <FormControl>
+                              <Input placeholder="Enter member's name" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      <FormField
+                        control={memberForm.control}
+                        name="position"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Position</FormLabel>
+                            <FormControl>
+                              <Input placeholder="Enter member's position" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      <FormField
+                        control={memberForm.control}
+                        name="bio"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Bio</FormLabel>
+                            <FormControl>
+                              <Textarea placeholder="Enter member's bio" className="min-h-[100px]" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      <FormField
+                        control={memberForm.control}
+                        name="photo"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Photo</FormLabel>
+                            <FormControl>
+                              <div className="flex items-center gap-4">
+                                <div className="h-16 w-16 rounded-full bg-muted flex items-center justify-center overflow-hidden">
+                                  {field.value ? (
+                                    <img
+                                      src={field.value || "/placeholder.svg"}
+                                      alt="Member preview"
+                                      className="h-full w-full object-cover"
+                                    />
+                                  ) : (
+                                    <User className="h-8 w-8 text-muted-foreground" />
+                                  )}
+                                </div>
+                                <div className="relative flex-1">
+                                  <Input
+                                    type="file"
+                                    accept="image/*"
+                                    id="photo-upload"
+                                    className="absolute inset-0 opacity-0 cursor-pointer z-10 w-full h-full"
+                                    onChange={async (e) => {
+                                      const file = e.target.files[0]
+                                      if (!file) return
+
+                                      try {
+                                        const formData = new FormData()
+                                        formData.append("file", file)
+                                        formData.append("type", "image")
+
+                                      
+                                        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/upload`, {
+                                          method: "POST",
+                                          headers: {
+                                            Authorization: `Bearer ${localStorage.getItem('access_token')}`,
+                                          },
+                                          body: formData,
+                                        })
+
+                                        if (response.ok) {
+                                          const data = await response.json()
+                                          field.onChange(data.url)
+                                          toast({
+                                            title: "Upload Successful",
+                                            description: "Photo has been uploaded successfully.",
+                                          })
+                                        } else {
+                                          throw new Error("Failed to upload photo")
+                                        }
+                                      } catch (error) {
+                                        console.error("Error uploading photo:", error)
+                                        toast({
+                                          title: "Upload Failed",
+                                          description: "Failed to upload photo. Please try again.",
+                                          variant: "destructive",
+                                        })
+                                      }
+                                    }}
+                                  />
+                                  <Button type="button" variant="outline" className="w-full relative z-0">
+                                    <Upload className="mr-2 h-4 w-4" /> Upload Photo
+                                  </Button>
+                                </div>
+                              </div>
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      <DialogFooter>
+                        <Button type="submit" className="bg-bhagva-700 hover:bg-bhagva-800" disabled={isLoading}>
+                          {isLoading ? "Saving..." : isAddingMember ? "Add Member" : "Save Changes"}
+                        </Button>
+                      </DialogFooter>
+                    </form>
+                  </Form>
+                </DialogContent>
                       </Dialog>
                       <Button
                         variant="outline"
