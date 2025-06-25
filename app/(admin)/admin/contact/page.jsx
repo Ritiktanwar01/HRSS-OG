@@ -357,43 +357,51 @@ export default function AdminContactPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="p-3 sm:p-6 space-y-4 sm:space-y-6">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight">Contact Page Management</h1>
-        <p className="text-muted-foreground">Manage contact information and inquiries.</p>
+        <h1 className="text-xl sm:text-2xl font-bold tracking-tight">Contact Page Management</h1>
+        <p className="text-muted-foreground text-sm">Manage contact information and inquiries.</p>
       </div>
 
       <Tabs defaultValue="content" className="space-y-4">
-        <TabsList>
-          <TabsTrigger value="content">Contact Information</TabsTrigger>
-          <TabsTrigger value="offices">Regional Offices</TabsTrigger>
-          <TabsTrigger value="inquiries">Inquiries</TabsTrigger>
+        <TabsList className="grid w-full grid-cols-3 text-xs sm:text-sm">
+          <TabsTrigger value="content" className="px-2 sm:px-4">
+            Contact Info
+          </TabsTrigger>
+          <TabsTrigger value="offices" className="px-2 sm:px-4">
+            Offices
+          </TabsTrigger>
+          <TabsTrigger value="inquiries" className="px-2 sm:px-4">
+            Inquiries
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="content" className="space-y-4">
           <Card>
-            <CardHeader>
-              <CardTitle>Contact Information</CardTitle>
-              <CardDescription>Edit the main contact information displayed on the contact page</CardDescription>
+            <CardHeader className="pb-4">
+              <CardTitle className="text-lg sm:text-xl">Contact Information</CardTitle>
+              <CardDescription className="text-sm">
+                Edit the main contact information displayed on the contact page
+              </CardDescription>
             </CardHeader>
             <CardContent>
               <Form {...contactForm}>
-                <form onSubmit={contactForm.handleSubmit(onContactSubmit)} className="space-y-6">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <form onSubmit={contactForm.handleSubmit(onContactSubmit)} className="space-y-4 sm:space-y-6">
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
                     <div className="space-y-4">
                       <div className="flex items-start">
-                        <MapPin className="h-5 w-5 text-bhagva-600 mr-3 mt-1" />
+                        <MapPin className="h-5 w-5 text-bhagva-600 mr-3 mt-1 flex-shrink-0" />
                         <div className="flex-1">
                           <FormField
                             control={contactForm.control}
                             name="address"
                             render={({ field }) => (
                               <FormItem>
-                                <FormLabel>Address</FormLabel>
+                                <FormLabel className="text-sm">Address</FormLabel>
                                 <FormControl>
                                   <Textarea
                                     placeholder="Enter organization address"
-                                    className="min-h-[80px]"
+                                    className="min-h-[80px] text-sm"
                                     {...field}
                                   />
                                 </FormControl>
@@ -405,16 +413,16 @@ export default function AdminContactPage() {
                       </div>
 
                       <div className="flex items-start">
-                        <Phone className="h-5 w-5 text-bhagva-600 mr-3 mt-1" />
+                        <Phone className="h-5 w-5 text-bhagva-600 mr-3 mt-1 flex-shrink-0" />
                         <div className="flex-1 space-y-4">
                           <FormField
                             control={contactForm.control}
                             name="phone1"
                             render={({ field }) => (
                               <FormItem>
-                                <FormLabel>Primary Phone</FormLabel>
+                                <FormLabel className="text-sm">Primary Phone</FormLabel>
                                 <FormControl>
-                                  <Input placeholder="Enter primary phone number" {...field} />
+                                  <Input placeholder="Enter primary phone number" className="text-sm" {...field} />
                                 </FormControl>
                                 <FormMessage />
                               </FormItem>
@@ -426,9 +434,9 @@ export default function AdminContactPage() {
                             name="phone2"
                             render={({ field }) => (
                               <FormItem>
-                                <FormLabel>Secondary Phone (Optional)</FormLabel>
+                                <FormLabel className="text-sm">Secondary Phone (Optional)</FormLabel>
                                 <FormControl>
-                                  <Input placeholder="Enter secondary phone number" {...field} />
+                                  <Input placeholder="Enter secondary phone number" className="text-sm" {...field} />
                                 </FormControl>
                                 <FormMessage />
                               </FormItem>
@@ -440,16 +448,16 @@ export default function AdminContactPage() {
 
                     <div className="space-y-4">
                       <div className="flex items-start">
-                        <Mail className="h-5 w-5 text-bhagva-600 mr-3 mt-1" />
+                        <Mail className="h-5 w-5 text-bhagva-600 mr-3 mt-1 flex-shrink-0" />
                         <div className="flex-1 space-y-4">
                           <FormField
                             control={contactForm.control}
                             name="email1"
                             render={({ field }) => (
                               <FormItem>
-                                <FormLabel>Primary Email</FormLabel>
+                                <FormLabel className="text-sm">Primary Email</FormLabel>
                                 <FormControl>
-                                  <Input placeholder="Enter primary email address" {...field} />
+                                  <Input placeholder="Enter primary email address" className="text-sm" {...field} />
                                 </FormControl>
                                 <FormMessage />
                               </FormItem>
@@ -461,9 +469,9 @@ export default function AdminContactPage() {
                             name="email2"
                             render={({ field }) => (
                               <FormItem>
-                                <FormLabel>Secondary Email (Optional)</FormLabel>
+                                <FormLabel className="text-sm">Secondary Email (Optional)</FormLabel>
                                 <FormControl>
-                                  <Input placeholder="Enter secondary email address" {...field} />
+                                  <Input placeholder="Enter secondary email address" className="text-sm" {...field} />
                                 </FormControl>
                                 <FormMessage />
                               </FormItem>
@@ -477,9 +485,9 @@ export default function AdminContactPage() {
                         name="officeHours"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>Office Hours</FormLabel>
+                            <FormLabel className="text-sm">Office Hours</FormLabel>
                             <FormControl>
-                              <Textarea placeholder="Enter office hours" className="min-h-[80px]" {...field} />
+                              <Textarea placeholder="Enter office hours" className="min-h-[80px] text-sm" {...field} />
                             </FormControl>
                             <FormMessage />
                           </FormItem>
@@ -488,7 +496,12 @@ export default function AdminContactPage() {
                     </div>
                   </div>
 
-                  <Button type="submit" className="bg-bhagva-700 hover:bg-bhagva-800" disabled={isLoading}>
+                  <Button
+                    type="submit"
+                    className="w-full sm:w-auto bg-bhagva-700 hover:bg-bhagva-800 text-sm"
+                    disabled={isLoading}
+                    size="sm"
+                  >
                     {isLoading ? "Saving..." : "Save Changes"}
                   </Button>
                 </form>
@@ -499,21 +512,25 @@ export default function AdminContactPage() {
 
         <TabsContent value="offices" className="space-y-4">
           <Card>
-            <CardHeader className="flex flex-row items-center justify-between">
+            <CardHeader className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-2 sm:space-y-0 pb-4">
               <div>
-                <CardTitle>Regional Offices</CardTitle>
-                <CardDescription>Manage regional office locations displayed on the contact page</CardDescription>
+                <CardTitle className="text-lg sm:text-xl">Regional Offices</CardTitle>
+                <CardDescription className="text-sm">Manage regional office locations</CardDescription>
               </div>
               <Dialog>
                 <DialogTrigger asChild>
-                  <Button className="bg-bhagva-700 hover:bg-bhagva-800" onClick={handleAddOffice}>
+                  <Button
+                    className="w-full sm:w-auto bg-bhagva-700 hover:bg-bhagva-800 text-sm"
+                    onClick={handleAddOffice}
+                    size="sm"
+                  >
                     <Plus className="mr-2 h-4 w-4" /> Add Office
                   </Button>
                 </DialogTrigger>
-                <DialogContent className="sm:max-w-[500px]">
+                <DialogContent className="w-[95vw] max-w-[500px] max-h-[90vh] overflow-y-auto">
                   <DialogHeader>
-                    <DialogTitle>{isAddingOffice ? "Add New Office" : "Edit Office"}</DialogTitle>
-                    <DialogDescription>
+                    <DialogTitle className="text-lg">{isAddingOffice ? "Add New Office" : "Edit Office"}</DialogTitle>
+                    <DialogDescription className="text-sm">
                       {isAddingOffice
                         ? "Add details for the new regional office."
                         : "Update the details of the regional office."}
@@ -526,9 +543,9 @@ export default function AdminContactPage() {
                         name="name"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>Office Name</FormLabel>
+                            <FormLabel className="text-sm">Office Name</FormLabel>
                             <FormControl>
-                              <Input placeholder="e.g., Mumbai Office" {...field} />
+                              <Input placeholder="e.g., Mumbai Office" className="text-sm" {...field} />
                             </FormControl>
                             <FormMessage />
                           </FormItem>
@@ -540,9 +557,13 @@ export default function AdminContactPage() {
                         name="address"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>Address</FormLabel>
+                            <FormLabel className="text-sm">Address</FormLabel>
                             <FormControl>
-                              <Textarea placeholder="Enter office address" className="min-h-[80px]" {...field} />
+                              <Textarea
+                                placeholder="Enter office address"
+                                className="min-h-[80px] text-sm"
+                                {...field}
+                              />
                             </FormControl>
                             <FormMessage />
                           </FormItem>
@@ -554,9 +575,9 @@ export default function AdminContactPage() {
                         name="phone"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>Phone (Optional)</FormLabel>
+                            <FormLabel className="text-sm">Phone (Optional)</FormLabel>
                             <FormControl>
-                              <Input placeholder="Enter phone number" {...field} />
+                              <Input placeholder="Enter phone number" className="text-sm" {...field} />
                             </FormControl>
                             <FormMessage />
                           </FormItem>
@@ -568,9 +589,9 @@ export default function AdminContactPage() {
                         name="email"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>Email (Optional)</FormLabel>
+                            <FormLabel className="text-sm">Email (Optional)</FormLabel>
                             <FormControl>
-                              <Input placeholder="Enter email address" {...field} />
+                              <Input placeholder="Enter email address" className="text-sm" {...field} />
                             </FormControl>
                             <FormMessage />
                           </FormItem>
@@ -578,7 +599,12 @@ export default function AdminContactPage() {
                       />
 
                       <DialogFooter>
-                        <Button type="submit" className="bg-bhagva-700 hover:bg-bhagva-800" disabled={isLoading}>
+                        <Button
+                          type="submit"
+                          className="w-full sm:w-auto bg-bhagva-700 hover:bg-bhagva-800 text-sm"
+                          disabled={isLoading}
+                          size="sm"
+                        >
                           {isLoading ? "Saving..." : isAddingOffice ? "Add Office" : "Save Changes"}
                         </Button>
                       </DialogFooter>
@@ -588,34 +614,47 @@ export default function AdminContactPage() {
               </Dialog>
             </CardHeader>
             <CardContent>
-              <div className="space-y-4">
+              <div className="space-y-3">
                 {offices.map((office) => (
-                  <div key={office._id} className="flex items-start p-4 border rounded-md">
+                  <div
+                    key={office._id}
+                    className="flex flex-col sm:flex-row sm:items-start p-3 sm:p-4 border rounded-md space-y-3 sm:space-y-0"
+                  >
                     <div className="flex-1">
-                      <h3 className="font-semibold text-lg">{office.name}</h3>
-                      <p className="text-muted-foreground mt-1">{office.address}</p>
-                      {office.phone && <p className="text-sm mt-1">Phone: {office.phone}</p>}
-                      {office.email && <p className="text-sm mt-1">Email: {office.email}</p>}
+                      <h3 className="font-semibold text-base sm:text-lg">{office.name}</h3>
+                      <p className="text-muted-foreground mt-1 text-sm">{office.address}</p>
+                      {office.phone && <p className="text-xs sm:text-sm mt-1">Phone: {office.phone}</p>}
+                      {office.email && <p className="text-xs sm:text-sm mt-1">Email: {office.email}</p>}
                     </div>
-                    <div className="flex space-x-2">
+                    <div className="flex space-x-2 sm:ml-4">
                       <Dialog>
                         <DialogTrigger asChild>
-                          <Button variant="outline" size="sm" onClick={() => handleEditOffice(office)}>
-                            <Edit className="h-4 w-4 mr-2" /> Edit
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleEditOffice(office)}
+                            className="text-xs"
+                          >
+                            <Edit className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" /> Edit
                           </Button>
                         </DialogTrigger>
                       </Dialog>
                       <Button
                         variant="outline"
                         size="sm"
-                        className="text-red-500 hover:text-red-700"
+                        className="text-red-500 hover:text-red-700 text-xs"
                         onClick={() => handleDeleteOffice(office._id)}
                       >
-                        <Trash2 className="h-4 w-4 mr-2" /> Delete
+                        <Trash2 className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" /> Delete
                       </Button>
                     </div>
                   </div>
                 ))}
+                {offices.length === 0 && (
+                  <div className="text-center py-8 text-gray-500">
+                    <p className="text-sm">No regional offices added yet.</p>
+                  </div>
+                )}
               </div>
             </CardContent>
           </Card>
@@ -623,31 +662,34 @@ export default function AdminContactPage() {
 
         <TabsContent value="inquiries" className="space-y-4">
           <Card>
-            <CardHeader>
-              <CardTitle>Contact Inquiries</CardTitle>
-              <CardDescription>View and manage inquiries submitted through the contact form</CardDescription>
+            <CardHeader className="pb-4">
+              <CardTitle className="text-lg sm:text-xl">Contact Inquiries</CardTitle>
+              <CardDescription className="text-sm">
+                View and manage inquiries submitted through the contact form
+              </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="overflow-x-auto">
+              {/* Desktop Table View */}
+              <div className="hidden md:block overflow-x-auto">
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Name</TableHead>
-                      <TableHead>Email</TableHead>
-                      <TableHead>Date</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead className="text-right">Actions</TableHead>
+                      <TableHead className="text-xs">Name</TableHead>
+                      <TableHead className="text-xs">Email</TableHead>
+                      <TableHead className="text-xs">Date</TableHead>
+                      <TableHead className="text-xs">Status</TableHead>
+                      <TableHead className="text-right text-xs">Actions</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {inquiries.map((inquiry) => (
                       <TableRow key={inquiry._id}>
-                        <TableCell className="font-medium">{inquiry.name}</TableCell>
-                        <TableCell>{inquiry.email}</TableCell>
-                        <TableCell>{new Date(inquiry.createdAt).toLocaleDateString()}</TableCell>
+                        <TableCell className="font-medium text-sm">{inquiry.name}</TableCell>
+                        <TableCell className="text-sm">{inquiry.email}</TableCell>
+                        <TableCell className="text-sm">{new Date(inquiry.createdAt).toLocaleDateString()}</TableCell>
                         <TableCell>
                           <span
-                            className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                            className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
                               inquiry.status === "unread"
                                 ? "bg-bhagva-100 text-bhagva-800"
                                 : "bg-gray-100 text-gray-800"
@@ -657,35 +699,42 @@ export default function AdminContactPage() {
                           </span>
                         </TableCell>
                         <TableCell className="text-right">
-                          <div className="flex justify-end space-x-2">
+                          <div className="flex justify-end space-x-1">
                             <Dialog>
                               <DialogTrigger asChild>
-                                <Button variant="outline" size="sm" onClick={() => handleViewInquiry(inquiry)}>
-                                  <Eye className="h-4 w-4 mr-2" /> View
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => handleViewInquiry(inquiry)}
+                                  className="text-xs"
+                                >
+                                  <Eye className="h-3 w-3 mr-1" /> View
                                 </Button>
                               </DialogTrigger>
-                              <DialogContent className="sm:max-w-[500px]">
+                              <DialogContent className="w-[95vw] max-w-[500px] max-h-[90vh] overflow-y-auto">
                                 <DialogHeader>
-                                  <DialogTitle>Inquiry Details</DialogTitle>
+                                  <DialogTitle className="text-lg">Inquiry Details</DialogTitle>
                                 </DialogHeader>
                                 {selectedInquiry && selectedInquiry._id === inquiry._id && (
                                   <div className="space-y-4">
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    <div className="grid grid-cols-1 gap-3">
                                       <div>
                                         <h4 className="text-sm font-medium text-gray-500">Name</h4>
-                                        <p className="mt-1">{selectedInquiry.name}</p>
-                                      </div>
-                                      <div>
-                                        <h4 className="text-sm font-medium text-gray-500">Date</h4>
-                                        <p className="mt-1">{new Date(selectedInquiry.createdAt).toLocaleString()}</p>
+                                        <p className="mt-1 text-sm">{selectedInquiry.name}</p>
                                       </div>
                                       <div>
                                         <h4 className="text-sm font-medium text-gray-500">Email</h4>
-                                        <p className="mt-1">{selectedInquiry.email}</p>
+                                        <p className="mt-1 text-sm">{selectedInquiry.email}</p>
                                       </div>
                                       <div>
                                         <h4 className="text-sm font-medium text-gray-500">Phone</h4>
-                                        <p className="mt-1">{selectedInquiry.phone || "Not provided"}</p>
+                                        <p className="mt-1 text-sm">{selectedInquiry.phone || "Not provided"}</p>
+                                      </div>
+                                      <div>
+                                        <h4 className="text-sm font-medium text-gray-500">Date</h4>
+                                        <p className="mt-1 text-sm">
+                                          {new Date(selectedInquiry.createdAt).toLocaleString()}
+                                        </p>
                                       </div>
                                     </div>
                                     <div>
@@ -701,10 +750,10 @@ export default function AdminContactPage() {
                             <Button
                               variant="outline"
                               size="sm"
-                              className="text-red-500 hover:text-red-700"
+                              className="text-red-500 hover:text-red-700 text-xs"
                               onClick={() => handleDeleteInquiry(inquiry._id)}
                             >
-                              <Trash2 className="h-4 w-4 mr-2" /> Delete
+                              <Trash2 className="h-3 w-3" />
                             </Button>
                           </div>
                         </TableCell>
@@ -714,59 +763,61 @@ export default function AdminContactPage() {
                 </Table>
               </div>
 
-              {/* Mobile view for inquiries */}
-              <div className="md:hidden space-y-3 mt-4">
+              {/* Mobile Card View */}
+              <div className="md:hidden space-y-3">
                 {inquiries.map((inquiry) => (
-                  <Card key={inquiry._id} className="p-4">
-                    <div className="space-y-3">
+                  <Card key={inquiry._id} className="p-3 border-l-4 border-l-bhagva-600">
+                    <div className="space-y-2">
                       <div className="flex justify-between items-start">
-                        <div>
-                          <h3 className="font-semibold">{inquiry.name}</h3>
-                          <p className="text-sm text-gray-600">{inquiry.email}</p>
+                        <div className="flex-1 min-w-0 pr-2">
+                          <h3 className="font-semibold text-sm truncate">{inquiry.name}</h3>
+                          <p className="text-xs text-gray-600 truncate">{inquiry.email}</p>
                         </div>
                         <span
-                          className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                          className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium flex-shrink-0 ${
                             inquiry.status === "unread" ? "bg-bhagva-100 text-bhagva-800" : "bg-gray-100 text-gray-800"
                           }`}
                         >
                           {inquiry.status === "unread" ? "Unread" : "Read"}
                         </span>
                       </div>
-                      <p className="text-sm text-gray-500">{new Date(inquiry.createdAt).toLocaleDateString()}</p>
-                      <div className="flex space-x-2">
+                      <p className="text-xs text-gray-500">{new Date(inquiry.createdAt).toLocaleDateString()}</p>
+                      <div className="flex space-x-2 pt-1">
                         <Dialog>
                           <DialogTrigger asChild>
                             <Button
                               variant="outline"
                               size="sm"
-                              className="flex-1"
+                              className="flex-1 text-xs"
                               onClick={() => handleViewInquiry(inquiry)}
                             >
-                              <Eye className="h-4 w-4 mr-2" /> View
+                              <Eye className="h-3 w-3 mr-1" /> View
                             </Button>
                           </DialogTrigger>
-                          <DialogContent className="sm:max-w-[500px]">
+                          <DialogContent className="w-[95vw] max-w-[500px] max-h-[90vh] overflow-y-auto">
                             <DialogHeader>
-                              <DialogTitle>Inquiry Details</DialogTitle>
+                              <DialogTitle className="text-lg">Inquiry Details</DialogTitle>
                             </DialogHeader>
                             {selectedInquiry && selectedInquiry._id === inquiry._id && (
                               <div className="space-y-4">
-                                <div className="grid grid-cols-1 gap-4">
+                                <div className="grid grid-cols-1 gap-3">
                                   <div>
                                     <h4 className="text-sm font-medium text-gray-500">Name</h4>
-                                    <p className="mt-1">{selectedInquiry.name}</p>
+                                    <p className="mt-1 text-sm">{selectedInquiry.name}</p>
                                   </div>
                                   <div>
                                     <h4 className="text-sm font-medium text-gray-500">Email</h4>
-                                    <p className="mt-1">{selectedInquiry.email}</p>
+                                    <p className="mt-1 text-sm">{selectedInquiry.email}</p>
                                   </div>
                                   <div>
                                     <h4 className="text-sm font-medium text-gray-500">Phone</h4>
-                                    <p className="mt-1">{selectedInquiry.phone || "Not provided"}</p>
+                                    <p className="mt-1 text-sm">{selectedInquiry.phone || "Not provided"}</p>
                                   </div>
                                   <div>
                                     <h4 className="text-sm font-medium text-gray-500">Date</h4>
-                                    <p className="mt-1">{new Date(selectedInquiry.createdAt).toLocaleString()}</p>
+                                    <p className="mt-1 text-sm">
+                                      {new Date(selectedInquiry.createdAt).toLocaleString()}
+                                    </p>
                                   </div>
                                 </div>
                                 <div>
@@ -782,10 +833,10 @@ export default function AdminContactPage() {
                         <Button
                           variant="outline"
                           size="sm"
-                          className="text-red-500 hover:text-red-700"
+                          className="text-red-500 hover:text-red-700 text-xs px-2"
                           onClick={() => handleDeleteInquiry(inquiry._id)}
                         >
-                          <Trash2 className="h-4 w-4" />
+                          <Trash2 className="h-3 w-3" />
                         </Button>
                       </div>
                     </div>
@@ -795,7 +846,7 @@ export default function AdminContactPage() {
 
               {inquiries.length === 0 && (
                 <div className="text-center py-8 text-gray-500">
-                  <p>No inquiries found.</p>
+                  <p className="text-sm">No inquiries found.</p>
                 </div>
               )}
             </CardContent>

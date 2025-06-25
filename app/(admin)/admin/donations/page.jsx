@@ -106,7 +106,7 @@ export default function DonationsPage() {
   const getStatusBadge = (status) => {
     switch (status) {
       case "success":
-        return <Badge className="bg-green-500">Success</Badge>
+        return <Badge className="bg-green-500 text-white">Success</Badge>
       case "failed":
         return <Badge variant="destructive">Failed</Badge>
       case "pending":
@@ -126,65 +126,71 @@ export default function DonationsPage() {
     .reduce((sum, donation) => sum + donation.amount, 0)
 
   return (
-    <div className="p-4 sm:p-6">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-4 sm:space-y-0 mb-6">
+    <div className="p-3 sm:p-6 space-y-4 sm:space-y-6">
+      {/* Header Section */}
+      <div className="flex flex-col space-y-3 sm:space-y-0 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-xl sm:text-2xl font-bold text-bhagva-800">Donations</h1>
-          <p className="text-gray-500 text-sm sm:text-base">Manage and track all donations</p>
+          <p className="text-gray-500 text-sm">Manage and track all donations</p>
         </div>
-        <Button onClick={exportToCSV} className="w-full sm:w-auto bg-bhagva-700 hover:bg-bhagva-800">
+        <Button onClick={exportToCSV} className="w-full sm:w-auto bg-bhagva-700 hover:bg-bhagva-800 text-sm" size="sm">
           <Download className="mr-2 h-4 w-4" /> Export CSV
         </Button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-lg">Total Donations</CardTitle>
-            <CardDescription>All time donations</CardDescription>
+      {/* Stats Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+        <Card className="p-3 sm:p-4">
+          <CardHeader className="pb-2 px-0">
+            <CardTitle className="text-sm sm:text-base">Total Donations</CardTitle>
+            <CardDescription className="text-xs sm:text-sm">All time donations</CardDescription>
           </CardHeader>
-          <CardContent>
-            <p className="text-3xl font-bold text-bhagva-800">₹{totalSuccessfulDonations.toLocaleString()}</p>
+          <CardContent className="px-0 pb-0">
+            <p className="text-xl sm:text-2xl lg:text-3xl font-bold text-bhagva-800">
+              ₹{totalSuccessfulDonations.toLocaleString()}
+            </p>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-lg">Successful Transactions</CardTitle>
-            <CardDescription>Completed donations</CardDescription>
+        <Card className="p-3 sm:p-4">
+          <CardHeader className="pb-2 px-0">
+            <CardTitle className="text-sm sm:text-base">Successful</CardTitle>
+            <CardDescription className="text-xs sm:text-sm">Completed donations</CardDescription>
           </CardHeader>
-          <CardContent>
-            <p className="text-3xl font-bold text-green-600">
+          <CardContent className="px-0 pb-0">
+            <p className="text-xl sm:text-2xl lg:text-3xl font-bold text-green-600">
               {donations.filter((d) => d.paymentStatus === "success").length}
             </p>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-lg">Failed Transactions</CardTitle>
-            <CardDescription>Unsuccessful attempts</CardDescription>
+        <Card className="p-3 sm:p-4 sm:col-span-2 lg:col-span-1">
+          <CardHeader className="pb-2 px-0">
+            <CardTitle className="text-sm sm:text-base">Failed</CardTitle>
+            <CardDescription className="text-xs sm:text-sm">Unsuccessful attempts</CardDescription>
           </CardHeader>
-          <CardContent>
-            <p className="text-3xl font-bold text-red-600">
+          <CardContent className="px-0 pb-0">
+            <p className="text-xl sm:text-2xl lg:text-3xl font-bold text-red-600">
               {donations.filter((d) => d.paymentStatus === "failed").length}
             </p>
           </CardContent>
         </Card>
       </div>
 
+      {/* Main Content Card */}
       <Card>
-        <CardHeader>
-          <CardTitle>Donation Records</CardTitle>
-          <CardDescription>View and manage all donation transactions</CardDescription>
+        <CardHeader className="pb-4">
+          <CardTitle className="text-lg sm:text-xl">Donation Records</CardTitle>
+          <CardDescription className="text-sm">View and manage all donation transactions</CardDescription>
         </CardHeader>
-        <CardContent>
-          <div className="flex flex-col space-y-4 mb-6">
+        <CardContent className="space-y-4">
+          {/* Search and Filters */}
+          <div className="space-y-3">
             <div className="relative">
               <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-500" />
               <Input
                 placeholder="Search by name, email or transaction ID"
-                className="pl-8"
+                className="pl-8 text-sm"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
@@ -192,9 +198,9 @@ export default function DonationsPage() {
 
             <div className="flex flex-col sm:flex-row gap-2">
               <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger className="w-full sm:w-[180px]">
+                <SelectTrigger className="w-full sm:w-[160px] text-sm">
                   <Filter className="mr-2 h-4 w-4" />
-                  <SelectValue placeholder="Filter by status" />
+                  <SelectValue placeholder="Status" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Statuses</SelectItem>
@@ -205,7 +211,7 @@ export default function DonationsPage() {
               </Select>
 
               <Select value={sortBy} onValueChange={setSortBy}>
-                <SelectTrigger className="w-full sm:w-[180px]">
+                <SelectTrigger className="w-full sm:w-[160px] text-sm">
                   <SelectValue placeholder="Sort by" />
                 </SelectTrigger>
                 <SelectContent>
@@ -218,14 +224,15 @@ export default function DonationsPage() {
             </div>
           </div>
 
+          {/* Loading State */}
           {loading ? (
             <div className="text-center py-8">
               <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-bhagva-600 border-r-transparent"></div>
-              <p className="mt-4 text-gray-500">Loading donations...</p>
+              <p className="mt-4 text-gray-500 text-sm">Loading donations...</p>
             </div>
           ) : sortedDonations.length === 0 ? (
             <div className="text-center py-12 border rounded-lg">
-              <p className="text-gray-500">No donations found</p>
+              <p className="text-gray-500 text-sm">No donations found</p>
             </div>
           ) : (
             <>
@@ -234,45 +241,28 @@ export default function DonationsPage() {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Name</TableHead>
-                      <TableHead>Email</TableHead>
-                      <TableHead>Amount</TableHead>
-                      <TableHead>Type</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead>Transaction ID</TableHead>
-                      <TableHead>Date</TableHead>
-                      {/* <TableHead>Actions</TableHead> */}
+                      <TableHead className="text-xs">Name</TableHead>
+                      <TableHead className="text-xs">Email</TableHead>
+                      <TableHead className="text-xs">Amount</TableHead>
+                      <TableHead className="text-xs">Type</TableHead>
+                      <TableHead className="text-xs">Status</TableHead>
+                      <TableHead className="text-xs">Transaction ID</TableHead>
+                      <TableHead className="text-xs">Date</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {sortedDonations.map((donation) => (
                       <TableRow key={donation._id}>
-                        <TableCell className="font-medium">{donation.name}</TableCell>
-                        <TableCell>{donation.email}</TableCell>
-                        <TableCell>₹{donation.amount}</TableCell>
-                        <TableCell>{donation.donationType === "oneTime" ? "One-time" : "Monthly"}</TableCell>
+                        <TableCell className="font-medium text-sm">{donation.name}</TableCell>
+                        <TableCell className="text-sm">{donation.email}</TableCell>
+                        <TableCell className="text-sm font-semibold">₹{donation.amount}</TableCell>
+                        <TableCell className="text-sm">
+                          {donation.donationType === "oneTime" ? "One-time" : "Monthly"}
+                        </TableCell>
                         <TableCell>{getStatusBadge(donation.paymentStatus)}</TableCell>
                         <TableCell className="font-mono text-xs">{donation.transactionId || "N/A"}</TableCell>
-                        <TableCell>
-                          {donation.createdAt ? format(new Date(donation.createdAt), "dd MMM yyyy, HH:mm") : "N/A"}
-                        </TableCell>
-                        <TableCell>
-                          {/* <div className="flex gap-2">
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => (window.location.href = `/admin/donations/view/${donation._id}`)}
-                            >
-                              <Eye className="h-4 w-4" />
-                            </Button>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => (window.location.href = `/admin/donations/edit/${donation._id}`)}
-                            >
-                              <Edit className="h-4 w-4" />
-                            </Button>
-                          </div> */}
+                        <TableCell className="text-sm">
+                          {donation.createdAt ? format(new Date(donation.createdAt), "dd MMM yyyy") : "N/A"}
                         </TableCell>
                       </TableRow>
                     ))}
@@ -283,38 +273,38 @@ export default function DonationsPage() {
               {/* Mobile Card View */}
               <div className="lg:hidden space-y-3">
                 {sortedDonations.map((donation) => (
-                  <Card key={donation._id} className="p-3">
+                  <Card key={donation._id} className="p-3 border-l-4 border-l-bhagva-600">
                     <div className="space-y-2">
                       <div className="flex justify-between items-start">
-                        <div className="flex-1 min-w-0">
-                          <h3 className="font-semibold text-base truncate">{donation.name}</h3>
-                          <p className="text-sm text-gray-600 truncate">{donation.email}</p>
+                        <div className="flex-1 min-w-0 pr-2">
+                          <h3 className="font-semibold text-sm truncate">{donation.name}</h3>
+                          <p className="text-xs text-gray-600 truncate">{donation.email}</p>
                         </div>
-                        <div className="text-right ml-2">
-                          <p className="font-bold text-base text-bhagva-800">₹{donation.amount}</p>
-                          {getStatusBadge(donation.paymentStatus)}
+                        <div className="text-right flex-shrink-0">
+                          <p className="font-bold text-sm text-bhagva-800">₹{donation.amount}</p>
+                          <div className="mt-1">{getStatusBadge(donation.paymentStatus)}</div>
                         </div>
                       </div>
 
-                      <div className="grid grid-cols-2 gap-2 text-sm">
+                      <div className="grid grid-cols-2 gap-2 text-xs">
                         <div>
-                          <span className="text-gray-500 text-xs">Type:</span>
-                          <p className="font-medium text-sm">
-                            {donation.donationType === "oneTime" ? "One-time" : "Monthly"}
-                          </p>
+                          <span className="text-gray-500">Type:</span>
+                          <p className="font-medium">{donation.donationType === "oneTime" ? "One-time" : "Monthly"}</p>
                         </div>
                         <div>
-                          <span className="text-gray-500 text-xs">Date:</span>
-                          <p className="font-medium text-sm">
+                          <span className="text-gray-500">Date:</span>
+                          <p className="font-medium">
                             {donation.createdAt ? format(new Date(donation.createdAt), "dd MMM yyyy") : "N/A"}
                           </p>
                         </div>
                       </div>
 
                       {donation.transactionId && (
-                        <div className="text-sm">
-                          <span className="text-gray-500 text-xs">Transaction ID:</span>
-                          <p className="font-mono text-xs break-all bg-gray-50 p-1 rounded">{donation.transactionId}</p>
+                        <div className="text-xs">
+                          <span className="text-gray-500">Transaction ID:</span>
+                          <p className="font-mono text-xs break-all bg-gray-50 p-1 rounded mt-1">
+                            {donation.transactionId}
+                          </p>
                         </div>
                       )}
                     </div>

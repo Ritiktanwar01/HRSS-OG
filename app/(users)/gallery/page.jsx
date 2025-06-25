@@ -4,7 +4,7 @@ import { useState, useEffect } from "react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Dialog, DialogContent, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog"
 import { X } from "lucide-react"
 
 export default function GalleryPage() {
@@ -14,6 +14,7 @@ export default function GalleryPage() {
     volunteers: [],
   })
   const [selectedItem, setSelectedItem] = useState(null)
+  const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [isVideoPlaying, setIsVideoPlaying] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
 
@@ -45,22 +46,30 @@ export default function GalleryPage() {
 
   const handleItemClick = (item) => {
     setSelectedItem(item)
+    setIsDialogOpen(true)
     if (item.type === "video") {
       setIsVideoPlaying(true)
     }
   }
 
   const handleDialogClose = () => {
+    setIsDialogOpen(false)
     if (selectedItem?.type === "video") {
       setIsVideoPlaying(false)
     }
-    setSelectedItem(null)
+    // Small delay to prevent flickering
+    setTimeout(() => {
+      setSelectedItem(null)
+    }, 150)
   }
 
   if (isLoading) {
     return (
       <div className="container mx-auto px-4 py-12 flex justify-center">
-        <div>Loading gallery...</div>
+        <div className="text-center">
+          <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-bhagva-600 border-r-transparent"></div>
+          <p className="mt-4 text-gray-500">Loading gallery...</p>
+        </div>
       </div>
     )
   }
@@ -95,85 +104,91 @@ export default function GalleryPage() {
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 {items.map((item) => (
-                  <Dialog key={item._id} onOpenChange={(open) => !open && handleDialogClose()}>
-                    <DialogTrigger asChild>
-                      <Card className="overflow-hidden cursor-pointer hover:shadow-lg transition-shadow">
-                        <CardContent className="p-0">
-                          <div className="relative">
-                            <img
-                              src={item.type === "image" ? item.url : item.thumbnail || item.url}
-                              alt={item.title}
-                              className="w-full h-48 object-cover"
-                              width={400}
-                              height={300}
-                            />
-                            {item.type === "video" && (
-                              <div className="absolute inset-0 flex items-center justify-center">
-                                <div className="h-12 w-12 rounded-full bg-black/50 flex items-center justify-center">
-                                  <svg
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    viewBox="0 0 24 24"
-                                    fill="white"
-                                    className="w-6 h-6"
-                                  >
-                                    <path d="M8 5v14l11-7z" />
-                                  </svg>
-                                </div>
-                              </div>
-                            )}
-                            <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent flex flex-col justify-end p-4 text-white">
-                              <h3 className="font-semibold text-lg">{item.title}</h3>
-                              <p className="text-sm text-white/90 line-clamp-2">{item.description}</p>
+                  <Card
+                    key={item._id}
+                    className="overflow-hidden cursor-pointer hover:shadow-lg transition-shadow"
+                    onClick={() => handleItemClick(item)}
+                  >
+                    <CardContent className="p-0">
+                      <div className="relative">
+                        <img
+                          src={item.type === "image" ? item.url : item.thumbnail || item.url}
+                          alt={item.title}
+                          className="w-full h-48 object-cover"
+                          width={400}
+                          height={300}
+                        />
+                        {item.type === "video" && (
+                          <div className="absolute inset-0 flex items-center justify-center">
+                            <div className="h-12 w-12 rounded-full bg-black/50 flex items-center justify-center">
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                viewBox="0 0 24 24"
+                                fill="white"
+                                className="w-6 h-6"
+                              >
+                                <path d="M8 5v14l11-7z" />
+                              </svg>
                             </div>
                           </div>
-                        </CardContent>
-                      </Card>
-                    </DialogTrigger>
-                    <DialogContent className="max-w-3xl p-0" onClick={() => handleItemClick(item)}>
-                      <DialogTitle className="sr-only">{item.title}</DialogTitle>
-                      <div className="relative">
-                        {selectedItem?.type === "image" ? (
-                          <img
-                            src={selectedItem.url || "/placeholder.svg"}
-                            alt={selectedItem.title}
-                            className="w-full max-h-[70vh] object-contain"
-                          />
-                        ) : (
-                          selectedItem && (
-                            <div className="w-full bg-black">
-                              <video
-                                src={selectedItem.url}
-                                controls
-                                autoPlay={isVideoPlaying}
-                                className="w-full max-h-[70vh]"
-                                onEnded={() => setIsVideoPlaying(false)}
-                              >
-                                Your browser does not support the video tag.
-                              </video>
-                            </div>
-                          )
                         )}
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="absolute top-2 right-2 rounded-full bg-black/40 hover:bg-black/60 text-white"
-                          onClick={() => document.querySelector("[data-radix-dialog-close]")?.click()}
-                        >
-                          <X className="h-5 w-5" />
-                        </Button>
-                        <div className="bg-white p-4">
-                          <h3 className="font-semibold text-xl text-bhagva-800">{selectedItem?.title}</h3>
-                          <p className="text-gray-700">{selectedItem?.description}</p>
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent flex flex-col justify-end p-4 text-white">
+                          <h3 className="font-semibold text-lg">{item.title}</h3>
+                          <p className="text-sm text-white/90 line-clamp-2">{item.description}</p>
                         </div>
                       </div>
-                    </DialogContent>
-                  </Dialog>
+                    </CardContent>
+                  </Card>
                 ))}
               </div>
             )}
           </TabsContent>
         ))}
       </Tabs>
+
+      {/* Single Dialog controlled by state */}
+      <Dialog open={isDialogOpen} onOpenChange={handleDialogClose}>
+        <DialogContent className="max-w-4xl w-[95vw] p-0 overflow-hidden">
+          <DialogTitle className="sr-only">{selectedItem?.title || "Gallery Item"}</DialogTitle>
+          {selectedItem && (
+            <div className="relative">
+              {selectedItem.type === "image" ? (
+                <div className="relative">
+                  <img
+                    src={selectedItem.url || "/placeholder.svg"}
+                    alt={selectedItem.title}
+                    className="w-full max-h-[80vh] object-contain bg-black"
+                  />
+                </div>
+              ) : (
+                <div className="w-full bg-black">
+                  <video
+                    src={selectedItem.url}
+                    controls
+                    autoPlay={isVideoPlaying}
+                    className="w-full max-h-[80vh] object-contain"
+                    onEnded={() => setIsVideoPlaying(false)}
+                  >
+                    Your browser does not support the video tag.
+                  </video>
+                </div>
+              )}
+              <Button
+                variant="ghost"
+                size="icon"
+                className="absolute top-2 right-2 rounded-full bg-black/60 hover:bg-black/80 text-white z-10"
+                onClick={handleDialogClose}
+              >
+                <X className="h-5 w-5" />
+              </Button>
+              <div className="bg-white p-4">
+                <h3 className="font-semibold text-xl text-bhagva-800 mb-2">{selectedItem.title}</h3>
+                <p className="text-gray-700">{selectedItem.description}</p>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
 
       <div className="text-center mt-16">
         <p className="text-gray-700 mb-6">Would you like to contribute your photos or videos to our gallery?</p>
