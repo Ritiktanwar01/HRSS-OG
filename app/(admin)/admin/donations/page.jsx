@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { toast } from "@/components/ui/use-toast"
-import { Download, Search, Filter, Eye, Edit } from "lucide-react"
+import { Download, Search, Filter } from "lucide-react"
 import { format } from "date-fns"
 
 export default function DonationsPage() {
@@ -126,18 +126,18 @@ export default function DonationsPage() {
     .reduce((sum, donation) => sum + donation.amount, 0)
 
   return (
-    <div className="p-6">
-      <div className="flex flex-col space-y-4 mb-6">
+    <div className="p-4 sm:p-6">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-4 sm:space-y-0 mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-bhagva-800">Donations</h1>
-          <p className="text-gray-500">Manage and track all donations</p>
+          <h1 className="text-xl sm:text-2xl font-bold text-bhagva-800">Donations</h1>
+          <p className="text-gray-500 text-sm sm:text-base">Manage and track all donations</p>
         </div>
         <Button onClick={exportToCSV} className="w-full sm:w-auto bg-bhagva-700 hover:bg-bhagva-800">
           <Download className="mr-2 h-4 w-4" /> Export CSV
         </Button>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-lg">Total Donations</CardTitle>
@@ -190,7 +190,7 @@ export default function DonationsPage() {
               />
             </div>
 
-            <div className="flex flex-col sm:flex-row gap-4">
+            <div className="flex flex-col sm:flex-row gap-2">
               <Select value={statusFilter} onValueChange={setStatusFilter}>
                 <SelectTrigger className="w-full sm:w-[180px]">
                   <Filter className="mr-2 h-4 w-4" />
@@ -281,29 +281,31 @@ export default function DonationsPage() {
               </div>
 
               {/* Mobile Card View */}
-              <div className="lg:hidden space-y-4">
+              <div className="lg:hidden space-y-3">
                 {sortedDonations.map((donation) => (
-                  <Card key={donation._id} className="p-4">
-                    <div className="space-y-3">
+                  <Card key={donation._id} className="p-3">
+                    <div className="space-y-2">
                       <div className="flex justify-between items-start">
-                        <div>
-                          <h3 className="font-semibold text-lg">{donation.name}</h3>
-                          <p className="text-sm text-gray-600">{donation.email}</p>
+                        <div className="flex-1 min-w-0">
+                          <h3 className="font-semibold text-base truncate">{donation.name}</h3>
+                          <p className="text-sm text-gray-600 truncate">{donation.email}</p>
                         </div>
-                        <div className="text-right">
-                          <p className="font-bold text-lg text-bhagva-800">₹{donation.amount}</p>
+                        <div className="text-right ml-2">
+                          <p className="font-bold text-base text-bhagva-800">₹{donation.amount}</p>
                           {getStatusBadge(donation.paymentStatus)}
                         </div>
                       </div>
 
-                      <div className="grid grid-cols-2 gap-4 text-sm">
+                      <div className="grid grid-cols-2 gap-2 text-sm">
                         <div>
-                          <span className="text-gray-500">Type:</span>
-                          <p className="font-medium">{donation.donationType === "oneTime" ? "One-time" : "Monthly"}</p>
+                          <span className="text-gray-500 text-xs">Type:</span>
+                          <p className="font-medium text-sm">
+                            {donation.donationType === "oneTime" ? "One-time" : "Monthly"}
+                          </p>
                         </div>
                         <div>
-                          <span className="text-gray-500">Date:</span>
-                          <p className="font-medium">
+                          <span className="text-gray-500 text-xs">Date:</span>
+                          <p className="font-medium text-sm">
                             {donation.createdAt ? format(new Date(donation.createdAt), "dd MMM yyyy") : "N/A"}
                           </p>
                         </div>
@@ -311,31 +313,10 @@ export default function DonationsPage() {
 
                       {donation.transactionId && (
                         <div className="text-sm">
-                          <span className="text-gray-500">Transaction ID:</span>
-                          <p className="font-mono text-xs break-all">{donation.transactionId}</p>
+                          <span className="text-gray-500 text-xs">Transaction ID:</span>
+                          <p className="font-mono text-xs break-all bg-gray-50 p-1 rounded">{donation.transactionId}</p>
                         </div>
                       )}
-
-                      {/* <div className="flex gap-2 pt-2">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="flex-1"
-                          onClick={() => (window.location.href = `/admin/donations/view/${donation._id}`)}
-                        >
-                          <Eye className="h-4 w-4 mr-2" />
-                          View
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="flex-1"
-                          onClick={() => (window.location.href = `/admin/donations/edit/${donation._id}`)}
-                        >
-                          <Edit className="h-4 w-4 mr-2" />
-                          Edit
-                        </Button>
-                      </div> */}
                     </div>
                   </Card>
                 ))}

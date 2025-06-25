@@ -75,7 +75,7 @@ const Navbar = () => {
               </Button>
             </SheetTrigger>
             <SheetContent side="right" className="w-[250px] sm:w-[300px]">
-              <DialogTitle>SideBar</DialogTitle>
+              <DialogTitle>{""}</DialogTitle>
               {/* Add an accessible title for the dialog */}
               <h2 className="sr-only">Navigation Menu</h2> {/* Screen-reader-only title */}
               <div className="flex flex-col mt-6 space-y-2">

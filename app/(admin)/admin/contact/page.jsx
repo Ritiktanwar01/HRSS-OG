@@ -628,85 +628,176 @@ export default function AdminContactPage() {
               <CardDescription>View and manage inquiries submitted through the contact form</CardDescription>
             </CardHeader>
             <CardContent>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Name</TableHead>
-                    <TableHead>Email</TableHead>
-                    <TableHead>Date</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {inquiries.map((inquiry) => (
-                    <TableRow key={inquiry._id}>
-                      <TableCell className="font-medium">{inquiry.name}</TableCell>
-                      <TableCell>{inquiry.email}</TableCell>
-                      <TableCell>{new Date(inquiry.createdAt).toLocaleDateString()}</TableCell>
-                      <TableCell>
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Name</TableHead>
+                      <TableHead>Email</TableHead>
+                      <TableHead>Date</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead className="text-right">Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {inquiries.map((inquiry) => (
+                      <TableRow key={inquiry._id}>
+                        <TableCell className="font-medium">{inquiry.name}</TableCell>
+                        <TableCell>{inquiry.email}</TableCell>
+                        <TableCell>{new Date(inquiry.createdAt).toLocaleDateString()}</TableCell>
+                        <TableCell>
+                          <span
+                            className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                              inquiry.status === "unread"
+                                ? "bg-bhagva-100 text-bhagva-800"
+                                : "bg-gray-100 text-gray-800"
+                            }`}
+                          >
+                            {inquiry.status === "unread" ? "Unread" : "Read"}
+                          </span>
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <div className="flex justify-end space-x-2">
+                            <Dialog>
+                              <DialogTrigger asChild>
+                                <Button variant="outline" size="sm" onClick={() => handleViewInquiry(inquiry)}>
+                                  <Eye className="h-4 w-4 mr-2" /> View
+                                </Button>
+                              </DialogTrigger>
+                              <DialogContent className="sm:max-w-[500px]">
+                                <DialogHeader>
+                                  <DialogTitle>Inquiry Details</DialogTitle>
+                                </DialogHeader>
+                                {selectedInquiry && selectedInquiry._id === inquiry._id && (
+                                  <div className="space-y-4">
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                      <div>
+                                        <h4 className="text-sm font-medium text-gray-500">Name</h4>
+                                        <p className="mt-1">{selectedInquiry.name}</p>
+                                      </div>
+                                      <div>
+                                        <h4 className="text-sm font-medium text-gray-500">Date</h4>
+                                        <p className="mt-1">{new Date(selectedInquiry.createdAt).toLocaleString()}</p>
+                                      </div>
+                                      <div>
+                                        <h4 className="text-sm font-medium text-gray-500">Email</h4>
+                                        <p className="mt-1">{selectedInquiry.email}</p>
+                                      </div>
+                                      <div>
+                                        <h4 className="text-sm font-medium text-gray-500">Phone</h4>
+                                        <p className="mt-1">{selectedInquiry.phone || "Not provided"}</p>
+                                      </div>
+                                    </div>
+                                    <div>
+                                      <h4 className="text-sm font-medium text-gray-500">Message</h4>
+                                      <div className="mt-1 p-3 bg-gray-50 rounded-md border">
+                                        <p className="text-sm whitespace-pre-wrap">{selectedInquiry.message}</p>
+                                      </div>
+                                    </div>
+                                  </div>
+                                )}
+                              </DialogContent>
+                            </Dialog>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="text-red-500 hover:text-red-700"
+                              onClick={() => handleDeleteInquiry(inquiry._id)}
+                            >
+                              <Trash2 className="h-4 w-4 mr-2" /> Delete
+                            </Button>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+
+              {/* Mobile view for inquiries */}
+              <div className="md:hidden space-y-3 mt-4">
+                {inquiries.map((inquiry) => (
+                  <Card key={inquiry._id} className="p-4">
+                    <div className="space-y-3">
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <h3 className="font-semibold">{inquiry.name}</h3>
+                          <p className="text-sm text-gray-600">{inquiry.email}</p>
+                        </div>
                         <span
-                          className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                          className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
                             inquiry.status === "unread" ? "bg-bhagva-100 text-bhagva-800" : "bg-gray-100 text-gray-800"
                           }`}
                         >
                           {inquiry.status === "unread" ? "Unread" : "Read"}
                         </span>
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <div className="flex justify-end space-x-2">
-                          <Dialog>
-                            <DialogTrigger asChild>
-                              <Button variant="outline" size="sm" onClick={() => handleViewInquiry(inquiry)}>
-                                <Eye className="h-4 w-4 mr-2" /> View
-                              </Button>
-                            </DialogTrigger>
-                            <DialogContent className="sm:max-w-[500px]">
-                              <DialogHeader>
-                                <DialogTitle>Inquiry Details</DialogTitle>
-                              </DialogHeader>
-                              {selectedInquiry && (
-                                <div className="space-y-4">
-                                  <div className="grid grid-cols-2 gap-4">
-                                    <div>
-                                      <h4 className="text-sm font-medium">Name</h4>
-                                      <p>{selectedInquiry.name}</p>
-                                    </div>
-                                    <div>
-                                      <h4 className="text-sm font-medium">Date</h4>
-                                      <p>{new Date(selectedInquiry.createdAt).toLocaleString()}</p>
-                                    </div>
-                                    <div>
-                                      <h4 className="text-sm font-medium">Email</h4>
-                                      <p>{selectedInquiry.email}</p>
-                                    </div>
-                                    <div>
-                                      <h4 className="text-sm font-medium">Phone</h4>
-                                      <p>{selectedInquiry.phone}</p>
-                                    </div>
+                      </div>
+                      <p className="text-sm text-gray-500">{new Date(inquiry.createdAt).toLocaleDateString()}</p>
+                      <div className="flex space-x-2">
+                        <Dialog>
+                          <DialogTrigger asChild>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="flex-1"
+                              onClick={() => handleViewInquiry(inquiry)}
+                            >
+                              <Eye className="h-4 w-4 mr-2" /> View
+                            </Button>
+                          </DialogTrigger>
+                          <DialogContent className="sm:max-w-[500px]">
+                            <DialogHeader>
+                              <DialogTitle>Inquiry Details</DialogTitle>
+                            </DialogHeader>
+                            {selectedInquiry && selectedInquiry._id === inquiry._id && (
+                              <div className="space-y-4">
+                                <div className="grid grid-cols-1 gap-4">
+                                  <div>
+                                    <h4 className="text-sm font-medium text-gray-500">Name</h4>
+                                    <p className="mt-1">{selectedInquiry.name}</p>
                                   </div>
                                   <div>
-                                    <h4 className="text-sm font-medium">Message</h4>
-                                    <p className="mt-1 p-3 bg-muted rounded-md">{selectedInquiry.message}</p>
+                                    <h4 className="text-sm font-medium text-gray-500">Email</h4>
+                                    <p className="mt-1">{selectedInquiry.email}</p>
+                                  </div>
+                                  <div>
+                                    <h4 className="text-sm font-medium text-gray-500">Phone</h4>
+                                    <p className="mt-1">{selectedInquiry.phone || "Not provided"}</p>
+                                  </div>
+                                  <div>
+                                    <h4 className="text-sm font-medium text-gray-500">Date</h4>
+                                    <p className="mt-1">{new Date(selectedInquiry.createdAt).toLocaleString()}</p>
                                   </div>
                                 </div>
-                              )}
-                            </DialogContent>
-                          </Dialog>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="text-red-500 hover:text-red-700"
-                            onClick={() => handleDeleteInquiry(inquiry._id)}
-                          >
-                            <Trash2 className="h-4 w-4 mr-2" /> Delete
-                          </Button>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+                                <div>
+                                  <h4 className="text-sm font-medium text-gray-500">Message</h4>
+                                  <div className="mt-1 p-3 bg-gray-50 rounded-md border">
+                                    <p className="text-sm whitespace-pre-wrap">{selectedInquiry.message}</p>
+                                  </div>
+                                </div>
+                              </div>
+                            )}
+                          </DialogContent>
+                        </Dialog>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="text-red-500 hover:text-red-700"
+                          onClick={() => handleDeleteInquiry(inquiry._id)}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  </Card>
+                ))}
+              </div>
+
+              {inquiries.length === 0 && (
+                <div className="text-center py-8 text-gray-500">
+                  <p>No inquiries found.</p>
+                </div>
+              )}
             </CardContent>
           </Card>
         </TabsContent>

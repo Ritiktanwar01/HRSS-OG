@@ -1,640 +1,194 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Textarea } from "@/components/ui/textarea"
-import { toast } from "@/components/ui/use-toast"
-import { Plus, Trash2, Edit, ImageIcon, Video, Upload, X } from "lucide-react"
-import { useAuth } from "@/hooks/use-auth"
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog"
+import { X } from "lucide-react"
 
-export default function AdminGalleryPage() {
-  const [galleryItems, setGalleryItems] = useState({ images: [], videos: [] })
-  const [activeTab, setActiveTab] = useState("images")
-  const [isAddingItem, setIsAddingItem] = useState(false)
-  const [editingItem, setEditingItem] = useState(null)
-  const [isLoading, setIsLoading] = useState(false)
-  const [isUploading, setIsUploading] = useState(false)
-  const { getAuthToken } = useAuth()
-
-  const [newItem, setNewItem] = useState({
-    title: "",
-    description: "",
-    category: "events",
-    type: "image",
-    url: "",
-    thumbnail: "",
+export default function GalleryPage() {
+  const [galleryData, setGalleryData] = useState({
+    events: [],
+    serviceProjects: [],
+    volunteers: [],
   })
+  const [selectedItem, setSelectedItem] = useState(null)
+  const [isVideoPlaying, setIsVideoPlaying] = useState(false)
+  const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
     const fetchGalleryItems = async () => {
       try {
-        // const token = await getAuthToken()
-        // if (!token) {
-        //   throw new Error("Authentication failed")
-        // }
-
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/gallery`, {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("access_token")}`,
-            "Content-Type": "application/json",
-          },
-        })
-
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/gallery/public`)
         if (response.ok) {
           const data = await response.json()
-          setGalleryItems({
-            images: data.filter((item) => item.type === "image"),
-            videos: data.filter((item) => item.type === "video"),
-          })
+
+          // Organize data by category
+          const categorizedData = {
+            events: data.filter((item) => item.category === "events"),
+            serviceProjects: data.filter((item) => item.category === "serviceProjects"),
+            volunteers: data.filter((item) => item.category === "volunteers"),
+          }
+
+          setGalleryData(categorizedData)
         }
       } catch (error) {
         console.error("Error fetching gallery items:", error)
-        toast({
-          title: "Error",
-          description: "Failed to load gallery items",
-          variant: "destructive",
-        })
+      } finally {
+        setIsLoading(false)
       }
     }
 
     fetchGalleryItems()
-  }, [getAuthToken])
+  }, [])
 
-  const handleAddItem = () => {
-    setIsAddingItem(true)
-    setEditingItem(null)
-    setNewItem({
-      title: "",
-      description: "",
-      category: "events",
-      type: activeTab === "images" ? "image" : "video",
-      url: "",
-      thumbnail: activeTab === "videos" ? "/placeholder.svg?height=300&width=400" : "",
-    })
-  }
-
-  const handleEditItem = (item) => {
-    setIsAddingItem(false)
-    setEditingItem(item)
-    setNewItem({
-      title: item.title,
-      description: item.description,
-      category: item.category,
-      type: item.type,
-      url: item.url,
-      thumbnail: item.thumbnail || "",
-    })
-  }
-
-  const handleDeleteItem = async (id, type) => {
-    try {
-      // const token = await getAuthToken()
-      // if (!token) {
-      //   throw new Error("Authentication failed")
-      // }
-
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/gallery/${id}`, {
-        method: "DELETE",
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("access_token")}`,
-        },
-      })
-
-      if (response.ok) {
-        if (type === "image") {
-          setGalleryItems({
-            ...galleryItems,
-            images: galleryItems.images.filter((item) => item._id !== id),
-          })
-        } else {
-          setGalleryItems({
-            ...galleryItems,
-            videos: galleryItems.videos.filter((item) => item._id !== id),
-          })
-        }
-
-        toast({
-          title: "Item Deleted",
-          description: "The gallery item has been successfully removed.",
-        })
-      } else {
-        throw new Error("Failed to delete gallery item")
-      }
-    } catch (error) {
-      console.error("Error deleting gallery item:", error)
-      toast({
-        title: "Error",
-        description: "Failed to delete gallery item",
-        variant: "destructive",
-      })
+  const handleItemClick = (item) => {
+    setSelectedItem(item)
+    if (item.type === "video") {
+      setIsVideoPlaying(true)
     }
   }
 
-  const handleUploadFile = async (e, fileType) => {
-    const file = e.target.files[0]
-    if (!file) return
-
-    setIsUploading(true)
-    const formData = new FormData()
-    formData.append("file", file)
-    formData.append("type", fileType)
-
-    try {
-      // const token = await getAuthToken()
-      // if (!token) {
-      //   throw new Error("Authentication failed")
-      // }
-
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/upload`, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("access_token")}`,
-        },
-        body: formData,
-      })
-
-      if (response.ok) {
-        const data = await response.json()
-        if (fileType === "image") {
-          setNewItem({ ...newItem, url: data.url })
-        } else if (fileType === "thumbnail") {
-          setNewItem({ ...newItem, thumbnail: data.url })
-        } else if (fileType === "video") {
-          setNewItem({ ...newItem, url: data.url })
-        }
-
-        toast({
-          title: "Upload Successful",
-          description: "File has been uploaded successfully.",
-        })
-      } else {
-        throw new Error("Failed to upload file")
-      }
-    } catch (error) {
-      console.error("Error uploading file:", error)
-      toast({
-        title: "Upload Failed",
-        description: "Failed to upload file. Please try again.",
-        variant: "destructive",
-      })
-    } finally {
-      setIsUploading(false)
+  const handleDialogClose = () => {
+    if (selectedItem?.type === "video") {
+      setIsVideoPlaying(false)
     }
+    setSelectedItem(null)
   }
 
-  const handleSubmit = async (e) => {
-    e.preventDefault()
-    setIsLoading(true)
-
-    try {
-      // const token = await getAuthToken()
-      // if (!token) {
-      //   throw new Error("Authentication failed")
-      // }
-
-      let response
-
-      if (editingItem) {
-        // Update existing item
-        response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/gallery/${editingItem._id}`, {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${localStorage.getItem("access_token")}`,
-          },
-          body: JSON.stringify(newItem),
-        })
-      } else {
-        // Add new item
-        response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/gallery`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${localStorage.getItem("access_token")}`,
-          },
-          body: JSON.stringify(newItem),
-        })
-      }
-
-      if (response.ok) {
-        const result = await response.json()
-
-        if (editingItem) {
-          // Update existing item in state
-          if (newItem.type === "image") {
-            setGalleryItems({
-              ...galleryItems,
-              images: galleryItems.images.map((item) => (item._id === editingItem._id ? result : item)),
-            })
-          } else {
-            setGalleryItems({
-              ...galleryItems,
-              videos: galleryItems.videos.map((item) => (item._id === editingItem._id ? result : item)),
-            })
-          }
-
-          toast({
-            title: "Item Updated",
-            description: "The gallery item has been successfully updated.",
-          })
-        } else {
-          // Add new item to state
-          if (newItem.type === "image") {
-            setGalleryItems({
-              ...galleryItems,
-              images: [...galleryItems.images, result],
-            })
-          } else {
-            setGalleryItems({
-              ...galleryItems,
-              videos: [...galleryItems.videos, result],
-            })
-          }
-
-          toast({
-            title: "Item Added",
-            description: "The new gallery item has been successfully added.",
-          })
-        }
-
-        // Close dialog
-        document.querySelector("[data-radix-dialog-close]")?.click()
-      } else {
-        throw new Error("Failed to save gallery item")
-      }
-    } catch (error) {
-      console.error("Error saving gallery item:", error)
-      toast({
-        title: "Error",
-        description: "Failed to save gallery item",
-        variant: "destructive",
-      })
-    } finally {
-      setIsLoading(false)
-    }
+  if (isLoading) {
+    return (
+      <div className="container mx-auto px-4 py-12 flex justify-center">
+        <div>Loading gallery...</div>
+      </div>
+    )
   }
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight">Gallery Management</h1>
-        <p className="text-muted-foreground">Manage images and videos displayed in the gallery section.</p>
-      </div>
+    <div className="container mx-auto px-4 py-12">
+      <h1 className="text-3xl md:text-4xl font-bold text-bhagva-800 mb-4 text-center">Gallery</h1>
+      <div className="h-1 w-20 bg-bhagva-600 mb-8 mx-auto"></div>
 
-      <Tabs defaultValue="images" className="space-y-4" onValueChange={setActiveTab}>
-        <TabsList>
-          <TabsTrigger value="images" className="flex items-center">
-            <ImageIcon className="mr-2 h-4 w-4" />
-            Images
+      <p className="text-gray-700 max-w-3xl mx-auto text-center mb-12">
+        Explore the visual journey of our initiatives, events, and impact through these photographs and videos. Each
+        image and video tells a story of service, dedication, and community.
+      </p>
+
+      <Tabs defaultValue="events" className="max-w-6xl mx-auto">
+        <TabsList className="grid w-full grid-cols-3 mb-8">
+          <TabsTrigger value="events" className="text-sm md:text-base">
+            Events & Celebrations
           </TabsTrigger>
-          <TabsTrigger value="videos" className="flex items-center">
-            <Video className="mr-2 h-4 w-4" />
-            Videos
+          <TabsTrigger value="serviceProjects" className="text-sm md:text-base">
+            Service Projects
+          </TabsTrigger>
+          <TabsTrigger value="volunteers" className="text-sm md:text-base">
+            Our Volunteers
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="images" className="space-y-4">
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between">
-              <div>
-                <CardTitle>Image Gallery</CardTitle>
-                <CardDescription>Manage images displayed in the gallery section</CardDescription>
-              </div>
-              <Dialog>
-                <DialogTrigger asChild>
-                  <Button className="bg-bhagva-700 hover:bg-bhagva-800" onClick={handleAddItem}>
-                    <Plus className="mr-2 h-4 w-4" /> Add Image
-                  </Button>
-                </DialogTrigger>
-                <DialogContent className="sm:max-w-[500px] max-h-[80vh] overflow-y-auto">
-                  <DialogHeader>
-                    <DialogTitle>{isAddingItem ? "Add New Image" : "Edit Image"}</DialogTitle>
-                    <DialogDescription>
-                      {isAddingItem
-                        ? "Add details for the new gallery image."
-                        : "Update the details of the gallery image."}
-                    </DialogDescription>
-                  </DialogHeader>
-                  <form onSubmit={handleSubmit} className="space-y-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="title">Title</Label>
-                      <Input
-                        id="title"
-                        value={newItem.title}
-                        onChange={(e) => setNewItem({ ...newItem, title: e.target.value })}
-                        placeholder="Enter image title"
-                        required
-                      />
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="description">Description</Label>
-                      <Textarea
-                        id="description"
-                        value={newItem.description}
-                        onChange={(e) => setNewItem({ ...newItem, description: e.target.value })}
-                        placeholder="Enter image description"
-                        required
-                      />
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="category">Category</Label>
-                      <Select
-                        value={newItem.category}
-                        onValueChange={(value) => setNewItem({ ...newItem, category: value })}
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select a category" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="events">Events & Celebrations</SelectItem>
-                          <SelectItem value="serviceProjects">Service Projects</SelectItem>
-                          <SelectItem value="volunteers">Our Volunteers</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label>Image</Label>
-                      <div className="flex flex-col gap-4">
-                        {newItem.url && (
-                          <div className="relative w-full h-40 bg-muted rounded-md overflow-hidden">
-                            <img
-                              src={newItem.url || "/placeholder.svg"}
-                              alt="Preview"
-                              className="w-full h-full object-cover"
-                            />
-                            <Button
-                              type="button"
-                              variant="destructive"
-                              size="icon"
-                              className="absolute top-2 right-2 h-6 w-6"
-                              onClick={() => setNewItem({ ...newItem, url: "" })}
-                            >
-                              <X className="h-4 w-4" />
-                            </Button>
-                          </div>
-                        )}
-                        <div className="relative">
-                          <Input
-                            type="file"
-                            accept="image/*"
-                            id="image-upload"
-                            onChange={(e) => handleUploadFile(e, "image")}
-                            disabled={isUploading}
-                            className="absolute inset-0 opacity-0 cursor-pointer z-10 w-full h-full"
-                          />
-                          <Button
-                            type="button"
-                            variant="outline"
-                            className="w-full relative z-0"
-                            disabled={isUploading}
-                          >
-                            <Upload className="mr-2 h-4 w-4" />
-                            {isUploading ? "Uploading..." : "Upload Image"}
-                          </Button>
-                        </div>
-                      </div>
-                    </div>
-
-                    <DialogFooter className="sticky bottom-0 right-0 pt-2 bg-white">
-                      <Button type="submit" className="bg-bhagva-700 hover:bg-bhagva-800" disabled={isLoading}>
-                        {isLoading ? "Saving..." : isAddingItem ? "Add Image" : "Save Changes"}
-                      </Button>
-                    </DialogFooter>
-                  </form>
-                </DialogContent>
-              </Dialog>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {galleryItems.images.map((item) => (
-                  <div key={item._id} className="relative group overflow-hidden rounded-md border">
-                    <img src={item.url || "/placeholder.svg"} alt={item.title} className="w-full h-48 object-cover" />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent flex flex-col justify-end p-4 text-white">
-                      <h3 className="font-semibold text-lg">{item.title}</h3>
-                      <p className="text-sm text-white/90">{item.description}</p>
-                      <div className="absolute top-2 right-2 flex space-x-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <Dialog>
-                          <DialogTrigger asChild>
-                            <Button
-                              variant="secondary"
-                              size="icon"
-                              className="h-8 w-8"
-                              onClick={() => handleEditItem(item)}
-                            >
-                              <Edit className="h-4 w-4" />
-                            </Button>
-                          </DialogTrigger>
-                        </Dialog>
-                        <Button
-                          variant="destructive"
-                          size="icon"
-                          className="h-8 w-8"
-                          onClick={() => handleDeleteItem(item._id, "image")}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="videos" className="space-y-4">
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between">
-              <div>
-                <CardTitle>Video Gallery</CardTitle>
-                <CardDescription>Manage videos displayed in the gallery section</CardDescription>
-              </div>
-              <Dialog>
-                <DialogTrigger asChild>
-                  <Button className="bg-bhagva-700 hover:bg-bhagva-800" onClick={handleAddItem}>
-                    <Plus className="mr-2 h-4 w-4" /> Add Video
-                  </Button>
-                </DialogTrigger>
-                <DialogContent className="sm:max-w-[500px] max-h-[80vh] overflow-y-auto">
-                  <DialogHeader>
-                    <DialogTitle>{isAddingItem ? "Add New Video" : "Edit Video"}</DialogTitle>
-                    <DialogDescription>
-                      {isAddingItem
-                        ? "Add details for the new gallery video."
-                        : "Update the details of the gallery video."}
-                    </DialogDescription>
-                  </DialogHeader>
-                  <form onSubmit={handleSubmit} className="space-y-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="title">Title</Label>
-                      <Input
-                        id="title"
-                        value={newItem.title}
-                        onChange={(e) => setNewItem({ ...newItem, title: e.target.value })}
-                        placeholder="Enter video title"
-                        required
-                      />
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="description">Description</Label>
-                      <Textarea
-                        id="description"
-                        value={newItem.description}
-                        onChange={(e) => setNewItem({ ...newItem, description: e.target.value })}
-                        placeholder="Enter video description"
-                        required
-                      />
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="category">Category</Label>
-                      <Select
-                        value={newItem.category}
-                        onValueChange={(value) => setNewItem({ ...newItem, category: value })}
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select a category" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="events">Events & Celebrations</SelectItem>
-                          <SelectItem value="serviceProjects">Service Projects</SelectItem>
-                          <SelectItem value="volunteers">Our Volunteers</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label>Video</Label>
+        {Object.entries(galleryData).map(([category, items]) => (
+          <TabsContent key={category} value={category} className="mt-0">
+            {items.length === 0 ? (
+              <div className="text-center py-12 text-gray-500">No items in this category yet.</div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                {items.map((item) => (
+                  <Card
+                    key={item._id}
+                    className="overflow-hidden cursor-pointer hover:shadow-lg transition-shadow"
+                    onClick={() => handleItemClick(item)}
+                  >
+                    <CardContent className="p-0">
                       <div className="relative">
-                        <Input
-                          type="file"
-                          accept="video/*"
-                          id="video-upload"
-                          onChange={(e) => handleUploadFile(e, "video")}
-                          disabled={isUploading}
-                          className="absolute inset-0 opacity-0 cursor-pointer z-10 w-full h-full"
+                        <img
+                          src={item.type === "image" ? item.url : item.thumbnail || item.url}
+                          alt={item.title}
+                          className="w-full h-48 object-cover"
+                          width={400}
+                          height={300}
                         />
-                        <Button type="button" variant="outline" className="w-full relative z-0" disabled={isUploading}>
-                          <Upload className="mr-2 h-4 w-4" />
-                          {isUploading ? "Uploading..." : "Upload Video"}
-                        </Button>
-                      </div>
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label>Thumbnail</Label>
-                      <div className="flex flex-col gap-4">
-                        {newItem.thumbnail && (
-                          <div className="relative w-full h-40 bg-muted rounded-md overflow-hidden">
-                            <img
-                              src={newItem.thumbnail || "/placeholder.svg"}
-                              alt="Thumbnail Preview"
-                              className="w-full h-full object-cover"
-                            />
-                            <Button
-                              type="button"
-                              variant="destructive"
-                              size="icon"
-                              className="absolute top-2 right-2 h-6 w-6"
-                              onClick={() => setNewItem({ ...newItem, thumbnail: "" })}
-                            >
-                              <X className="h-4 w-4" />
-                            </Button>
+                        {item.type === "video" && (
+                          <div className="absolute inset-0 flex items-center justify-center">
+                            <div className="h-12 w-12 rounded-full bg-black/50 flex items-center justify-center">
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                viewBox="0 0 24 24"
+                                fill="white"
+                                className="w-6 h-6"
+                              >
+                                <path d="M8 5v14l11-7z" />
+                              </svg>
+                            </div>
                           </div>
                         )}
-                        <div className="relative">
-                          <Input
-                            type="file"
-                            accept="image/*"
-                            id="thumbnail-upload"
-                            onChange={(e) => handleUploadFile(e, "thumbnail")}
-                            disabled={isUploading}
-                            className="absolute inset-0 opacity-0 cursor-pointer z-10 w-full h-full"
-                          />
-                          <Button
-                            type="button"
-                            variant="outline"
-                            className="w-full relative z-0"
-                            disabled={isUploading}
-                          >
-                            <Upload className="mr-2 h-4 w-4" />
-                            {isUploading ? "Uploading..." : "Upload Thumbnail"}
-                          </Button>
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent flex flex-col justify-end p-4 text-white">
+                          <h3 className="font-semibold text-lg">{item.title}</h3>
+                          <p className="text-sm text-white/90 line-clamp-2">{item.description}</p>
                         </div>
                       </div>
-                    </div>
-
-                    <DialogFooter className="sticky bottom-0 right-0 pt-2 bg-white">
-                      <Button type="submit" className="bg-bhagva-700 hover:bg-bhagva-800" disabled={isLoading}>
-                        {isLoading ? "Saving..." : isAddingItem ? "Add Video" : "Save Changes"}
-                      </Button>
-                    </DialogFooter>
-                  </form>
-                </DialogContent>
-              </Dialog>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {galleryItems.videos.map((item) => (
-                  <div key={item._id} className="relative group overflow-hidden rounded-md border">
-                    <div className="relative">
-                      <img
-                        src={item.thumbnail || "/placeholder.svg"}
-                        alt={item.title}
-                        className="w-full h-48 object-cover"
-                      />
-                      <div className="absolute inset-0 flex items-center justify-center">
-                        <div className="h-12 w-12 rounded-full bg-black/50 flex items-center justify-center">
-                          <Video className="h-6 w-6 text-white" />
-                        </div>
-                      </div>
-                    </div>
-                    <div className="p-4">
-                      <h3 className="font-semibold text-lg">{item.title}</h3>
-                      <p className="text-sm text-muted-foreground">{item.description}</p>
-                      <div className="mt-2 flex space-x-2">
-                        <Dialog>
-                          <DialogTrigger asChild>
-                            <Button variant="outline" size="sm" onClick={() => handleEditItem(item)}>
-                              <Edit className="mr-2 h-4 w-4" /> Edit
-                            </Button>
-                          </DialogTrigger>
-                        </Dialog>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="text-red-500 hover:text-red-700"
-                          onClick={() => handleDeleteItem(item._id, "video")}
-                        >
-                          <Trash2 className="mr-2 h-4 w-4" /> Delete
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
+                    </CardContent>
+                  </Card>
                 ))}
               </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
+            )}
+          </TabsContent>
+        ))}
+
+        {/* Single Dialog for all items */}
+        <Dialog open={!!selectedItem} onOpenChange={(open) => !open && handleDialogClose()}>
+          <DialogContent className="max-w-3xl p-0">
+            <DialogTitle className="sr-only">{selectedItem?.title}</DialogTitle>
+            {selectedItem && (
+              <div className="relative">
+                {selectedItem.type === "image" ? (
+                  <img
+                    src={selectedItem.url || "/placeholder.svg"}
+                    alt={selectedItem.title}
+                    className="w-full max-h-[70vh] object-contain"
+                  />
+                ) : (
+                  <div className="w-full bg-black">
+                    <video
+                      src={selectedItem.url}
+                      controls
+                      autoPlay={isVideoPlaying}
+                      className="w-full max-h-[70vh]"
+                      onEnded={() => setIsVideoPlaying(false)}
+                    >
+                      Your browser does not support the video tag.
+                    </video>
+                  </div>
+                )}
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="absolute top-2 right-2 rounded-full bg-black/40 hover:bg-black/60 text-white"
+                  onClick={handleDialogClose}
+                >
+                  <X className="h-5 w-5" />
+                </Button>
+                <div className="bg-white p-4">
+                  <h3 className="font-semibold text-xl text-bhagva-800">{selectedItem.title}</h3>
+                  <p className="text-gray-700">{selectedItem.description}</p>
+                </div>
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
       </Tabs>
+
+      <div className="text-center mt-16">
+        <p className="text-gray-700 mb-6">Would you like to contribute your photos or videos to our gallery?</p>
+        <Button
+          variant="outline"
+          className="border-bhagva-600 text-bhagva-700 hover:bg-bhagva-50"
+          onClick={() => (window.location.href = "/contact")}
+        >
+          Contact Us
+        </Button>
+      </div>
     </div>
   )
 }
