@@ -139,8 +139,8 @@ export default function AddTeamMemberPage() {
           </Button>
         </Link>
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Add New Team Member</h1>
-          <p className="text-muted-foreground">Add a new member to your organization's team.</p>
+          <h1 className="text-2xl font-bold tracking-tight">Edit Team Member</h1>
+          <p className="text-muted-foreground">Edit info of member in your organization's team.</p>
         </div>
       </div>
 
@@ -195,15 +195,15 @@ export default function AddTeamMemberPage() {
                 </div>
 
                 {/* Basic Information */}
-                <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-4 w-full">
                   <FormField
                     control={memberForm.control}
                     name="name"
                     render={({ field }) => (
-                      <FormItem>
+                      <FormItem className="w-full">
                         <FormLabel>Full Name *</FormLabel>
                         <FormControl>
-                          <Input placeholder="Enter member's full name" {...field} />
+                          <Input className="w-full" placeholder="Enter member's full name" {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -214,10 +214,10 @@ export default function AddTeamMemberPage() {
                     control={memberForm.control}
                     name="position"
                     render={({ field }) => (
-                      <FormItem>
+                      <FormItem className="w-full">
                         <FormLabel>Position/Title *</FormLabel>
                         <FormControl>
-                          <Input placeholder="e.g., President, Secretary, Treasurer" {...field} />
+                          <Input className="w-full" placeholder="e.g., President, Secretary, Treasurer" {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -228,10 +228,10 @@ export default function AddTeamMemberPage() {
                     control={memberForm.control}
                     name="email"
                     render={({ field }) => (
-                      <FormItem>
+                      <FormItem className="w-full">
                         <FormLabel>Email Address</FormLabel>
                         <FormControl>
-                          <Input type="email" placeholder="member@example.com" {...field} />
+                          <Input className="w-full" type="email" placeholder="member@example.com" {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -242,10 +242,10 @@ export default function AddTeamMemberPage() {
                     control={memberForm.control}
                     name="phone"
                     render={({ field }) => (
-                      <FormItem>
+                      <FormItem className="w-full">
                         <FormLabel>Phone Number</FormLabel>
                         <FormControl>
-                          <Input placeholder="+91 9876543210" {...field} />
+                          <Input className="w-full" placeholder="+91 9876543210" {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
