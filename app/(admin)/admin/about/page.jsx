@@ -11,7 +11,7 @@ import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { toast } from "@/components/ui/use-toast"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Plus, Trash2, Upload, User } from "lucide-react"
+import { IdCard, Plus, Trash2, Upload, User } from "lucide-react"
 import {
   Dialog,
   DialogContent,
@@ -93,6 +93,8 @@ export default function AdminAboutPage() {
         })
       }
     }
+
+    
 
     const fetchTeamMembers = async () => {
       try {
@@ -266,6 +268,39 @@ export default function AdminAboutPage() {
       setIsLoading(false)
     }
   }
+  const DownloadMemberCard = async (id) => {
+      try {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/team-members/${id}/card`, {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('access_token')}`,
+          },
+        })
+        if (response.ok) {
+          const blob = await response.blob()
+          const url = URL.createObjectURL(blob)
+          const a = document.createElement("a")
+          a.href = url
+          a.download = `team_member_${id}.png`
+          document.body.appendChild(a)
+          a.click()
+          document.body.removeChild(a)
+          URL.revokeObjectURL(url)
+          toast({
+            title: "Download Successful",
+            description: "Team member card has been downloaded successfully.",
+          })
+        } else {
+          throw new Error("Failed to download team member card")
+        }
+      } catch (error) {
+        console.error("Error downloading team member card:", error)
+        toast({
+          title: "Error",
+          description: "Failed to download team member card",
+          variant: "destructive",
+        })
+      }
+    }
 
   return (
     <div className="space-y-6">
@@ -662,6 +697,14 @@ export default function AdminAboutPage() {
                         onClick={() => handleDeleteMember(member._id)}
                       >
                         <Trash2 className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="text-red-500 hover:text-red-700"
+                        onClick={() => DownloadMemberCard(member._id)}
+                      >
+                        <IdCard />
                       </Button>
                     </div>
                   </div>

@@ -6,6 +6,8 @@ import { Button } from "@/components/ui/button"
 import { Heart, Users, Landmark, School } from "lucide-react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import Image from "next/image"
+import IDCARD from "@/components/id-card"
+import DonationCertificate from "@/ID/donation-certificate"
 export default function Home() {
   const [aboutData, setAboutData] = useState({
     mission: "",
