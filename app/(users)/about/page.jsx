@@ -109,7 +109,7 @@ export default function AboutPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             {teamMembers.map((member) => (
               <div
-                key={member._id}
+                key={member._id} id={member._id}
                 className="flex bg-white p-4 rounded-lg shadow-sm hover:shadow-md transition-shadow"
               >
                 <img
