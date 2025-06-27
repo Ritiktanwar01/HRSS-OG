@@ -22,7 +22,17 @@ const aboutFormSchema = z.object({
   vision: z.string().min(10, { message: "Vision must be at least 10 characters." }),
 })
 
-export default function AdminAboutPage() {
+import { Suspense } from "react"
+
+export default function AdminAboutPageWrapper() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <AdminAboutPage />
+    </Suspense>
+  )
+}
+
+function AdminAboutPage() {
   const [teamMembers, setTeamMembers] = useState([])
   const [isLoading, setIsLoading] = useState(false)
   const [activeTab, setActiveTab] = useState("content")
