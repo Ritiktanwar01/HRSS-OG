@@ -305,8 +305,8 @@ function AdminAboutPage() {
                         <Button
                           variant="outline"
                           size="sm"
-                          className="text-red-500 hover:text-red-700 bg-transparent"
-                          onClick={() => handleDeleteMember(member._id)}
+                          className=" bg-transparent"
+                          onClick={() => router.push(`/admin/edit-team-member?id=${member._id}`)}
                         >
                           <Edit className="h-4 w-4" />
                         </Button>
