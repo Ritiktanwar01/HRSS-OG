@@ -11,7 +11,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Textarea } from "@/components/ui/textarea"
 import { toast } from "@/components/ui/use-toast"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Plus, Trash2 } from "lucide-react"
+import { Edit, Plus, Trash2 } from "lucide-react"
 import Link from "next/link"
 import { useAuth } from "@/hooks/use-auth"
 
@@ -300,6 +300,15 @@ function AdminAboutPage() {
                           onClick={() => handleDeleteMember(member._id)}
                         >
                           <Trash2 className="h-4 w-4" />
+                        </Button>
+
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="text-red-500 hover:text-red-700 bg-transparent"
+                          onClick={() => handleDeleteMember(member._id)}
+                        >
+                          <Edit className="h-4 w-4" />
                         </Button>
                       </div>
                     </div>
