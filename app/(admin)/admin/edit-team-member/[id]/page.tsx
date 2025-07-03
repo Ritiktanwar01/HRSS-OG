@@ -58,7 +58,7 @@ export default function AddTeamMemberPage() {
     setIsLoading(true)
     try {
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/team-members`, {
-        method: "POST",
+        method: "PUT",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${localStorage.getItem("access_token")}`,
@@ -87,6 +87,15 @@ export default function AddTeamMemberPage() {
     } finally {
       setIsLoading(false)
     }
+  }
+
+  const getMember = async ()=>{
+    const req = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/team-member`,{
+      method:"GET",
+      headers:{
+         Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+      }
+    })
   }
 
   const handlePhotoUpload = async (file: File) => {

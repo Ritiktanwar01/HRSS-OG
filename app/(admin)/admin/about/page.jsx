@@ -306,7 +306,7 @@ function AdminAboutPage() {
                           variant="outline"
                           size="sm"
                           className=" bg-transparent"
-                          onClick={() => router.push(`/admin/edit-team-member?id=${member._id}`)}
+                          onClick={() => router.push(`/admin/edit-team-member/${member._id}`)}
                         >
                           <Edit className="h-4 w-4" />
                         </Button>
