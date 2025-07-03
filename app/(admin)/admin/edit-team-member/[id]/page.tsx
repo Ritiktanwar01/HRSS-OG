@@ -57,7 +57,7 @@ export default function AddTeamMemberPage() {
   async function onMemberSubmit(data: z.infer<typeof teamMemberSchema>) {
     setIsLoading(true)
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/team-members${id}`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/team-members/${id}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -90,7 +90,7 @@ export default function AddTeamMemberPage() {
   }
 
   const getMember = async ()=>{
-    const req = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/team-member${id}`,{
+    const req = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/team-member/${id}`,{
       method:"GET",
       headers:{
          Authorization: `Bearer ${localStorage.getItem("access_token")}`,
