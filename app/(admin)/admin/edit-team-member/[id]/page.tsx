@@ -1,10 +1,10 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
-import { useRouter } from "next/navigation"
+import { useParams, useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
@@ -34,7 +34,7 @@ export default function AddTeamMemberPage() {
   const [isLoading, setIsLoading] = useState(false)
   const [uploadingPhoto, setUploadingPhoto] = useState(false)
   const router = useRouter()
-  const { getAuthToken } = useAuth()
+  const {id} = useParams()
 
   // Form for team members
   const memberForm = useForm({
@@ -57,7 +57,7 @@ export default function AddTeamMemberPage() {
   async function onMemberSubmit(data: z.infer<typeof teamMemberSchema>) {
     setIsLoading(true)
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/team-members`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/team-members${id}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -68,7 +68,7 @@ export default function AddTeamMemberPage() {
 
       if (response.ok) {
         toast({
-          title: "Team Member Added",
+          title: "Team Member Updated",
           description: "The new team member has been successfully added.",
         })
 
@@ -90,13 +90,19 @@ export default function AddTeamMemberPage() {
   }
 
   const getMember = async ()=>{
-    const req = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/team-member`,{
+    const req = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/team-member${id}`,{
       method:"GET",
       headers:{
          Authorization: `Bearer ${localStorage.getItem("access_token")}`,
       }
     })
+    const data = await req.json()
+    console.log(data)
   }
+
+  useEffect(()=>{
+    getMember()
+  },[])
 
   const handlePhotoUpload = async (file: File) => {
     if (!file) return
