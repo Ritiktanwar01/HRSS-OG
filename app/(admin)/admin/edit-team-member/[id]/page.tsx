@@ -22,7 +22,7 @@ const teamMemberSchema = z.object({
   bio: z.string().min(10, { message: "Bio must be at least 10 characters." }),
   photo: z.string().optional(),
   email: z.string().email({ message: "Please enter a valid email address." }).optional().or(z.literal("")),
-  phone: z.string().optional(),
+  mobile: z.string().optional(),
   linkedin: z.string().url({ message: "Please enter a valid LinkedIn URL." }).optional().or(z.literal("")),
   twitter: z.string().url({ message: "Please enter a valid Twitter URL." }).optional().or(z.literal("")),
   experience: z.string().optional(),
@@ -45,7 +45,7 @@ export default function AddTeamMemberPage() {
       bio: "",
       photo: "",
       email: "",
-      phone: "",
+      mobile: "",
       linkedin: "",
       twitter: "",
       experience: "",
@@ -104,7 +104,7 @@ export default function AddTeamMemberPage() {
     bio: data.bio || "",
     photo: data.photo || "",
     email: data.email || "",
-    phone: data.phone || "",
+    mobile: data.mobile || "",
     linkedin: data.linkedin || "",
     twitter: data.twitter || "",
     experience: data.experience || "",
@@ -182,8 +182,8 @@ export default function AddTeamMemberPage() {
           <Form {...memberForm}>
             <form onSubmit={memberForm.handleSubmit(onMemberSubmit)} className="space-y-6">
               {/* Photo Upload Section */}
-              <div className="flex items-start gap-6">
-                <div className="flex flex-col items-center gap-4">
+              <div className="flex flex-col md:flex-row items-start gap-6">
+                <div className="flex flex-col items-center gap-4 w-full md:w-auto">
                   <div className="h-32 w-32 rounded-full bg-muted flex items-center justify-center overflow-hidden border-2 border-dashed border-gray-300">
                     {memberForm.watch("photo") ? (
                       <img
@@ -195,7 +195,7 @@ export default function AddTeamMemberPage() {
                       <User className="h-16 w-16 text-muted-foreground" />
                     )}
                   </div>
-                  <div className="relative">
+                  <div className="relative w-full">
                     <Input
                       type="file"
                       accept="image/*"
@@ -214,7 +214,7 @@ export default function AddTeamMemberPage() {
                       type="button"
                       variant="outline"
                       disabled={uploadingPhoto}
-                      className="relative z-0 bg-transparent"
+                      className="relative z-0 bg-transparent w-full"
                     >
                       <Upload className="mr-2 h-4 w-4" />
                       {uploadingPhoto ? "Uploading..." : "Upload Photo"}
@@ -268,7 +268,7 @@ export default function AddTeamMemberPage() {
 
                   <FormField
                     control={memberForm.control}
-                    name="phone"
+                    name="mobile"
                     render={({ field }) => (
                       <FormItem className="w-full">
                         <FormLabel>Phone Number</FormLabel>
