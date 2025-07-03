@@ -97,12 +97,25 @@ export default function AddTeamMemberPage() {
       }
     })
     const data = await req.json()
-    console.log(data)
+
+    memberForm.reset({
+    name: data.name || "",
+    position: data.position || "",
+    bio: data.bio || "",
+    photo: data.photo || "",
+    email: data.email || "",
+    phone: data.phone || "",
+    linkedin: data.linkedin || "",
+    twitter: data.twitter || "",
+    experience: data.experience || "",
+    education: data.education || "",
+    specialization: data.specialization || "",
+  })
   }
 
   useEffect(()=>{
     getMember()
-  },[])
+  },[id])
 
   const handlePhotoUpload = async (file: File) => {
     if (!file) return
