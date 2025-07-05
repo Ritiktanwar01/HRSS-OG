@@ -154,8 +154,8 @@ export default function AddTeamMemberPage() {
           <Form {...memberForm}>
             <form onSubmit={memberForm.handleSubmit(onMemberSubmit)} className="space-y-6">
               {/* Photo Upload Section */}
-              <div className="flex items-start gap-6">
-                <div className="flex flex-col items-center gap-4">
+              <div className="flex flex-col md:flex-row items-start gap-6">
+                <div className="flex flex-col items-center gap-4 w-full md:w-auto">
                   <div className="h-32 w-32 rounded-full bg-muted flex items-center justify-center overflow-hidden border-2 border-dashed border-gray-300">
                     {memberForm.watch("photo") ? (
                       <img
@@ -167,7 +167,7 @@ export default function AddTeamMemberPage() {
                       <User className="h-16 w-16 text-muted-foreground" />
                     )}
                   </div>
-                  <div className="relative">
+                  <div className="relative w-full">
                     <Input
                       type="file"
                       accept="image/*"
@@ -186,7 +186,7 @@ export default function AddTeamMemberPage() {
                       type="button"
                       variant="outline"
                       disabled={uploadingPhoto}
-                      className="relative z-0 bg-transparent"
+                      className="relative z-0 bg-transparent w-full"
                     >
                       <Upload className="mr-2 h-4 w-4" />
                       {uploadingPhoto ? "Uploading..." : "Upload Photo"}
