@@ -69,7 +69,6 @@ export default function DonationStatusPage({params}) {
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "/api"}/api/donations/status/${txnId}`)
       const data = await response.json()
 
-      console.log("Payment status response:", data)
 
       if (data.success) {
         setDonation(data.donation)
