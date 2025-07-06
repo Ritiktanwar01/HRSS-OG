@@ -299,10 +299,10 @@ export default function AddTeamMemberPage() {
                 name="DOB"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Educational Background</FormLabel>
+                    <FormLabel>Date Of Birth</FormLabel>
                     <FormControl>
                       <Input
-                        placeholder="Educational qualifications, degrees, certifications..."
+                        placeholder="00/00/0000"
                         className="min-h-[80px]"
                         {...field}
                       />
@@ -314,16 +314,16 @@ export default function AddTeamMemberPage() {
 
               {/* Social Media Links */}
               <div className="space-y-4">
-                <h3 className="text-lg font-medium">Social Media Links (Optional)</h3>
+                <h3 className="text-lg font-medium">Other info</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <FormField
                     control={memberForm.control}
                     name="fatherName"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>LinkedIn Profile</FormLabel>
+                        <FormLabel>Father's Name</FormLabel>
                         <FormControl>
-                          <Input placeholder="https://linkedin.com/in/username" {...field} />
+                          <Input placeholder="Father's name" {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -335,7 +335,7 @@ export default function AddTeamMemberPage() {
                     name="address"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Twitter Profile</FormLabel>
+                        <FormLabel>Full Address</FormLabel>
                         <FormControl>
                           <Textarea placeholder="v niwas bhulwana,hodal,palwal (Haryana)" {...field} />
                         </FormControl>
