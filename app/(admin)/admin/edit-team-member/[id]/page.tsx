@@ -22,12 +22,10 @@ const teamMemberSchema = z.object({
   bio: z.string().min(10, { message: "Bio must be at least 10 characters." }),
   photo: z.string().optional(),
   email: z.string().email({ message: "Please enter a valid email address." }).optional().or(z.literal("")),
-  mobile: z.string().optional(),
-  linkedin: z.string().url({ message: "Please enter a valid LinkedIn URL." }).optional().or(z.literal("")),
-  twitter: z.string().url({ message: "Please enter a valid Twitter URL." }).optional().or(z.literal("")),
-  experience: z.string().optional(),
-  education: z.string().optional(),
-  specialization: z.string().optional(),
+  mobile: z.string(),
+  fatherName: z.string().url({ message: "Please enter father's name" }).optional().or(z.literal("")),
+  address: z.string().url({ message: "Please enter a valid address" }).optional().or(z.literal("")),
+  DOB: z.string().url({ message: "Please enter a valid Twitter URL." }).optional().or(z.literal("")),
 })
 
 export default function AddTeamMemberPage() {
@@ -46,11 +44,8 @@ export default function AddTeamMemberPage() {
       photo: "",
       email: "",
       mobile: "",
-      linkedin: "",
-      twitter: "",
-      experience: "",
-      education: "",
-      specialization: "",
+      fatherName: "",
+      DOB :""
     },
   })
 
@@ -105,11 +100,9 @@ export default function AddTeamMemberPage() {
     photo: data.photo || "",
     email: data.email || "",
     mobile: data.mobile || "",
-    linkedin: data.linkedin || "",
-    twitter: data.twitter || "",
-    experience: data.experience || "",
-    education: data.education || "",
-    specialization: data.specialization || "",
+    fatherName: data.fatherName || "",
+    address: data.address || "",
+    DOB: data.DOB || "",
   })
   }
 
@@ -273,7 +266,7 @@ export default function AddTeamMemberPage() {
                       <FormItem className="w-full">
                         <FormLabel>Phone Number</FormLabel>
                         <FormControl>
-                          <Input className="w-full" placeholder="+91 9876543210" {...field} />
+                          <Input className="w-full" placeholder="+91 0000000000" {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -301,45 +294,14 @@ export default function AddTeamMemberPage() {
                 )}
               />
 
-              {/* Professional Information */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <FormField
-                  control={memberForm.control}
-                  name="specialization"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Area of Specialization</FormLabel>
-                      <FormControl>
-                        <Input placeholder="e.g., Community Outreach, Finance, Legal Affairs" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={memberForm.control}
-                  name="experience"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Years of Experience</FormLabel>
-                      <FormControl>
-                        <Input placeholder="e.g., 5 years in social work" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-
               <FormField
                 control={memberForm.control}
-                name="education"
+                name="DOB"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Educational Background</FormLabel>
                     <FormControl>
-                      <Textarea
+                      <Input
                         placeholder="Educational qualifications, degrees, certifications..."
                         className="min-h-[80px]"
                         {...field}
@@ -356,7 +318,7 @@ export default function AddTeamMemberPage() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <FormField
                     control={memberForm.control}
-                    name="linkedin"
+                    name="fatherName"
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>LinkedIn Profile</FormLabel>
@@ -370,12 +332,12 @@ export default function AddTeamMemberPage() {
 
                   <FormField
                     control={memberForm.control}
-                    name="twitter"
+                    name="address"
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Twitter Profile</FormLabel>
                         <FormControl>
-                          <Input placeholder="https://twitter.com/username" {...field} />
+                          <Textarea placeholder="v niwas bhulwana,hodal,palwal (Haryana)" {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
