@@ -7,15 +7,15 @@ import { useEffect } from "react"
 type Data = {
     name: string;
     uid: string;
-    dob: string;
-    designation: string;
+    DOB: string;
+    position: string;
     validFrom: string;
     validTo: string;
     emergencyContact: string;
     image: string;
-    qr_code: string;
-    fName: string;
-    Mobile?: string;
+    qrcode: string;
+    fatherName: string;
+    mobile: string;
     address: string;
 };
 
@@ -57,11 +57,11 @@ export default function IDCARD({data}: IDCARDProps) {
               </div>
               <div className="flex justify-start gap-1">
                 <span className="font-bold">D.O.B</span>
-                <span className="font-semibold">: {data.dob}</span>
+                <span className="font-semibold">: {data.DOB}</span>
               </div>
               <div className="flex justify-start gap-1">
                 <span className="font-bold">Designation</span>
-                <span className="font-semibold">: {data.designation}</span>
+                <span className="font-semibold">: {data.position}</span>
               </div>
               <div className="flex justify-start gap-1">
                 <span className="font-bold">Valid From</span>
@@ -95,16 +95,16 @@ export default function IDCARD({data}: IDCARDProps) {
 
             <div className="flex justify-center mb-4 print:mb-2">
               <div className="w-20 h-20 bg-white p-2 rounded print:w-10 print:h-10 print:p-1">
-                <img className="h-full" src={data.qr_code} alt="" />
+                <img className="h-full" src={data.qrcode} alt="" />
               </div>
             </div>
 
             <div className="space-y-2 text-xs print:space-y-1 print:text-[8px]">
               <div>
-                <span className="font-bold">S/O :</span> {data.fName}
+                <span className="font-bold">S/O :</span> {data.fatherName}
               </div>
               <div>
-                <span className="font-bold">Mobile :</span> {data.Mobile}
+                <span className="font-bold">Mobile :</span> {data.mobile}
               </div>
               <div>
                 <span className="font-bold">Address :</span> {data.address}

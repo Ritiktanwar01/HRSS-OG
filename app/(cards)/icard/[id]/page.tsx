@@ -6,15 +6,15 @@ import React from 'react'
 type Data = {
     name: string;
     uid: string;
-    dob: string;
-    designation: string;
+    DOB: string;
+    position: string;
     validFrom: string;
     validTo: string;
     emergencyContact: string;
     image: string;
-    qr_code: string;
-    fName: string;
-    Mobile?: string;
+    qrcode: string;
+    fatherName: string;
+    mobile: string;
     address: string;
 };
 
