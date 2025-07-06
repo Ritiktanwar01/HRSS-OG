@@ -20,7 +20,7 @@ export default function AboutPage() {
         const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/about/public`)
         if (response.ok) {
           const data = await response.json()
-          setAboutData(data)
+          setAboutData(data.sort((a, b) => a.order - b.order))
         }
       } catch (error) {
         console.error("Error fetching about data:", error)
