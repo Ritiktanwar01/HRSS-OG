@@ -59,7 +59,7 @@ export default function IDCARD({ data }: IDCARDProps) {
                 <span className="font-bold">D.O.B</span>
                 <span className="font-semibold">: {new Date(data.DOB).toLocaleDateString('en-IN', {
                   day: 'numeric',
-                  month: 'long',
+                  month: 'numeric',
                   year: 'numeric'
                 })}</span>
               </div>
