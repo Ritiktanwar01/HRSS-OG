@@ -22,12 +22,11 @@ const teamMemberSchema = z.object({
   bio: z.string().min(10, { message: "Bio must be at least 10 characters." }),
   photo: z.string().optional(),
   email: z.string().email({ message: "Please enter a valid email address." }).optional().or(z.literal("")),
-  phone: z.string().optional(),
-  linkedin: z.string().url({ message: "Please enter a valid LinkedIn URL." }).optional().or(z.literal("")),
-  twitter: z.string().url({ message: "Please enter a valid Twitter URL." }).optional().or(z.literal("")),
-  experience: z.string().optional(),
-  education: z.string().optional(),
-  specialization: z.string().optional(),
+  mobile: z.string(),
+  fatherName: z.string(),
+  address: z.string(),
+  DOB: z.string(),
+  order :z.string().optional()
 })
 
 export default function AddTeamMemberPage() {
@@ -40,17 +39,15 @@ export default function AddTeamMemberPage() {
   const memberForm = useForm({
     resolver: zodResolver(teamMemberSchema),
     defaultValues: {
-      name: "",
+     name: "",
       position: "",
       bio: "",
       photo: "",
       email: "",
-      phone: "",
-      linkedin: "",
-      twitter: "",
-      experience: "",
-      education: "",
-      specialization: "",
+      mobile: "",
+      fatherName: "",
+      DOB: "",
+      order:""
     },
   })
 
@@ -130,252 +127,240 @@ export default function AddTeamMemberPage() {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center gap-4">
-        <Link href="/admin/about?tab=team">
-          <Button variant="outline" size="sm">
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Back to Team Members
-          </Button>
-        </Link>
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">Add New Team Member</h1>
-          <p className="text-muted-foreground">Add a new member to your organization's team.</p>
-        </div>
-      </div>
-
-      {/* Form Card */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Team Member Details</CardTitle>
-          <CardDescription>Fill in the information for the new team member</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Form {...memberForm}>
-            <form onSubmit={memberForm.handleSubmit(onMemberSubmit)} className="space-y-6">
-              {/* Photo Upload Section */}
-              <div className="flex flex-col md:flex-row items-start gap-6">
-                <div className="flex flex-col items-center gap-4 w-full md:w-auto">
-                  <div className="h-32 w-32 rounded-full bg-muted flex items-center justify-center overflow-hidden border-2 border-dashed border-gray-300">
-                    {memberForm.watch("photo") ? (
-                      <img
-                        src={memberForm.watch("photo") || "/placeholder.svg"}
-                        alt="Member preview"
-                        className="h-full w-full object-cover"
+          {/* Header */}
+          <div className="flex items-center gap-4">
+            <Link href="/admin/about?tab=team">
+              <Button variant="outline" size="sm">
+                <ArrowLeft className="mr-2 h-4 w-4" />
+                Back to Team Members
+              </Button>
+            </Link>
+            <div>
+              <h1 className="text-2xl font-bold tracking-tight">Add New Team Member</h1>
+              <p className="text-muted-foreground">Edit info of member in your organization's team.</p>
+            </div>
+          </div>
+    
+          {/* Form Card */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Team Member Details</CardTitle>
+              <CardDescription>Fill in the information for the new team member</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Form {...memberForm}>
+                <form onSubmit={memberForm.handleSubmit(onMemberSubmit)} className="space-y-6">
+                  {/* Photo Upload Section */}
+                  <div className="flex flex-col md:flex-row items-start gap-6">
+                    <div className="flex flex-col items-center gap-4 w-full md:w-auto">
+                      <div className="h-32 w-32 rounded-full bg-muted flex items-center justify-center overflow-hidden border-2 border-dashed border-gray-300">
+                        {memberForm.watch("photo") ? (
+                          <img
+                            src={memberForm.watch("photo") || "/placeholder.svg"}
+                            alt="Member preview"
+                            className="h-full w-full object-cover"
+                          />
+                        ) : (
+                          <User className="h-16 w-16 text-muted-foreground" />
+                        )}
+                      </div>
+                      <div className="relative w-full">
+                        <Input
+                          type="file"
+                          accept="image/*"
+                          id="photo-upload"
+                          className="absolute inset-0 opacity-0 cursor-pointer z-10 w-full h-full"
+                          onChange={(e) => {
+                            const files = e.target.files
+                            const file = files && files[0]
+                            if (file) {
+                              handlePhotoUpload(file)
+                            }
+                          }}
+                          disabled={uploadingPhoto}
+                        />
+                        <Button
+                          type="button"
+                          variant="outline"
+                          disabled={uploadingPhoto}
+                          className="relative z-0 bg-transparent w-full"
+                        >
+                          <Upload className="mr-2 h-4 w-4" />
+                          {uploadingPhoto ? "Uploading..." : "Upload Photo"}
+                        </Button>
+                      </div>
+                    </div>
+    
+                    {/* Basic Information */}
+                    <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-4 w-full">
+                      <FormField
+                        control={memberForm.control}
+                        name="name"
+                        render={({ field }) => (
+                          <FormItem className="w-full">
+                            <FormLabel>Full Name *</FormLabel>
+                            <FormControl>
+                              <Input className="w-full" placeholder="Enter member's full name" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
                       />
-                    ) : (
-                      <User className="h-16 w-16 text-muted-foreground" />
-                    )}
+    
+                      <FormField
+                        control={memberForm.control}
+                        name="position"
+                        render={({ field }) => (
+                          <FormItem className="w-full">
+                            <FormLabel>Position/Title *</FormLabel>
+                            <FormControl>
+                              <Input className="w-full" placeholder="e.g., President, Secretary, Treasurer" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+    
+                      <FormField
+                        control={memberForm.control}
+                        name="email"
+                        render={({ field }) => (
+                          <FormItem className="w-full">
+                            <FormLabel>Email Address</FormLabel>
+                            <FormControl>
+                              <Input className="w-full" type="email" placeholder="member@example.com" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+    
+                      <FormField
+                        control={memberForm.control}
+                        name="mobile"
+                        render={({ field }) => (
+                          <FormItem className="w-full">
+                            <FormLabel>Phone Number</FormLabel>
+                            <FormControl>
+                              <Input className="w-full" placeholder="+91 0000000000" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
                   </div>
-                  <div className="relative w-full">
-                    <Input
-                      type="file"
-                      accept="image/*"
-                      id="photo-upload"
-                      className="absolute inset-0 opacity-0 cursor-pointer z-10 w-full h-full"
-                      onChange={(e) => {
-                        const files = e.target.files
-                        const file = files && files[0]
-                        if (file) {
-                          handlePhotoUpload(file)
-                        }
-                      }}
-                      disabled={uploadingPhoto}
-                    />
+    
+                  {/* Bio Section */}
+                  <FormField
+                    control={memberForm.control}
+                    name="bio"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Biography *</FormLabel>
+                        <FormControl>
+                          <Textarea
+                            placeholder="Write a brief biography about the team member, their role, and contributions to the organization..."
+                            className="min-h-[120px]"
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+    
+                  <FormField
+                    control={memberForm.control}
+                    name="address"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Full Address</FormLabel>
+                        <FormControl>
+                          <Textarea className="min-h-[80px]" placeholder="v niwas bhulwana,hodal,palwal (Haryana)" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+    
+                  {/* Social Media Links */}
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-medium">Other info</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <FormField
+                        control={memberForm.control}
+                        name="fatherName"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Father's Name</FormLabel>
+                            <FormControl>
+                              <Input placeholder="Father's name" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={memberForm.control}
+                        name="DOB"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Date Of Birth</FormLabel>
+                            <FormControl>
+                              <Input
+                                placeholder="00/00/0000"
+    
+                                {...field}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+    
+                      <FormField
+                        control={memberForm.control}
+                        name="order"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Order</FormLabel>
+                            <FormControl>
+                              <Input type="number"
+                                placeholder="0"
+    
+                                {...field}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+    
+    
+                    </div>
+                  </div>
+    
+                  {/* Action Buttons */}
+                  <div className="flex items-center justify-end gap-4 pt-6 border-t">
+                    <Link href="/admin/about?tab=team">
+                      <Button type="button" variant="outline">
+                        Cancel
+                      </Button>
+                    </Link>
                     <Button
-                      type="button"
-                      variant="outline"
-                      disabled={uploadingPhoto}
-                      className="relative z-0 bg-transparent w-full"
+                      type="submit"
+                      className="bg-bhagva-700 hover:bg-bhagva-800"
+                      disabled={isLoading || uploadingPhoto}
                     >
-                      <Upload className="mr-2 h-4 w-4" />
-                      {uploadingPhoto ? "Uploading..." : "Upload Photo"}
+                      <Save className="mr-2 h-4 w-4" />
+                      {isLoading ? "Adding Member..." : "Add Team Member"}
                     </Button>
                   </div>
-                </div>
-
-                {/* Basic Information */}
-                <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <FormField
-                    control={memberForm.control}
-                    name="name"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Full Name *</FormLabel>
-                        <FormControl>
-                          <Input placeholder="Enter member's full name" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={memberForm.control}
-                    name="position"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Position/Title *</FormLabel>
-                        <FormControl>
-                          <Input placeholder="e.g., President, Secretary, Treasurer" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={memberForm.control}
-                    name="email"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Email Address</FormLabel>
-                        <FormControl>
-                          <Input type="email" placeholder="member@example.com" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={memberForm.control}
-                    name="phone"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Phone Number</FormLabel>
-                        <FormControl>
-                          <Input placeholder="+91 9876543210" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-              </div>
-
-              {/* Bio Section */}
-              <FormField
-                control={memberForm.control}
-                name="bio"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Biography *</FormLabel>
-                    <FormControl>
-                      <Textarea
-                        placeholder="Write a brief biography about the team member, their role, and contributions to the organization..."
-                        className="min-h-[120px]"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              {/* Professional Information */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <FormField
-                  control={memberForm.control}
-                  name="specialization"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Area of Specialization</FormLabel>
-                      <FormControl>
-                        <Input placeholder="e.g., Community Outreach, Finance, Legal Affairs" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={memberForm.control}
-                  name="experience"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Years of Experience</FormLabel>
-                      <FormControl>
-                        <Input placeholder="e.g., 5 years in social work" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-
-              <FormField
-                control={memberForm.control}
-                name="education"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Educational Background</FormLabel>
-                    <FormControl>
-                      <Textarea
-                        placeholder="Educational qualifications, degrees, certifications..."
-                        className="min-h-[80px]"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              {/* Social Media Links */}
-              <div className="space-y-4">
-                <h3 className="text-lg font-medium">Social Media Links (Optional)</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <FormField
-                    control={memberForm.control}
-                    name="linkedin"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>LinkedIn Profile</FormLabel>
-                        <FormControl>
-                          <Input placeholder="https://linkedin.com/in/username" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={memberForm.control}
-                    name="twitter"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Twitter Profile</FormLabel>
-                        <FormControl>
-                          <Input placeholder="https://twitter.com/username" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-              </div>
-
-              {/* Action Buttons */}
-              <div className="flex items-center justify-end gap-4 pt-6 border-t">
-                <Link href="/admin/about?tab=team">
-                  <Button type="button" variant="outline">
-                    Cancel
-                  </Button>
-                </Link>
-                <Button
-                  type="submit"
-                  className="bg-bhagva-700 hover:bg-bhagva-800"
-                  disabled={isLoading || uploadingPhoto}
-                >
-                  <Save className="mr-2 h-4 w-4" />
-                  {isLoading ? "Adding Member..." : "Add Team Member"}
-                </Button>
-              </div>
-            </form>
-          </Form>
-        </CardContent>
-      </Card>
-    </div>
+                </form>
+              </Form>
+            </CardContent>
+          </Card>
+        </div>
   )
 }
