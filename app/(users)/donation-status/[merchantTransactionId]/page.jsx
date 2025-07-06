@@ -93,7 +93,7 @@ export default function DonationStatusPage({params}) {
   }
   useEffect(() => {
     checkPaymentStatus(false)
-  })
+  },[])
 
   // Function to download receipt
   const downloadReceipt = () => {
