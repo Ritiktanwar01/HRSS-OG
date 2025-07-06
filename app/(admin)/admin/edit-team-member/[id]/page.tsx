@@ -13,7 +13,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { toast } from "@/components/ui/use-toast"
 import { ArrowLeft, Upload, User, Save } from "lucide-react"
 import Link from "next/link"
-import { useAuth } from "@/hooks/use-auth"
+
 
 // Form schema for team members
 const teamMemberSchema = z.object({
