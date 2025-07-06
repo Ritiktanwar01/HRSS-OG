@@ -118,11 +118,11 @@ export default function IDCARD({ data }: IDCARDProps) {
             <div className="mt-4 text-xs print:mt-2 print:text-[8px]">
               <p className="font-bold">* Note :</p>
               <p className="leading-tight print:leading-tight">
-                This card is not any kind of residential/I.D.O.B or it is not applicable for government identification
+                This card is not any kind of residential/identity or it is not applicable for government identification
                 proof
               </p>
               <p className="mt-2 text-xs leading-tight print:text-[7px] print:leading-tight">
-                यह कार्ड किसी भी प्रकार का आवासीय/पहचान पत्र प्रमाण का यह सरकारी पहचान पत्र के लिए लागू नहीं है
+                यह कार्ड किसी भी प्रकार का आवासीय/पहचान का प्रमाण सरकारी पहचान पत्र के लिए लागू नहीं है
               </p>
             </div>
 
