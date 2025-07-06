@@ -12,7 +12,7 @@ type Data = {
     validFrom: string;
     validTo: string;
     emergencyContact: string;
-    image: string;
+    photo: string;
     qrcode: string;
     fatherName: string;
     mobile: string;
@@ -42,7 +42,7 @@ export default function IDCARD({data}: IDCARDProps) {
 
             <div className="flex justify-center mb-4 print:mb-2">
               <div className="w-24 h-28 bg-gray-200 rounded overflow-hidden print:w-12 print:h-14">
-                <img src="/portrait.png" alt="Raman Lal" className="w-full h-full object-cover" />
+                <img src={data.photo} alt="Raman Lal" className="w-full h-full object-cover" />
               </div>
             </div>
 

@@ -11,7 +11,7 @@ type Data = {
     validFrom: string;
     validTo: string;
     emergencyContact: string;
-    image: string;
+    photo: string;
     qrcode: string;
     fatherName: string;
     mobile: string;
