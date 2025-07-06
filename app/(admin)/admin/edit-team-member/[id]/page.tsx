@@ -24,15 +24,16 @@ const teamMemberSchema = z.object({
   email: z.string().email({ message: "Please enter a valid email address." }).optional().or(z.literal("")),
   mobile: z.string(),
   fatherName: z.string().url({ message: "Please enter father's name" }).optional().or(z.literal("")),
-  address: z.string().url({ message: "Please enter a valid address" }).optional().or(z.literal("")),
-  DOB: z.string().url({ message: "Please enter a valid Twitter URL." }).optional().or(z.literal("")),
+  address: z.string().url({ message: "Please enter  a valid address" }).optional().or(z.literal("")),
+  DOB: z.string().url({ message: "Please enter a valid date of birth" }).optional().or(z.literal("")),
+  order :z.number().optional()
 })
 
 export default function AddTeamMemberPage() {
   const [isLoading, setIsLoading] = useState(false)
   const [uploadingPhoto, setUploadingPhoto] = useState(false)
   const router = useRouter()
-  const {id} = useParams()
+  const { id } = useParams()
 
   // Form for team members
   const memberForm = useForm({
@@ -45,7 +46,8 @@ export default function AddTeamMemberPage() {
       email: "",
       mobile: "",
       fatherName: "",
-      DOB :""
+      DOB: "",
+      order:0
     },
   })
 
@@ -84,31 +86,32 @@ export default function AddTeamMemberPage() {
     }
   }
 
-  const getMember = async ()=>{
-    const req = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/team-members/${id}`,{
-      method:"GET",
-      headers:{
-         Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+  const getMember = async () => {
+    const req = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/team-members/${id}`, {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("access_token")}`,
       }
     })
     const data = await req.json()
 
     memberForm.reset({
-    name: data.name || "",
-    position: data.position || "",
-    bio: data.bio || "",
-    photo: data.photo || "",
-    email: data.email || "",
-    mobile: data.mobile || "",
-    fatherName: data.fatherName || "",
-    address: data.address || "",
-    DOB: data.DOB || "",
-  })
+      name: data.name || "",
+      position: data.position || "",
+      bio: data.bio || "",
+      photo: data.photo || "",
+      email: data.email || "",
+      mobile: data.mobile || "",
+      fatherName: data.fatherName || "",
+      address: data.address || "",
+      DOB: data.DOB || "",
+      order:data.order || 0
+    })
   }
 
-  useEffect(()=>{
+  useEffect(() => {
     getMember()
-  },[id])
+  }, [id])
 
   const handlePhotoUpload = async (file: File) => {
     if (!file) return
@@ -295,18 +298,18 @@ export default function AddTeamMemberPage() {
               />
 
               <FormField
-                    control={memberForm.control}
-                    name="address"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Full Address</FormLabel>
-                        <FormControl>
-                          <Textarea className="min-h-[80px]" placeholder="v niwas bhulwana,hodal,palwal (Haryana)" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                control={memberForm.control}
+                name="address"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Full Address</FormLabel>
+                    <FormControl>
+                      <Textarea className="min-h-[80px]" placeholder="v niwas bhulwana,hodal,palwal (Haryana)" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
               {/* Social Media Links */}
               <div className="space-y-4">
@@ -326,24 +329,42 @@ export default function AddTeamMemberPage() {
                     )}
                   />
                   <FormField
-                control={memberForm.control}
-                name="DOB"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Date Of Birth</FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder="00/00/0000"
-                        
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+                    control={memberForm.control}
+                    name="DOB"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Date Of Birth</FormLabel>
+                        <FormControl>
+                          <Input
+                            placeholder="00/00/0000"
 
-                  
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={memberForm.control}
+                    name="order"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Order</FormLabel>
+                        <FormControl>
+                          <Input
+                            placeholder="0"
+
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+
                 </div>
               </div>
 
