@@ -47,7 +47,7 @@ export default function AddTeamMemberPage() {
       mobile: "",
       fatherName: "",
       DOB: "",
-      order:0
+      order:""
     },
   })
 
@@ -94,6 +94,7 @@ export default function AddTeamMemberPage() {
       }
     })
     const data = await req.json()
+    console.log(data)
 
     memberForm.reset({
       name: data.name || "",
