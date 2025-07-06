@@ -31,6 +31,7 @@ export default function AdminDashboardPage() {
           const data = await response.json()
           setStats({
             donations: {
+              
               value: `₹${data.stats.totalDonations.toLocaleString()}`,
               change: `${data.stats.donationChange}%`,
             },
@@ -61,10 +62,13 @@ export default function AdminDashboardPage() {
   }, [getAuthToken])
 
   // Format stats for display
+  const totalSuccessfulDonations = stats.donations
+    .filter((d) => d.paymentStatus === "success")
+    .reduce((sum, donation) => sum + donation.amount, 0)
   const statsData = [
     {
       title: "Total Donations",
-      value: stats.donations.value,
+      value: totalSuccessfulDonations,
       change: stats.donations.change,
       icon: <DollarSign className="h-5 w-5 text-bhagva-600" />,
     },
