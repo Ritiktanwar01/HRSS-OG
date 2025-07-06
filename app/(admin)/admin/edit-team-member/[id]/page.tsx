@@ -353,7 +353,7 @@ export default function AddTeamMemberPage() {
                       <FormItem>
                         <FormLabel>Order</FormLabel>
                         <FormControl>
-                          <Input
+                          <Input type="number"
                             placeholder="0"
 
                             {...field}
