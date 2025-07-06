@@ -26,7 +26,7 @@ const teamMemberSchema = z.object({
   fatherName: z.string(),
   address: z.string(),
   DOB: z.string(),
-  order :z.number().optional()
+  order :z.string().optional()
 })
 
 export default function AddTeamMemberPage() {
