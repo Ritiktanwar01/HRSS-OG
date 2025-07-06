@@ -295,22 +295,18 @@ export default function AddTeamMemberPage() {
               />
 
               <FormField
-                control={memberForm.control}
-                name="DOB"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Date Of Birth</FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder="00/00/0000"
-                        className="min-h-[80px]"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+                    control={memberForm.control}
+                    name="address"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Full Address</FormLabel>
+                        <FormControl>
+                          <Textarea className="min-h-[80px]" placeholder="v niwas bhulwana,hodal,palwal (Haryana)" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
               {/* Social Media Links */}
               <div className="space-y-4">
@@ -329,20 +325,25 @@ export default function AddTeamMemberPage() {
                       </FormItem>
                     )}
                   />
-
                   <FormField
-                    control={memberForm.control}
-                    name="address"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Full Address</FormLabel>
-                        <FormControl>
-                          <Textarea placeholder="v niwas bhulwana,hodal,palwal (Haryana)" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                control={memberForm.control}
+                name="DOB"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Date Of Birth</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="00/00/0000"
+                        
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+                  
                 </div>
               </div>
 
