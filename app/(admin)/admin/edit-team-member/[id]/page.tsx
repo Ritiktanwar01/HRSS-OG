@@ -23,9 +23,9 @@ const teamMemberSchema = z.object({
   photo: z.string().optional(),
   email: z.string().email({ message: "Please enter a valid email address." }).optional().or(z.literal("")),
   mobile: z.string(),
-  fatherName: z.string().url({ message: "Please enter father's name" }).optional().or(z.literal("")),
-  address: z.string().url({ message: "Please enter  a valid address" }).optional().or(z.literal("")),
-  DOB: z.string().url({ message: "Please enter a valid date of birth" }).optional().or(z.literal("")),
+  fatherName: z.string(),
+  address: z.string(),
+  DOB: z.string(),
   order :z.number().optional()
 })
 
