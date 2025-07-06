@@ -39,7 +39,7 @@ const page = () => {
           console.error("Error fetching member data:", data)
           setMember(null)
         } else {
-          console.log(data)
+
           setMember(data)
         }
       }
