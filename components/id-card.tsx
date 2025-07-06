@@ -5,28 +5,28 @@ import { useEffect } from "react"
 
 
 type Data = {
-    name: string;
-    uid: string;
-    DOB: string;
-    position: string;
-    validFrom: string;
-    validTo: string;
-    emergencyContact: string;
-    photo: string;
-    qrcode: string;
-    fatherName: string;
-    mobile: string;
-    address: string;
+  name: string;
+  uid: string;
+  DOB: string;
+  position: string;
+  validFrom: string;
+  validTo: string;
+  emergencyContact: string;
+  photo: string;
+  qrcode: string;
+  fatherName: string;
+  mobile: string;
+  address: string;
 };
 
 interface IDCARDProps {
-    data: Data;
+  data: Data;
 }
 
-export default function IDCARD({data}: IDCARDProps) {
+export default function IDCARD({ data }: IDCARDProps) {
   useEffect(() => {
     window.print()
-  },[])
+  }, [])
   return (
     <>
       <div className="min-h-screen bg-gray-100 p-8 print:p-0 print:bg-white">
@@ -57,7 +57,11 @@ export default function IDCARD({data}: IDCARDProps) {
               </div>
               <div className="flex justify-start gap-1">
                 <span className="font-bold">D.O.B</span>
-                <span className="font-semibold">: {data.DOB}</span>
+                <span className="font-semibold">: {new Date(data.DOB).toLocaleDateString('en-IN', {
+                  day: 'numeric',
+                  month: 'long',
+                  year: 'numeric'
+                })}</span>
               </div>
               <div className="flex justify-start gap-1">
                 <span className="font-bold">Designation</span>
