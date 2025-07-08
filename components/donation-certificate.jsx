@@ -3,10 +3,10 @@
 import { Award } from "lucide-react"
 import { useEffect } from "react"
 
-export default function DonationCertificate({ data }: { data: any }) {
+export default function DonationCertificate({ data }) {
 
 // Simple number to words function for demonstration (supports up to 9999)
-function NumberToWords({ num }: { num: number }): string {
+function NumberToWords(num) {
   const ones = [
     "", "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine",
     "Ten", "Eleven", "Twelve", "Thirteen", "Fourteen", "Fifteen", "Sixteen", "Seventeen", "Eighteen", "Nineteen"
@@ -22,11 +22,8 @@ function NumberToWords({ num }: { num: number }): string {
   return num.toString();
 }
 
-interface FormatToLocalDateOptions {
-  isoString: string;
-}
 
-function formatToLocalDate(isoString: string): string {
+function formatToLocalDate(isoString) {
   const date = new Date(isoString);
   return date.toLocaleString('en-IN', {
     timeZone: 'Asia/Kolkata',
@@ -56,33 +53,23 @@ function getCurrentDateTime() {
   });
 }
 
-interface CreateUniqueCodeParams {
-  dateStr: string;
-  numberStr: string;
-  prefixStr: string;
-}
 
-interface CreateUniqueCodeParams {
-  dateStr: string;
-  numberStr: string;
-  prefixStr: string;
-}
 
 function createUniqueCode(
-  dateStr: CreateUniqueCodeParams["dateStr"],
-  numberStr: CreateUniqueCodeParams["numberStr"],
-  prefixStr: CreateUniqueCodeParams["prefixStr"]
-): string {
+  dateStr,
+  numberStr,
+  prefixStr
+) {
   const date = new Date(dateStr);
 
   // Extract first character from prefix string
-  const prefixInitial: string = prefixStr.charAt(0).toUpperCase();
+  const prefixInitial = prefixStr.charAt(0).toUpperCase();
 
   // Break down the date into components
-  const year: number = date.getFullYear();
-  const month: string = String(date.getMonth() + 1).padStart(2, '0');
-  const day: string = String(date.getDate()).padStart(2, '0');
-  const time: string = `${date.getHours()}${date.getMinutes()}${date.getSeconds()}`;
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  const time = `${date.getHours()}${date.getMinutes()}${date.getSeconds()}`;
 
   // Combine parts into a unique string
   return `${prefixInitial}${year}${month}${day}${time}${numberStr}`;
