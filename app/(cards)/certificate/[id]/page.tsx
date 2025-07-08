@@ -15,8 +15,8 @@ const page = () => {
     const req = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/donations/donation-cert/${id}`)
     const data = await req.json()
     
+    console.log(data)
     if (data.status == "success"){
-      console.log(data)
       setinfo(data)
       setIsdonation(true)
     }
