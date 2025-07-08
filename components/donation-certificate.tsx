@@ -3,7 +3,7 @@
 import { Award } from "lucide-react"
 import { useEffect } from "react"
 
-export default function DonationCertificate() {
+export default function DonationCertificate({ data }: { data: any }) {
   useEffect(()=>{
     window.print()
   },[])
