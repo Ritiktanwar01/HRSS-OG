@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { useSearchParams, useRouter, useParams } from "next/navigation"
+import { useRouter } from "next/router"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Loader2, CheckCircle2, XCircle, Home, RefreshCw, Heart, Download } from "lucide-react"
@@ -93,6 +94,8 @@ export default function DonationStatusPage({params}) {
   useEffect(() => {
     checkPaymentStatus(false)
   },[])
+
+  const Router = useRouter()
 
   // Function to download receipt
   const downloadReceipt = () => {
@@ -215,7 +218,7 @@ For any queries, please contact us at support@hrssog.org
             </div>
 
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
-              <Button onClick={window.location('https://hrssindia.org/certificate/683cf537e4e10544bbcdc2f1')} className="bg-bhagva-700 hover:bg-bhagva-800">
+              <Button onClick={()=>Router.push('https://hrssindia.org/certificate/683cf537e4e10544bbcdc2f1')} className="bg-bhagva-700 hover:bg-bhagva-800">
                 <Download className="mr-2 h-4 w-4" /> Download Receipt
               </Button>
               <Button asChild variant="outline" className="border-bhagva-200 text-bhagva-700">
