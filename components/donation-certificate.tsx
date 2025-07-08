@@ -4,6 +4,90 @@ import { Award } from "lucide-react"
 import { useEffect } from "react"
 
 export default function DonationCertificate({ data }: { data: any }) {
+
+// Simple number to words function for demonstration (supports up to 9999)
+function NumberToWords({ num }: { num: number }): string {
+  const ones = [
+    "", "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine",
+    "Ten", "Eleven", "Twelve", "Thirteen", "Fourteen", "Fifteen", "Sixteen", "Seventeen", "Eighteen", "Nineteen"
+  ];
+  const tens = [
+    "", "", "Twenty", "Thirty", "Forty", "Fifty", "Sixty", "Seventy", "Eighty", "Ninety"
+  ];
+
+  if (num < 20) return ones[num];
+  if (num < 100) return tens[Math.floor(num / 10)] + (num % 10 ? " " + ones[num % 10] : "");
+  if (num < 1000) return ones[Math.floor(num / 100)] + " Hundred" + (num % 100 ? " " + NumberToWords({ num: num % 100 }) : "");
+  if (num < 10000) return ones[Math.floor(num / 1000)] + " Thousand" + (num % 1000 ? " " + NumberToWords({ num: num % 1000 }) : "");
+  return num.toString();
+}
+
+interface FormatToLocalDateOptions {
+  isoString: string;
+}
+
+function formatToLocalDate(isoString: string): string {
+  const date = new Date(isoString);
+  return date.toLocaleString('en-IN', {
+    timeZone: 'Asia/Kolkata',
+    weekday: 'long',
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+    hour: 'numeric',
+    minute: 'numeric',
+    second: 'numeric',
+    hour12: true
+  });
+}
+
+function getCurrentDateTime() {
+  const now = new Date();
+  return now.toLocaleString('en-IN', {
+    timeZone: 'Asia/Kolkata',
+    weekday: 'long',
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+    hour: 'numeric',
+    minute: 'numeric',
+    second: 'numeric',
+    hour12: true
+  });
+}
+
+interface CreateUniqueCodeParams {
+  dateStr: string;
+  numberStr: string;
+  prefixStr: string;
+}
+
+interface CreateUniqueCodeParams {
+  dateStr: string;
+  numberStr: string;
+  prefixStr: string;
+}
+
+function createUniqueCode(
+  dateStr: CreateUniqueCodeParams["dateStr"],
+  numberStr: CreateUniqueCodeParams["numberStr"],
+  prefixStr: CreateUniqueCodeParams["prefixStr"]
+): string {
+  const date = new Date(dateStr);
+
+  // Extract first character from prefix string
+  const prefixInitial: string = prefixStr.charAt(0).toUpperCase();
+
+  // Break down the date into components
+  const year: number = date.getFullYear();
+  const month: string = String(date.getMonth() + 1).padStart(2, '0');
+  const day: string = String(date.getDate()).padStart(2, '0');
+  const time: string = `${date.getHours()}${date.getMinutes()}${date.getSeconds()}`;
+
+  // Combine parts into a unique string
+  return `${prefixInitial}${year}${month}${day}${time}${numberStr}`;
+}
+
   useEffect(()=>{
     window.print()
   },[])
@@ -40,23 +124,23 @@ export default function DonationCertificate({ data }: { data: any }) {
               <p className="text-xl text-gray-700 print:text-base">This is to certify that</p>
 
               <div className="border-b-3 border-orange-300 pb-3 mb-4 mx-8">
-                <p className="text-3xl font-bold text-orange-700 py-2 print:text-xl">Ritik Tanwar</p>
+                <p className="text-3xl font-bold text-orange-700 py-2 print:text-xl">{data.donations.name}</p>
                 <p className="text-base text-gray-500 print:text-sm">(Donor Name)</p>
               </div>
 
               <div className="space-y-3 print:space-y-2">
                 <p className="text-xl text-gray-700 print:text-base">has generously donated an amount of</p>
                 <div className="text-3xl font-bold text-orange-700 print:text-xl">
-                  ₹ <span className="border-b-3 border-gray-400 px-3 py-1 inline-block min-w-[150px]">500</span>
+                  ₹ <span className="border-b-3 border-gray-400 px-3 py-1 inline-block min-w-[150px]">{data.donations.amount}</span>
                 </div>
                 <p className="text-lg text-gray-700 print:text-base">
                   (Rupees{" "}
-                  <span className="border-b-2 border-gray-300 px-2 inline-block min-w-[250px]">Five Hundred Only</span>{" "}
+                  <span className="border-b-2 border-gray-300 px-2 inline-block min-w-[250px]">{NumberToWords(data.donations.amount)}</span>{" "}
                   only)
                 </p>
                 <p className="text-lg text-gray-700 print:text-base">
                   to our charitable trust on{" "}
-                  <span className="border-b-2 border-gray-300 px-2 inline-block min-w-[150px]">26/06/2025</span>
+                  <span className="border-b-2 border-gray-300 px-2 inline-block min-w-[150px]">{formatToLocalDate(data.donations.createdAt)}</span>
                 </p>
               </div>
 
@@ -71,11 +155,11 @@ export default function DonationCertificate({ data }: { data: any }) {
             <div className="flex justify-between items-end flex-shrink-0 mt-6">
               <div className="text-left">
                 <p className="text-base text-gray-600 mb-3 print:text-sm">
-                  Date: <span className="border-b-2 border-gray-400 px-2 inline-block min-w-[120px]">12/10/2005</span>
+                  Date: <span className="border-b-2 border-gray-400 px-2 inline-block min-w-[120px]">{getCurrentDateTime()}</span>
                 </p>
                 <p className="text-base text-gray-600 print:text-sm">
                   Receipt No:{" "}
-                  <span className="border-b-2 border-gray-400 px-2 inline-block min-w-[120px]">DNN20250610</span>
+                  <span className="border-b-2 border-gray-400 px-2 inline-block min-w-[120px]">DNN{createUniqueCode(data.donations.createdAt,data.donations.amount,data.donations.name)}</span>
                 </p>
               </div>
 
@@ -140,7 +224,7 @@ export default function DonationCertificate({ data }: { data: any }) {
                     <div className="text-xs text-gray-600 text-center print:text-[10px]">
                       QR Code
                       <br />
-                      DNN20250610
+                      DNN{createUniqueCode(data.donations.createdAt,data.donations.amount,data.donations.name)}
                     </div>
                   </div>
                 </div>
