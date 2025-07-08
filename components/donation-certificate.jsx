@@ -1,9 +1,13 @@
 "use client"
 
 import { Award } from "lucide-react"
+
 import { useEffect } from "react"
 
 export default function DonationCertificate({ data }) {
+
+
+  
 
 // Simple number to words function for demonstration (supports up to 9999)
 function NumberToWords(num) {
@@ -209,9 +213,7 @@ function createUniqueCode(
                   {/* QR Code placeholder */}
                   <div className="w-32 h-32 print:w-24 print:h-24 bg-white border-4 border-orange-300 flex items-center justify-center rounded-lg">
                     <div className="text-xs text-gray-600 text-center print:text-[10px]">
-                      QR Code
-                      <br />
-                      DNN{createUniqueCode(data.donations.createdAt,data.donations.amount,data.donations.name)}
+                      <div dangerouslySetInnerHTML={{ __html: data.qrcode }} />
                     </div>
                   </div>
                 </div>

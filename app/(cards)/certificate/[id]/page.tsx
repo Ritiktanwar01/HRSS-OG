@@ -2,11 +2,14 @@
 import DonationCertificate from '@/components/donation-certificate'
 import { useParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
+import QRCode from "qrcode";
 
 
 
 const page = () => {
    const {id} = useParams()
+   const [svgCode, setSvgCode] = useState('');
+
 
    const [info,setinfo]= useState({})
    const [isDonation,setIsdonation] = useState(false)
@@ -16,6 +19,10 @@ const page = () => {
     const data = await req.json()
     
     if (data.donations.paymentStatus == "success"){
+      await QRCode.toString('https://hrssindia.org/certificate?id=12345', { type: 'svg' })
+      .then((svg: string) => setSvgCode(svg))
+      .catch((err: Error) => console.error(err));
+      data.qrcode = svgCode
       setinfo(data)
       setIsdonation(true)
     }
