@@ -189,7 +189,7 @@ function createUniqueCode(
                 <h3 className="text-xl font-bold text-orange-700 mb-4 print:text-lg">Trust Information</h3>
                 <div className="space-y-2 text-base print:text-sm">
                   <p className="text-gray-700">
-                    <strong className="text-orange-600">Registration No:</strong> HRSS/2024/001
+                    <strong className="text-orange-600">Registration No:</strong> HRSS 4247
                   </p>
                   <p className="text-gray-700">
                     <strong className="text-orange-600">Website:</strong> www.hrssindia.org
@@ -198,7 +198,7 @@ function createUniqueCode(
                     <strong className="text-orange-600">Address:</strong> Hodal, Haryana
                   </p>
                   <p className="text-gray-700">
-                    <strong className="text-orange-600">Contact:</strong> 9053436854
+                    <strong className="text-orange-600">Contact:</strong> 9034692324
                   </p>
                   <p className="text-gray-700">
                     <strong className="text-orange-600">Email:</strong> info@hrssindia.org
