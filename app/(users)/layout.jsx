@@ -107,9 +107,11 @@ export const metadata = {
   ],
   authors: [
     {
-      name: "Laptech Solutions",
-      url: "https://laptech.solutions"
+      name: "Leaftech Solutions",
+      url: "https://leaftech.solutions"
 }],
+icons: {
+    icon: "/favicon.ico",},
 
 }
 
