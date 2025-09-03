@@ -1,34 +1,9 @@
-"use client"
-
-import { useState, useEffect } from "react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Heart, Users, Landmark, School } from "lucide-react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import Image from "next/image"
 export default function Home() {
-  const [aboutData, setAboutData] = useState({
-    mission: "",
-  })
-  const [isLoading, setIsLoading] = useState(true)
-
-  useEffect(() => {
-    const fetchAboutData = async () => {
-      try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/about/public`)
-        if (response.ok) {
-          const data = await response.json()
-          setAboutData(data)
-        }
-      } catch (error) {
-        console.error("Error fetching about data:", error)
-      } finally {
-        setIsLoading(false)
-      }
-    }
-
-    fetchAboutData()
-  }, [])
 
   return (
     <div className="flex flex-col">
