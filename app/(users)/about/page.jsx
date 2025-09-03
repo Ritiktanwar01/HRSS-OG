@@ -5,22 +5,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Clock, MapPin, Users } from "lucide-react"
 import Image from "next/image"
 
-export default function AboutPage() {
-  const [aboutData, setAboutData] = useState({
-    story: "",
-    mission: "",
-    vision: "",
-  })
-  const [teamMembers, setTeamMembers] = useState([])
-  const [isLoading, setIsLoading] = useState(true)
-
-  useEffect(() => {
-    const fetchAboutData = async () => {
+const fetchAboutData = async () => {
       try {
         const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/about/public`)
         if (response.ok) {
           const data = await response.json()
-          setAboutData(data.sort((a, b) => a.order - b.order))
+         const sorted_data = data.sort((a, b) => a.order - b.order)
+         return sorted_data
         }
       } catch (error) {
         console.error("Error fetching about data:", error)
@@ -32,26 +23,17 @@ export default function AboutPage() {
         const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/team-members/public`)
         if (response.ok) {
           const data = await response.json()
-          setTeamMembers(data)
+         return data
         }
       } catch (error) {
         console.error("Error fetching team members:", error)
-      } finally {
-        setIsLoading(false)
       }
     }
 
-    fetchAboutData()
-    fetchTeamMembers()
-  }, [])
+export default async function AboutPage() {
+  const aboutData = await fetchAboutData()
+  const teamMembers = await fetchTeamMembers()
 
-  if (isLoading) {
-    return (
-      <div className="container mx-auto px-4 py-12 flex justify-center">
-        <div>Loading...</div>
-      </div>
-    )
-  }
 
   return (
     <div className="container mx-auto px-4 py-12">
