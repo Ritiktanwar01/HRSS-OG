@@ -1,0 +1,255 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>User Details</title>
+  <style>
+    :root{
+      --primary:#2563eb; /* brand */
+      --white:#ffffff;   /* neutral */
+      --text:#111827;    /* neutral */
+      --border:#e5e7eb;  /* neutral */
+      --accent:#10b981;  /* accent */
+    }
+    *{box-sizing:border-box}
+    html,body{margin:0;padding:0;background:var(--white);color:var(--text);font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Ubuntu,"Helvetica Neue",Arial;}
+    a{color:inherit;text-decoration:none}
+    .layout{min-height:100dvh;display:grid;grid-template-columns:260px 1fr}
+    .sidebar{border-right:1px solid var(--border);padding:18px;display:flex;flex-direction:column;gap:12px}
+    .brand{display:flex;align-items:center;gap:10px;font-weight:800}
+    .brand .dot{width:12px;height:12px;background:var(--primary);border-radius:50%}
+    nav{display:flex;flex-direction:column;gap:4px;margin-top:12px}
+    .nav-link{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px}
+    .nav-link.active,.nav-link:hover{background:rgba(37,99,235,0.08)}
+    .logout{margin-top:auto}
+    .btn{display:inline-flex;align-items:center;justify-content:center;padding:10px 12px;border-radius:8px;border:1px solid var(--border);background:var(--white);cursor:pointer;font-weight:600}
+    .btn.primary{background:var(--primary);border-color:var(--primary);color:#fff}
+    .btn.danger{border-color:#ef4444;color:#ef4444;background:var(--white)}
+    header{display:flex;align-items:center;justify-content:space-between;padding:16px;border-bottom:1px solid var(--border)}
+    .menu-btn{display:none}
+    main{padding:16px}
+    .card{border:1px solid var(--border);border-radius:12px;background:var(--white);padding:16px}
+    .grid{display:grid;grid-template-columns:1fr;gap:16px}
+    label{font-size:14px}
+    input[type="text"],input[type="email"],input[type="number"]{width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:8px;font-size:16px}
+    .states{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+    .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+    .table{width:100%;border-collapse:collapse;margin-top:10px}
+    .table th,.table td{padding:10px;border-bottom:1px solid var(--border);text-align:left}
+    .muted{opacity:.85}
+    @media (min-width:900px){
+      .grid{grid-template-columns:1fr 1fr}
+    }
+    @media (max-width:799px){
+      .layout{grid-template-columns:1fr}
+      .sidebar{position:fixed;inset:0 auto 0 0;width:78%;max-width:320px;background:var(--white);transform:translateX(-101%);transition:transform .2s ease;z-index:40}
+      .sidebar.open{transform:none}
+      header .menu-btn{display:inline-flex}
+      header{position:sticky;top:0;background:var(--white);z-index:30}
+      main{padding-bottom:48px}
+    }
+  </style>
+</head>
+<body data-page="user-detail">
+  <div class="layout">
+    <aside id="sidebar" class="sidebar" aria-label="Sidebar">
+      <div class="brand"><span class="dot" aria-hidden="true"></span> Admin</div>
+      <nav>
+        <a class="nav-link" href="dashboard.html">Dashboard</a>
+        <a class="nav-link" href="users.html">Users</a>
+      </nav>
+      <div class="logout">
+        <button class="btn" id="logout-btn" aria-label="Log out">Log out</button>
+      </div>
+    </aside>
+
+    <div class="content">
+      <header>
+        <button id="menu-btn" class="btn menu-btn" aria-label="Toggle menu">☰</button>
+        <div class="row">
+          <a class="btn" href="users.html" aria-label="Back to users">← Back</a>
+          <strong id="user-title">User</strong>
+        </div>
+        <div></div>
+      </header>
+
+      <main>
+        <section class="grid">
+          <div class="card" aria-label="User info">
+            <h3 style="margin-top:0">User Info</h3>
+            <div class="row">
+              <div style="flex:1;min-width:220px">
+                <label for="name">Name</label>
+                <input id="name" type="text" />
+              </div>
+              <div style="flex:1;min-width:220px">
+                <label for="email">Email</label>
+                <input id="email" type="email" />
+              </div>
+            </div>
+            <div style="margin-top:12px">
+              <label>Assign States</label>
+              <div id="state-list" class="states" role="group" aria-label="States"></div>
+            </div>
+            <div class="row" style="margin-top:12px">
+              <button class="btn primary" id="save">Save Changes</button>
+              <button class="btn danger" id="delete">Delete User</button>
+            </div>
+          </div>
+
+          <div class="card" aria-label="Statewise revenue">
+            <h3 style="margin-top:0">Revenue by State</h3>
+            <p class="muted">Edit revenue for each assigned state.</p>
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>State</th>
+                  <th>Revenue (USD)</th>
+                </tr>
+              </thead>
+              <tbody id="revenue-rows">
+                 rows 
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Total</th>
+                  <th id="revenue-total">$0</th>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <script>
+    // Auth guard
+    if(localStorage.getItem("authed")!=="true"){ window.location.href = "index.html"; }
+
+    // Sidebar toggle + logout
+    const menuBtn = document.getElementById("menu-btn");
+    const sidebar = document.getElementById("sidebar");
+    menuBtn?.addEventListener("click", ()=> sidebar.classList.toggle("open"));
+    document.getElementById("logout-btn").addEventListener("click", ()=>{
+      localStorage.removeItem("authed");
+      window.location.href = "index.html";
+    });
+
+    function getParam(name){
+      const url = new URL(window.location.href);
+      return url.searchParams.get(name);
+    }
+    function getUsers(){ return JSON.parse(localStorage.getItem("users")||"[]"); }
+    function saveUsers(u){ localStorage.setItem("users", JSON.stringify(u)); }
+    function getStates(){ return JSON.parse(localStorage.getItem("states")||"[]"); }
+    function formatMoney(n){ return "$" + (n||0).toLocaleString(); }
+
+    const userId = getParam("id");
+   
+
+    function getUser(){
+      return getUsers().find(u=>u.id===userId);
+    }
+
+    function renderStatesChecklist(selected){
+      const c = document.getElementById("state-list");
+      c.innerHTML = "";
+      getStates().forEach(st=>{
+        const id = "st-" + st.replace(/\s+/g,'-').toLowerCase();
+        const wrap = document.createElement("label");
+        wrap.style.display="flex"; wrap.style.alignItems="center"; wrap.style.gap="8px";
+        const checked = selected.includes(st) ? "checked" : "";
+        wrap.innerHTML = `<input type="checkbox" value="${st}" id="${id}" ${checked}/> ${st}`;
+        c.appendChild(wrap);
+      });
+    }
+
+    function renderRevenueRows(user){
+      const tbody = document.getElementById("revenue-rows");
+      tbody.innerHTML = "";
+      let total = 0;
+      (user.states || []).forEach(st=>{
+        const val = Number(user.revenue?.[st] || 0);
+        total += val;
+        const id = "rev-" + st.replace(/\s+/g,'-').toLowerCase();
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${st}</td>
+          <td><input type="number" id="${id}" min="0" step="100" value="${val}" style="max-width:220px"/></td>
+        `;
+        tbody.appendChild(tr);
+      });
+      document.getElementById("revenue-total").textContent = formatMoney(total);
+    }
+
+    function updateTotalFromInputs(){
+      let total = 0;
+      document.querySelectorAll("#revenue-rows input[type='number']").forEach(inp=>{
+        total += Number(inp.value || 0);
+      });
+      document.getElementById("revenue-total").textContent = formatMoney(total);
+    }
+
+    
+
+    // Re-render revenue table when states change
+    document.getElementById("state-list").addEventListener("change", ()=>{
+      const user = getUser();
+      const selected = Array.from(document.querySelectorAll("#state-list input[type='checkbox']:checked")).map(i=>i.value);
+      user.states = selected;
+      // keep existing revenue values
+      saveUsers(getUsers().map(u=> u.id===user.id ? user : u));
+      renderRevenueRows(user);
+    });
+
+    // Update total when numbers change
+    document.getElementById("revenue-rows").addEventListener("input", (e)=>{
+      if(e.target.matches("input[type='number']")){
+        updateTotalFromInputs();
+      }
+    });
+
+    // Save
+    document.getElementById("save").addEventListener("click", ()=>{
+      let users = getUsers();
+      const idx = users.findIndex(u=>u.id===userId);
+      if(idx===-1){ alert("User not found"); return; }
+      const name = document.getElementById("name").value.trim();
+      const email = document.getElementById("email").value.trim();
+      const states = Array.from(document.querySelectorAll("#state-list input[type='checkbox']:checked")).map(i=>i.value);
+      const revenueInputs = Array.from(document.querySelectorAll("#revenue-rows input[type='number']"));
+      const revenue = {};
+      revenueInputs.forEach(inp=>{
+        const st = inp.id.replace(/^rev-/,'').replace(/-/g,' ');
+        // reconstruct the proper state label (we kept label in the row first cell)
+      });
+      // better: read row pairs
+      document.querySelectorAll("#revenue-rows tr").forEach(tr=>{
+        const st = tr.children[0].textContent;
+        const val = Number(tr.querySelector('input').value || 0);
+        revenue[st] = val;
+      });
+      if(!name || !email){ alert("Please fill name and email."); return; }
+      users[idx] = { ...users[idx], name, email, states, revenue };
+      saveUsers(users);
+      alert("Saved!");
+      load(); // refresh UI
+    });
+
+    // Delete
+    document.getElementById("delete").addEventListener("click", ()=>{
+      const users = getUsers();
+      const user = users.find(u=>u.id===userId);
+      if(user && confirm(`Delete user "${user.name}"? This cannot be undone.`)){
+        const rest = users.filter(u=>u.id!==userId);
+        saveUsers(rest);
+        window.location.href = "users.html";
+      }
+    });
+
+    load();
+  </script>
+</body>
+</html>

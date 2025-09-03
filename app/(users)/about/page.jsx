@@ -10,8 +10,7 @@ const fetchAboutData = async () => {
         const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/about/public`)
         if (response.ok) {
           const data = await response.json()
-         const sorted_data = data.sort((a, b) => a.order - b.order)
-         return sorted_data
+         return data
         }
       } catch (error) {
         console.error("Error fetching about data:", error)
