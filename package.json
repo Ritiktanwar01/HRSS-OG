@@ -52,7 +52,7 @@
     "lucide-react": "^0.454.0",
     "morgan": "latest",
     "multer": "latest",
-    "next": "15.2.4",
+    "next": "15.2.8",
     "next-themes": "latest",
     "react": "^18.3.1",
     "react-day-picker": "latest",
