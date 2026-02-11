@@ -24,10 +24,8 @@ const contactFormSchema = z.object({
 export default function ContactPage() {
   const [contactInfo, setContactInfo] = useState({
     address: "",
-    phone1: "",
-    phone2: "",
-    email1: "",
-    email2: "",
+    phone: "",
+    email: "",
     officeHours: "",
   })
   const [offices, setOffices] = useState([])
@@ -47,10 +45,11 @@ export default function ContactPage() {
   useEffect(() => {
     const fetchContactInfo = async () => {
       try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/contact/public`)
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/trust/contact`)
         if (response.ok) {
           const data = await response.json()
-          setContactInfo(data)
+        
+          setContactInfo(data[0])
         }
       } catch (error) {
         console.error("Error fetching contact info:", error)
@@ -59,7 +58,7 @@ export default function ContactPage() {
 
     const fetchOffices = async () => {
       try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/offices/public`)
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/trust/offices`)
         if (response.ok) {
           const data = await response.json()
           setOffices(data)
@@ -78,7 +77,7 @@ export default function ContactPage() {
   async function onSubmit(data) {
     setIsSubmitting(true)
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/inquiries`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/trust/inquiries/`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -93,6 +92,7 @@ export default function ContactPage() {
         })
         form.reset()
       } else {
+        console.log(response)
         throw new Error("Failed to send message")
       }
     } catch (error) {
@@ -143,13 +143,7 @@ export default function ContactPage() {
                 <div>
                   <h3 className="font-medium text-gray-900">Phone</h3>
                   <p className="text-gray-600">
-                    {contactInfo.phone1}
-                    {contactInfo.phone2 && (
-                      <>
-                        <br />
-                        {contactInfo.phone2}
-                      </>
-                    )}
+                    {contactInfo.phone}
                   </p>
                 </div>
               </div>
@@ -159,13 +153,7 @@ export default function ContactPage() {
                 <div>
                   <h3 className="font-medium text-gray-900">Email</h3>
                   <p className="text-gray-600">
-                    {contactInfo.email1}
-                    {contactInfo.email2 && (
-                      <>
-                        <br />
-                        {contactInfo.email2}
-                      </>
-                    )}
+                    {contactInfo.email}
                   </p>
                 </div>
               </div>

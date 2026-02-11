@@ -8,85 +8,59 @@ import { useAuth } from "@/hooks/use-auth"
 
 export default function AdminDashboardPage() {
   const [stats, setStats] = useState({
-    donations: { value: "₹0", change: "0%" },
-    visitors: { value: "0", change: "0%" },
-    inquiries: { value: "0", change: "0%" },
-    galleryItems: { value: "0", change: "0%" },
-  })
-  const [recentActivities, setRecentActivities] = useState([])
-  const [upcomingEvents, setUpcomingEvents] = useState([])
-  const [isLoading, setIsLoading] = useState(true)
-  const { getAuthToken,user } = useAuth()
+  donations: { value: "₹0", change: "0%" },
+  visitors: { value: "0", change: "0%" },
+  inquiries: { value: "0", change: "0%" },
+  galleryItems: { value: "0", change: "0%" },
+})
+const [recentActivities, setRecentActivities] = useState([])
+const [upcomingEvents, setUpcomingEvents] = useState([])
+const [isLoading, setIsLoading] = useState(true)
+const { user } = useAuth()   // no need for getAuthToken anymore
 
-  useEffect(() => {
-    const fetchDashboardData = async () => {
-      try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/dashboard`, {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+useEffect(() => {
+  const fetchDashboardData = async () => {
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/dashboard/`, {
+        method: "GET",
+        credentials: "include",   // send session cookies
+      })
+
+      if (response.ok) {
+        const data = await response.json()
+        setStats({
+          donations: {
+            value: `₹${data.stats.totalDonations.toLocaleString()}`,
+            change: `${data.stats.donationChange}%`,
+          },
+          visitors: {
+            value: data.stats.websiteVisitors.toLocaleString(),
+            change: `${data.stats.visitorChange}%`,
+          },
+          inquiries: {
+            value: data.stats.contactInquiries.toString(),
+            change: `${data.stats.inquiryChange}%`,
+          },
+          galleryItems: {
+            value: data.stats.galleryItems.toString(),
+            change: `${data.stats.galleryChange}%`,
           },
         })
-
-        if (response.ok) {
-          const data = await response.json()
-          setStats({
-            donations: {
-              value: `₹${data.stats.totalDonations.toLocaleString()}`,
-              change: `${data.stats.donationChange}%`,
-            },
-            visitors: {
-              value: data.stats.websiteVisitors.toLocaleString(),
-              change: `${data.stats.visitorChange}%`,
-            },
-            inquiries: {
-              value: data.stats.contactInquiries.toString(),
-              change: `${data.stats.inquiryChange}%`,
-            },
-            galleryItems: {
-              value: data.stats.galleryItems.toString(),
-              change: `${data.stats.galleryChange}%`,
-            },
-          })
-          setRecentActivities(data.recentActivities)
-          setUpcomingEvents(data.upcomingEvents)
-        }
-      } catch (error) {
-        console.error("Error fetching dashboard data:", error)
-      } finally {
-        setIsLoading(false)
+        setRecentActivities(data.recentActivities)
+        setUpcomingEvents(data.upcomingEvents)
+      } else {
+        console.error("Failed to fetch dashboard data")
       }
+    } catch (error) {
+      console.error("Error fetching dashboard data:", error)
+    } finally {
+      setIsLoading(false)
     }
+  }
 
-    fetchDashboardData()
-  }, [getAuthToken])
+  fetchDashboardData()
+}, [user])   // re-run when user changes (login/logout)
 
-  // Format stats for display
-  const statsData = [
-    {
-      title: "Total Donations",
-      value: stats.donations.value,
-      change: stats.donations.change,
-      icon: <DollarSign className="h-5 w-5 text-bhagva-600" />,
-    },
-    {
-      title: "Website Visitors",
-      value: stats.visitors.value,
-      change: stats.visitors.change,
-      icon: <Users className="h-5 w-5 text-bhagva-600" />,
-    },
-    {
-      title: "Contact Inquiries",
-      value: stats.inquiries.value,
-      change: stats.inquiries.change,
-      icon: <Mail className="h-5 w-5 text-bhagva-600" />,
-    },
-    {
-      title: "Gallery Items",
-      value: stats.galleryItems.value,
-      change: stats.galleryItems.change,
-      icon: <ImageIcon className="h-5 w-5 text-bhagva-600" />,
-    },
-  ]
 
   return (
     <div className="space-y-4 sm:space-y-6">

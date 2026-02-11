@@ -6,22 +6,20 @@ import { useEffect, useState } from "react"
 const Footer = () => {
   const fetchData = async () => {
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/contact/public`)
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/trust/contact`)
       if (!response.ok) {
         throw new Error("Network response was not ok")
       }
       const data = await response.json()
-      return data
+      return data[0]
     } catch (error) {
       console.error("Error fetching footer data:", error)
     }
   }
   const [footerData, setFooterData] = useState({
     address: "",
-    phone1: "",
-    phone2: "",
-    email1: "",
-    email2: "",
+    phone: "",
+    email: "",
     officeHours: "",
   })
   useEffect(() => {
@@ -106,11 +104,11 @@ const Footer = () => {
               </li>
               <li className="flex items-center">
                 <Phone className="h-5 w-5 text-bhagva-500 mr-2" />
-                <span className="text-gray-400">{footerData.phone1}</span>
+                <span className="text-gray-400">{footerData.phone}</span>
               </li>
               <li className="flex items-center">
                 <Mail className="h-5 w-5 text-bhagva-500 mr-2" />
-                <span className="text-gray-400">{footerData.email1}</span>
+                <span className="text-gray-400">{footerData.email}</span>
               </li>
             </ul>
           </div>

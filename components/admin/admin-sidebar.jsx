@@ -55,26 +55,36 @@ export default function AdminSidebar({ isOpen, onLinkClick }) {
       href: "/admin/dashboard",
       icon: <BarChart3 className="h-5 w-5" />,
     },
-    // {
-    //   name: "Members",
-    //   href: "/admin/members",
-    //   icon: <Users className="h-5 w-5" />,
-    // },
-    // {
-    //   name: "Designations",
-    //   href: "/admin/designations",
-    //   icon: <Award className="h-5 w-5" />,
-    // },
+    {
+      name: "Members",
+      href: "/admin/members",
+      icon: <Users className="h-5 w-5" />,
+    },
+    {
+      name: "Designations",
+      href: "/admin/designations",
+      icon: <Award className="h-5 w-5" />,
+    },
     {
       name: "About",
       href: "/admin/about",
       icon: <Info className="h-5 w-5" />,
     },
-    // {
-    //   name: "Certificates",
-    //   href: "/admin/certificates",
-    //   icon: <FileText className="h-5 w-5" />,
-    // },
+    {
+      name: "Certificates",
+      href: "/admin/certificates",
+      icon: <FileText className="h-5 w-5" />,
+    },
+    {
+      name: "Memberships",
+      href: "/admin/memberships",
+      icon: <Users className="h-5 w-5" />,
+    },
+    {
+      name: "Public Notices",
+      href: "/admin/notices",
+      icon: <FileText className="h-5 w-5" />,
+    },
     {
       name: "Contact",
       href: "/admin/contact",
@@ -147,8 +157,8 @@ export default function AdminSidebar({ isOpen, onLinkClick }) {
           {/* Footer */}
           <div className="border-t p-4">
             <Link
-              href="#"
-              onClick={() => {localStorage.clear(); window.location.href = "/admin/login"}}
+              href="/admin/login"
+              onClick={handleLinkClick}
               className="flex w-full items-center justify-center rounded-md bg-red-100 px-3 py-2 text-sm font-medium text-red-700 hover:bg-red-200 transition-colors"
             >
               <LogOut className="mr-2 h-5 w-5" />

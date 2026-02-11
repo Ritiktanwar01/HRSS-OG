@@ -4,10 +4,10 @@ import Image from "next/image"
 
 const fetchAboutData = async () => {
       try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/about/public`)
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/trust/about`)
         if (response.ok) {
           const data = await response.json()
-         return data
+         return data[0]
         }
       } catch (error) {
         console.error("Error fetching about data:", error)
@@ -16,9 +16,10 @@ const fetchAboutData = async () => {
 
     const fetchTeamMembers = async () => {
       try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/team-members/public`)
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/users/profiles`)
         if (response.ok) {
           const data = await response.json()
+          console.log(data)
          return data
         }
       } catch (error) {

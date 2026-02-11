@@ -10,54 +10,55 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true)
   const router = useRouter()
 
-  // Check if user is logged in on initial load
-  const checkAuth = async () => {
-      try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/me`, {
-          credentials: "include",
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("access_token")}`,
-          },
-          method: "GET",
-        })
-        if (response.ok) {
-          const userData = await response.json()
-          setUser(userData)
-        } else {
-          const NewToken =  await refreshToken()
-          return NewToken
-
-        }
-      } catch (error) {
-        const NewToken =  await refreshToken()
-        console.log("Login:",NewToken )
-      } finally {
-        setLoading(false)
-      }
+  // Helper: get CSRF token from cookies
+  const getCsrfToken = () => {
+    if (typeof document !== "undefined") {
+      const match = document.cookie.match(/csrftoken=([^;]+)/)
+      return match ? match[1] : null
     }
+    return null
+  }
+
+  // Check if user is logged in
+  const checkAuth = async () => {
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/me/`, {
+        method: "GET",
+        credentials: "include",
+      })
+      if (response.ok) {
+        const userData = await response.json()
+        setUser(userData)
+      } else {
+        setUser(null)
+      }
+    } catch (error) {
+      console.error("Auth check error:", error)
+      setUser(null)
+    } finally {
+      setLoading(false)
+    }
+  }
+
   useEffect(() => {
     checkAuth()
   }, [])
 
-  // Login function
-  const Login = async (email, password, role) => {
+  // Login
+  const Login = async (email, password) => {
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/login`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/login/`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          "X-CSRFToken": getCsrfToken(),
         },
-        body: JSON.stringify({ email, password, role }),
+        body: JSON.stringify({ email, password }),
         credentials: "include",
       })
 
       if (response.ok) {
-        const userData = await response.json()
-        console.log("User data:", userData)
-        localStorage.clear()
-        localStorage.setItem("access_token", userData.user.access_token)
-        localStorage.setItem("refresh_token", userData.user.refresh_token)
-        setUser(userData.user)
+        await checkAuth()
         return { success: true }
       } else {
         const error = await response.json()
@@ -69,11 +70,14 @@ export function AuthProvider({ children }) {
     }
   }
 
-  // Logout function
+  // Logout
   const Logout = async () => {
     try {
-      await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/logout`, {
+      await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/logout/`, {
         method: "POST",
+        headers: {
+          "X-CSRFToken": getCsrfToken(),
+        },
         credentials: "include",
       })
       setUser(null)
@@ -83,57 +87,12 @@ export function AuthProvider({ children }) {
     }
   }
 
-  // Get auth token from cookies (client-side only)
-  const getAuthToken = () => {
-    if (typeof window !== "undefined") {
-      const cookies = document.cookie.split(";")
-      const tokenCookie = cookies.find((cookie) => cookie.trim().startsWith("access_token="))
-      if (tokenCookie) {
-        return tokenCookie.split("=")[1]
-      }
-    }
-    return null
-  }
-
-  // Refresh token function
-  const refreshToken = async () => {
-    try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/refresh-token`, {
-        method: "POST",
-        credentials: "include",
-         headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("refresh_token")}`,
-        },
-      })
-
-      if (response.ok) {
-        localStorage.clear()
-        const userData = await response.json()
-        localStorage.setItem("access_token", userData.tokens.access_token)
-        localStorage.setItem("refresh_token", userData.tokens.refresh_token);
-        checkAuth()
-        return true
-      } else {
-        setUser(null)
-        router.push("/admin/login")
-        return false
-      }
-    } catch (error) {
-      console.error("Token refresh error:", error)
-      setUser(null)
-      router.push("/admin/login")
-      return false
-    }
-  }
-
   const value = {
     user,
     loading,
     Login,
     Logout,
-    getAuthToken,
-    refreshToken,
+    checkAuth,
   }
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

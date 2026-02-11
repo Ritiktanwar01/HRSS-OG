@@ -27,6 +27,7 @@ const Navbar = () => {
     { name: "About", href: "/about" },
     { name: "Gallery", href: "/gallery" },
     { name: "Contact", href: "/contact" },
+    { name: "Public Notices", href: "/public-notices" },
   ]
 
   return (
@@ -61,6 +62,9 @@ const Navbar = () => {
             </Link>
           ))}
           <Button asChild size="sm" className="ml-2 bg-bhagva-700 hover:bg-bhagva-800">
+            <Link href="/join-us">Join Us</Link>
+          </Button>
+          <Button asChild size="sm" className="ml-2 bg-bhagva-600 hover:bg-bhagva-700">
             <Link href="/donate">Donate Now</Link>
           </Button>
         </nav>
@@ -75,7 +79,7 @@ const Navbar = () => {
               </Button>
             </SheetTrigger>
             <SheetContent side="right" className="w-[250px] sm:w-[300px]">
-              <DialogTitle>{""}</DialogTitle>
+              <DialogTitle>SideBar</DialogTitle>
               {/* Add an accessible title for the dialog */}
               <h2 className="sr-only">Navigation Menu</h2> {/* Screen-reader-only title */}
               <div className="flex flex-col mt-6 space-y-2">
@@ -93,7 +97,10 @@ const Navbar = () => {
                     {item.name}
                   </Link>
                 ))}
-                <Button asChild className="mt-4 bg-bhagva-700 hover:bg-bhagva-800">
+                <Button asChild className="mt-4 bg-bhagva-700 hover:bg-bhagva-800 w-full">
+                  <Link href="/join-us">Join Us</Link>
+                </Button>
+                <Button asChild className="mt-2 bg-bhagva-600 hover:bg-bhagva-700 w-full">
                   <Link href="/donate">Donate Now</Link>
                 </Button>
               </div>

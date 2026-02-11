@@ -12,7 +12,6 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Textarea } from "@/components/ui/textarea"
 import { toast } from "@/components/ui/use-toast"
 import { Heart, CheckCircle2 } from "lucide-react"
-import { userInfo } from "os"
 
 const donationFormSchema = z.object({
   name: z.string().min(2, { message: "Name must be at least 2 characters." }),
@@ -21,7 +20,7 @@ const donationFormSchema = z.object({
   amount: z.string().refine((val) => !isNaN(Number(val)) && Number(val) > 0, {
     message: "Please enter a valid amount.",
   }),
-  donationType: z.enum(["oneTime", "monthly"]),
+  donationType: z.enum(["ONE_TIME", "monthly"]),
   message: z.string().optional(),
 })
 
@@ -37,7 +36,7 @@ export default function DonatePage() {
       email: "",
       phone: "",
       amount: "",
-      donationType: "oneTime",
+      donationType: "ONE_TIME",
       message: "",
     },
   })
@@ -50,45 +49,53 @@ export default function DonatePage() {
   }
 
   async function onSubmit(data) {
-    setIsSubmitting(true)
-    try {
-      const UserInfo = data
-      console.log("User Info:", UserInfo)
-      const request = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/donations/`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ data: UserInfo }),
-      })
-      if (!request.ok) {
-        throw new Error("Network response was not ok")
-      } else {
-        const response = await request.json()
-        if (!response.success) {
-          throw new Error("Failed to process donation")
-        } else {
-          setIsSuccess(true)
-          window.location.href = `${response.data.paymentUrl}`
-          toast({
-            title: "Donation Successful",
-            description: "Thank you for your generous contribution!",
-          })
-        }
-      }
-
-
-    } catch (error) {
-      console.error("Error processing donation:", error)
-      toast({
-        title: "Error",
-        description: "Failed to process your donation. Please try again.",
-        variant: "destructive",
-      })
-    } finally {
-      setIsSubmitting(false)
+  setIsSubmitting(true)
+  try {
+    const UserInfo = {
+      name: data.name,
+      email: data.email,
+      phone: data.phone,
+      amount: Number(data.amount),
+      donation_type: data.donationType.toUpperCase(), // normalize
+      message: data.message,
     }
+
+    console.log("User Info:", UserInfo)
+
+    const request = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/payments/payments/initiate/`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(UserInfo),
+    })
+
+    if (!request.ok) {
+      console.log(request)
+      throw new Error("Network response was not ok")
+    }
+
+    const response = await request.json()
+    if (!response.success) throw new Error("Failed to process donation")
+
+    setIsSuccess(true)
+    window.location.href = `${response.data.paymentUrl}`
+    toast({
+      title: "Donation Successful",
+      description: "Thank you for your generous contribution!",
+    })
+  } catch (error) {
+    console.error("Error processing donation:", error)
+    toast({
+      title: "Error",
+      description: "Failed to process your donation. Please try again.",
+      variant: "destructive",
+    })
+  } finally {
+    setIsSubmitting(false)
   }
+}
+
 
   return (
     <div className="container mx-auto px-4 py-12">
@@ -229,7 +236,7 @@ export default function DonatePage() {
                               >
                                 <FormItem className="flex items-center space-x-2 space-y-0">
                                   <FormControl>
-                                    <RadioGroupItem value="oneTime" />
+                                    <RadioGroupItem value="ONE_TIME" />
                                   </FormControl>
                                   <FormLabel className="font-normal">One-time</FormLabel>
                                 </FormItem>
