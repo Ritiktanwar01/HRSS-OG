@@ -61,6 +61,34 @@ useEffect(() => {
   fetchDashboardData()
 }, [user])   // re-run when user changes (login/logout)
 
+const statsData = [
+    {
+      title: "Total Donations",
+      value: stats.donations.value,
+      change: stats.donations.change,
+      icon: <DollarSign className="h-5 w-5 text-bhagva-600" />,
+    },
+    {
+      title: "Website Visitors",
+      value: stats.visitors.value,
+      change: stats.visitors.change,
+      icon: <Users className="h-5 w-5 text-bhagva-600" />,
+    },
+    {
+      title: "Contact Inquiries",
+      value: stats.inquiries.value,
+      change: stats.inquiries.change,
+      icon: <Mail className="h-5 w-5 text-bhagva-600" />,
+    },
+    {
+      title: "Gallery Items",
+      value: stats.galleryItems.value,
+      change: stats.galleryItems.change,
+      icon: <ImageIcon className="h-5 w-5 text-bhagva-600" />,
+    },
+  ]
+
+
 
   return (
     <div className="space-y-4 sm:space-y-6">

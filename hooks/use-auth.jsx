@@ -47,7 +47,7 @@ export function AuthProvider({ children }) {
   // Login
   const Login = async (email, password) => {
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/login/`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/users/auth/login/`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -62,6 +62,7 @@ export function AuthProvider({ children }) {
         return { success: true }
       } else {
         const error = await response.json()
+        console.log({ success: false, message: error.message })
         return { success: false, message: error.message }
       }
     } catch (error) {
