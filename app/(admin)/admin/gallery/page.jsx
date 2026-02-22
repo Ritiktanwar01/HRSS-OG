@@ -589,7 +589,7 @@ export default function AdminGalleryPage() {
                             type="button"
                             variant="outline"
                             className="w-full relative z-0"
-                            disabled={isUploading}
+                            // disabled={isUploading}
                           >
                             <Upload className="mr-2 h-4 w-4" />
                             Upload Thumbnail
