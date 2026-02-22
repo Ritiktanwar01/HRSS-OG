@@ -22,7 +22,7 @@ export function AuthProvider({ children }) {
   // Check if user is logged in
   const checkAuth = async () => {
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/me/`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/users/auth/me/`, {
         method: "GET",
         credentials: "include",
       })
