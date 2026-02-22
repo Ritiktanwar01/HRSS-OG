@@ -47,7 +47,7 @@ export default function AdminGalleryPage() {
         //   throw new Error("Authentication failed")
         // }
 
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/gallery`, {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/trust/galleryitem/`, {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("access_token")}`,
             "Content-Type": "application/json",
