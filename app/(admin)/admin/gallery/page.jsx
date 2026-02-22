@@ -27,7 +27,6 @@ export default function AdminGalleryPage() {
   const [isAddingItem, setIsAddingItem] = useState(false)
   const [editingItem, setEditingItem] = useState(null)
   const [isLoading, setIsLoading] = useState(false)
-  const [isUploading, setIsUploading] = useState(false)
   const { getAuthToken } = useAuth()
 
   const [newItem, setNewItem] = useState({
@@ -35,8 +34,11 @@ export default function AdminGalleryPage() {
     description: "",
     category: "events",
     type: "image",
-    url: "",
-    thumbnail: "",
+    url: "",              // existing media URL (when editing)
+    thumbnail: "",        // existing thumbnail URL for video
+    imageFile: null,        // new file objects
+    videoFile: null,
+    thumbnailFile: null,
   })
 
   useEffect(() => {
@@ -82,9 +84,37 @@ export default function AdminGalleryPage() {
       description: "",
       category: "events",
       type: activeTab === "images" ? "image" : "video",
-      url: "",
-      thumbnail: activeTab === "videos" ? "/placeholder.svg?height=300&width=400" : "",
+      url: "",              // existing media URL (when editing)
+      thumbnail: activeTab === "videos" ? "/placeholder.svg?height=300&width=400" : "",        // existing thumbnail URL for video
+      imageFile: null,        // new file objects
+      videoFile: null,
+      thumbnailFile: null,
     })
+  }
+
+  const backendToFrontendCategory = (cat) => {
+    if (!cat) return "events"
+    switch (cat.toLowerCase()) {
+      case "event":
+      case "event & celebration":
+      case "events":
+      case "event":
+        return "events"
+      case "service":
+      case "serviceproject":
+      case "serviceprojects":
+        return "serviceProjects"
+      case "volunteer":
+      case "volunteers":
+        return "volunteers"
+      case "event":
+      default:
+        // if uppercase code like EVENT/SERVICE/VOLUNTEER
+        if (cat === "EVENT") return "events"
+        if (cat === "SERVICE") return "serviceProjects"
+        if (cat === "VOLUNTEER") return "volunteers"
+        return "events"
+    }
   }
 
   const handleEditItem = (item) => {
@@ -93,10 +123,13 @@ export default function AdminGalleryPage() {
     setNewItem({
       title: item.title,
       description: item.description,
-      category: item.category,
+      category: backendToFrontendCategory(item.gallery_type || item.category),
       type: item.type,
       url: item.url,
       thumbnail: item.thumbnail || "",
+      imageFile: null,
+      videoFile: null,
+      thumbnailFile: null,
     })
   }
 
@@ -107,7 +140,7 @@ export default function AdminGalleryPage() {
       //   throw new Error("Authentication failed")
       // }
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/trust/gallery/${id}`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/trust/galleryitem/${id}/`, {
         method: "DELETE",
         headers: {
           Authorization: `Bearer ${localStorage.getItem("access_token")}`,
@@ -144,55 +177,28 @@ export default function AdminGalleryPage() {
     }
   }
 
-  const handleUploadFile = async (e, fileType) => {
+  const handleUploadFile = (e, fileType) => {
     const file = e.target.files[0]
     if (!file) return
 
-    setIsUploading(true)
-    const formData = new FormData()
-    formData.append("file", file)
-    formData.append("type", fileType)
-
-    try {
-      // const token = await getAuthToken()
-      // if (!token) {
-      //   throw new Error("Authentication failed")
-      // }
-
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/trust/upload/`, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("access_token")}`,
-        },
-        body: formData,
+    if (fileType === "image") {
+      setNewItem({
+        ...newItem,
+        imageFile: file,
+        url: URL.createObjectURL(file),
       })
-
-      if (response.ok) {
-        const data = await response.json()
-        if (fileType === "image") {
-          setNewItem({ ...newItem, url: data.url })
-        } else if (fileType === "thumbnail") {
-          setNewItem({ ...newItem, thumbnail: data.url })
-        } else if (fileType === "video") {
-          setNewItem({ ...newItem, url: data.url })
-        }
-
-        toast({
-          title: "Upload Successful",
-          description: "File has been uploaded successfully.",
-        })
-      } else {
-        throw new Error("Failed to upload file")
-      }
-    } catch (error) {
-      console.error("Error uploading file:", error)
-      toast({
-        title: "Upload Failed",
-        description: "Failed to upload file. Please try again.",
-        variant: "destructive",
+    } else if (fileType === "video") {
+      setNewItem({
+        ...newItem,
+        videoFile: file,
+        url: URL.createObjectURL(file),
       })
-    } finally {
-      setIsUploading(false)
+    } else if (fileType === "thumbnail") {
+      setNewItem({
+        ...newItem,
+        thumbnailFile: file,
+        thumbnail: URL.createObjectURL(file),
+      })
     }
   }
 
@@ -201,34 +207,44 @@ export default function AdminGalleryPage() {
     setIsLoading(true)
 
     try {
-      // const token = await getAuthToken()
-      // if (!token) {
-      //   throw new Error("Authentication failed")
-      // }
+      const form = new FormData()
+      form.append("title", newItem.title)
+      form.append("description", newItem.description)
+      form.append("gallery_type", newItem.category)
+      form.append("type", newItem.type)
+
+      if (newItem.type === "image") {
+        if (newItem.imageFile) {
+          form.append("image_file", newItem.imageFile)
+        } else if (newItem.url) {
+          form.append("url", newItem.url)
+        }
+      } else {
+        // video
+        if (newItem.videoFile) {
+          form.append("video_file", newItem.videoFile)
+        }
+        if (newItem.thumbnailFile) {
+          form.append("thumbnail_file", newItem.thumbnailFile)
+        } else if (newItem.thumbnail) {
+          form.append("thumbnail", newItem.thumbnail)
+        }
+        if (newItem.url) {
+          form.append("url", newItem.url)
+        }
+      }
 
       let response
-
-      if (editingItem) {
-        // Update existing item
-        response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/trust/gallery/${editingItem._id}`, {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${localStorage.getItem("access_token")}`,
-          },
-          body: JSON.stringify(newItem),
-        })
-      } else {
-        // Add new item
-        response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/trust/gallery`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${localStorage.getItem("access_token")}`,
-          },
-          body: JSON.stringify(newItem),
-        })
-      }
+      const endpoint = `${process.env.NEXT_PUBLIC_API_URL}/api/trust/galleryitem/${
+        editingItem ? editingItem._id + "/" : ""
+      }`
+      response = await fetch(endpoint, {
+        method: editingItem ? "PUT" : "POST",
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+        },
+        body: form,
+      })
 
       if (response.ok) {
         const result = await response.json()
@@ -396,17 +412,17 @@ export default function AdminGalleryPage() {
                             accept="image/*"
                             id="image-upload"
                             onChange={(e) => handleUploadFile(e, "image")}
-                            disabled={isUploading}
+                            disabled={false}
                             className="absolute inset-0 opacity-0 cursor-pointer z-10 w-full h-full"
                           />
                           <Button
                             type="button"
                             variant="outline"
                             className="w-full relative z-0"
-                            disabled={isUploading}
+                            disabled={false}
                           >
                             <Upload className="mr-2 h-4 w-4" />
-                            {isUploading ? "Uploading..." : "Upload Image"}
+                            Upload Image
                           </Button>
                         </div>
                       </div>
@@ -529,12 +545,12 @@ export default function AdminGalleryPage() {
                           accept="video/*"
                           id="video-upload"
                           onChange={(e) => handleUploadFile(e, "video")}
-                          disabled={isUploading}
+                          disabled={false}
                           className="absolute inset-0 opacity-0 cursor-pointer z-10 w-full h-full"
                         />
-                        <Button type="button" variant="outline" className="w-full relative z-0" disabled={isUploading}>
+                        <Button type="button" variant="outline" className="w-full relative z-0" disabled={false}>
                           <Upload className="mr-2 h-4 w-4" />
-                          {isUploading ? "Uploading..." : "Upload Video"}
+                          Upload Video
                         </Button>
                       </div>
                     </div>
@@ -566,7 +582,7 @@ export default function AdminGalleryPage() {
                             accept="image/*"
                             id="thumbnail-upload"
                             onChange={(e) => handleUploadFile(e, "thumbnail")}
-                            disabled={isUploading}
+                            disabled={false}
                             className="absolute inset-0 opacity-0 cursor-pointer z-10 w-full h-full"
                           />
                           <Button
@@ -576,7 +592,7 @@ export default function AdminGalleryPage() {
                             disabled={isUploading}
                           >
                             <Upload className="mr-2 h-4 w-4" />
-                            {isUploading ? "Uploading..." : "Upload Thumbnail"}
+                            Upload Thumbnail
                           </Button>
                         </div>
                       </div>
