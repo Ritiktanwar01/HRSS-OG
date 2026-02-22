@@ -112,13 +112,13 @@ export default function GalleryPage() {
                     <CardContent className="p-0">
                       <div className="relative">
                         <img
-                          src={item.type === "image" ? item.url : item.thumbnail || item.url}
+                          src={item.media_type === "image" ? item.url : item.thumbnail || item.url}
                           alt={item.title}
                           className="w-full h-48 object-cover"
                           width={400}
                           height={300}
                         />
-                        {item.type === "video" && (
+                        {item.media_type === "video" && (
                           <div className="absolute inset-0 flex items-center justify-center">
                             <div className="h-12 w-12 rounded-full bg-black/50 flex items-center justify-center">
                               <svg
