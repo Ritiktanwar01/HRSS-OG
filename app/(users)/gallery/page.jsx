@@ -32,7 +32,6 @@ export default function GalleryPage() {
             serviceProjects: data.filter((item) => item.gallery_type === "SERVICE"),
             volunteers: data.filter((item) => item.gallery_type === "VOLUNTEER"),
           }
-console.log(categorizedData)
           setGalleryData(categorizedData)
         }
       } catch (error) {
@@ -156,7 +155,7 @@ console.log(categorizedData)
               {selectedItem.type === "image" ? (
                 <div className="relative">
                   <img
-                    src={selectedItem.url || "/placeholder.svg"}
+                    src={selectedItem.image || "/placeholder.svg"}
                     alt={selectedItem.title}
                     className="w-full max-h-[80vh] object-contain bg-black"
                   />
