@@ -105,14 +105,14 @@ export default function GalleryPage() {
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 {items.map((item) => (
                   <Card
-                    key={item._id}
+                    key={item.id}
                     className="overflow-hidden cursor-pointer hover:shadow-lg transition-shadow"
                     onClick={() => handleItemClick(item)}
                   >
                     <CardContent className="p-0">
                       <div className="relative">
                         <img
-                          src={item.media_type === "image" ? item.url : item.thumbnail || item.url}
+                          src={item.media_type === "image" ? item.image : item.image || item.image}
                           alt={item.title}
                           className="w-full h-48 object-cover"
                           width={400}
