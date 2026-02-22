@@ -107,7 +107,7 @@ export default function AdminGalleryPage() {
       //   throw new Error("Authentication failed")
       // }
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/gallery/${id}`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/trust/gallery/${id}`, {
         method: "DELETE",
         headers: {
           Authorization: `Bearer ${localStorage.getItem("access_token")}`,
@@ -159,7 +159,7 @@ export default function AdminGalleryPage() {
       //   throw new Error("Authentication failed")
       // }
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api//upload`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/trust/upload`, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${localStorage.getItem("access_token")}`,
@@ -210,7 +210,7 @@ export default function AdminGalleryPage() {
 
       if (editingItem) {
         // Update existing item
-        response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/gallery/${editingItem._id}`, {
+        response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/trust/gallery/${editingItem._id}`, {
           method: "PUT",
           headers: {
             "Content-Type": "application/json",
@@ -220,7 +220,7 @@ export default function AdminGalleryPage() {
         })
       } else {
         // Add new item
-        response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/gallery`, {
+        response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/trust/gallery`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
