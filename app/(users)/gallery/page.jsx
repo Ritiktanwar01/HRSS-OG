@@ -21,7 +21,7 @@ export default function GalleryPage() {
   useEffect(() => {
     const fetchGalleryItems = async () => {
       try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/gallery/public`)
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/trust/galleryitems/`)
         if (response.ok) {
           const data = await response.json()
 
