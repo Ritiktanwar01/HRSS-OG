@@ -25,13 +25,14 @@ export default function GalleryPage() {
         if (response.ok) {
           const data = await response.json()
 
+          
           // Organize data by category
           const categorizedData = {
-            events: data.filter((item) => item.category === "events"),
-            serviceProjects: data.filter((item) => item.category === "serviceProjects"),
-            volunteers: data.filter((item) => item.category === "volunteers"),
+            events: data.filter((item) => item.gallery_type === "EVENT"),
+            serviceProjects: data.filter((item) => item.gallery_type === "SERVICE"),
+            volunteers: data.filter((item) => item.gallery_type === "VOLUNTEER"),
           }
-
+console.log(categorizedData)
           setGalleryData(categorizedData)
         }
       } catch (error) {

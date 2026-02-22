@@ -131,7 +131,7 @@ export default function PublicNoticesPage() {
                     >
                       View Details
                     </Button>
-                    {notice.fileUrl && (
+                    {notice.file_url && (
                       <Button
                         onClick={() => handleDownload(notice)}
                         variant="outline"

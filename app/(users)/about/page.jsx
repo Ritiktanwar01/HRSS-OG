@@ -19,7 +19,6 @@ const fetchAboutData = async () => {
         const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/users/profiles`)
         if (response.ok) {
           const data = await response.json()
-          console.log(data)
          return data
         }
       } catch (error) {
@@ -88,11 +87,11 @@ export default async function AboutPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             {teamMembers.map((member) => (
               <div
-                key={member._id} id={member._id}
+                key={member.id} id={member.id}
                 className="flex bg-white p-4 rounded-lg shadow-sm hover:shadow-md transition-shadow"
               >
                 <img
-                  src={member.photo || "/placeholder.svg?height=100&width=100"}
+                  src={member.profile_pic || "/placeholder.svg?height=100&width=100"}
                   alt={member.name}
                   className="w-24 h-24 rounded-full mr-4 object-cover border-2 border-bhagva-100"
                   width={100}
@@ -100,7 +99,7 @@ export default async function AboutPage() {
                 />
                 <div>
                   <h3 className="text-xl font-semibold text-bhagva-700">{member.name}</h3>
-                  <p className="text-gray-500 mb-2">{member.position}</p>
+                  <p className="text-gray-500 mb-2">{member.designation.title}</p>
                   <p className="text-gray-700 text-sm">{member.bio}</p>
                 </div>
               </div>
