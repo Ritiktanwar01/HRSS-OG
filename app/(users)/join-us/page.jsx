@@ -48,12 +48,21 @@ export default function JoinUsPage() {
   const onSubmit = async (data) => {
     setIsSubmitting(true)
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/memberships`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/users/membership-applications/`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(data),
+        body: JSON.stringify({
+          full_name: data.fullName,
+          father_or_spouse_name: data.fatherOrSpouseName,
+          address: data.address,
+          mobile: data.mobile,
+          email: data.email,
+          date_of_birth: data.dateOfBirth,
+          fee_paid: false,
+          status: "pending",
+        }),
       })
 
       if (!response.ok) {

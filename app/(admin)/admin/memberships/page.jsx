@@ -15,28 +15,35 @@ export default function MembershipsPage() {
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState("")
   const [statusFilter, setStatusFilter] = useState("all")
+  const [sortAsc, setSortAsc] = useState(true) // sort by status
   const [selectedMembership, setSelectedMembership] = useState(null)
+  const [isRejectDialogOpen, setIsRejectDialogOpen] = useState(false)
+  const [rejectRemark, setRejectRemark] = useState("")
   const [stats, setStats] = useState(null)
 
   useEffect(() => {
+    // load once at startup
     fetchMemberships()
-    fetchStats()
-  }, [statusFilter])
+    // fetchStats()
+  }, [])
 
   const fetchMemberships = async () => {
     try {
-      const status = statusFilter !== "all" ? `&status=${statusFilter}` : ""
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/memberships?search=${searchTerm}${status}`,
+        `${process.env.NEXT_PUBLIC_API_URL}/api/users/membership-applications/list/`,
         {
+          method: "GET",
+          credentials: "include",
           headers: {
-            Authorization: `Bearer ${localStorage.getItem("adminToken")}`,
+            // Authorization: `Bearer ${localStorage.getItem("adminToken")}`,
           },
         }
       )
       if (!response.ok) throw new Error("Failed to fetch")
       const data = await response.json()
-      setMemberships(data.memberships)
+    console.log("Fetched memberships:", data)
+      setMemberships(data)
+      setLoading(false) // ensure loading false after fetch
     } catch (error) {
       console.error("Error:", error)
       toast({
@@ -49,46 +56,70 @@ export default function MembershipsPage() {
     }
   }
 
-  const fetchStats = async () => {
+  // const fetchStats = async () => {
+  //   try {
+  //     const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/memberships/stats/overview`, {
+  //       headers: {
+  //         Authorization: `Bearer ${localStorage.getItem("adminToken")}`,
+  //       },
+  //     })
+  //     if (!response.ok) throw new Error("Failed to fetch stats")
+  //     const data = await response.json()
+  //     setStats(data)
+  //   } catch (error) {
+  //     console.error("Error:", error)
+  //   }
+  // }
+
+  // Accept an application
+  const handleAccept = async (id) => {
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/memberships/stats/overview`, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("adminToken")}`,
-        },
-      })
-      if (!response.ok) throw new Error("Failed to fetch stats")
-      const data = await response.json()
-      setStats(data)
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/users/membership-applications/${id}/`,
+        {
+          method: "PUT",
+          credentials: "include",
+          headers: {"Content-Type": "application/json"},
+          body: JSON.stringify({status: "accepted"}),
+        }
+      )
+      if (!response.ok) throw new Error("Failed to accept")
+      toast({title: "Success", description: "Application accepted"})
+      fetchMemberships()
+      setSelectedMembership(null)
     } catch (error) {
-      console.error("Error:", error)
+      toast({title: "Error", description: "Unable to accept", variant: "destructive"})
     }
   }
 
-  const handleDelete = async (id) => {
-    if (!confirm("Are you sure you want to delete this membership?")) return
+  // Reject an application (opens confirmation)
+  const initiateReject = (membership) => {
+    setSelectedMembership(membership)
+    setIsRejectDialogOpen(true)
+  }
 
+  const handleReject = async () => {
+    if (!selectedMembership) return
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/memberships/${id}`, {
-        method: "DELETE",
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("adminToken")}`,
-        },
-      })
-
-      if (!response.ok) throw new Error("Failed to delete")
-
-      toast({
-        title: "Success",
-        description: "Membership deleted successfully",
-      })
-
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/users/membership-applications/${selectedMembership.id}/`,
+        {
+          method: "PUT",
+          credentials: "include",
+          headers: {"Content-Type": "application/json"},
+          body: JSON.stringify({status: "rejected", remark: rejectRemark}),
+        }
+      )
+      if (!response.ok) throw new Error("Failed to reject")
+      toast({title: "Success", description: "Application rejected"})
       fetchMemberships()
+      setSelectedMembership(null)
     } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to delete membership",
-        variant: "destructive",
-      })
+      toast({title: "Error", description: "Unable to reject", variant: "destructive"})
+    } finally {
+      setIsRejectDialogOpen(false)
+      setSelectedMembership(null)
+      setRejectRemark("")
     }
   }
 
@@ -110,6 +141,27 @@ export default function MembershipsPage() {
       </div>
     )
   }
+
+  // compute filtered + sorted list
+  const filteredMemberships = memberships
+    .filter((m) => {
+      if (statusFilter !== "all" && m.status !== statusFilter) return false
+      if (searchTerm) {
+        const term = searchTerm.toLowerCase()
+        if (
+          !m.full_name.toLowerCase().includes(term) &&
+          !m.email.toLowerCase().includes(term) &&
+          !m.mobile.toLowerCase().includes(term)
+        )
+          return false
+      }
+      return true
+    })
+    .sort((a, b) => {
+      if (a.status < b.status) return sortAsc ? -1 : 1
+      if (a.status > b.status) return sortAsc ? 1 : -1
+      return new Date(b.created_at) - new Date(a.created_at)
+    })
 
   return (
     <div className="space-y-6">
@@ -174,23 +226,27 @@ export default function MembershipsPage() {
                 placeholder="Search by name, email, or mobile..."
                 value={searchTerm}
                 onChange={(e) => {
-                  setSearchTerm(e.target.value)
-                  fetchMemberships()
+                          setSearchTerm(e.target.value)
                 }}
                 className="pl-10"
               />
             </div>
-            <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="w-full md:w-48">
-                <SelectValue placeholder="Filter by status" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Statuses</SelectItem>
-                <SelectItem value="pending">Pending</SelectItem>
-                <SelectItem value="approved">Approved</SelectItem>
-                <SelectItem value="rejected">Rejected</SelectItem>
-              </SelectContent>
-            </Select>
+            <div className="flex items-center gap-2">
+              <Select value={statusFilter} onValueChange={setStatusFilter}>
+                <SelectTrigger className="w-full md:w-48">
+                  <SelectValue placeholder="Filter by status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Statuses</SelectItem>
+                  <SelectItem value="pending">Pending</SelectItem>
+                  <SelectItem value="accepted">Accepted</SelectItem>
+                  <SelectItem value="rejected">Rejected</SelectItem>
+                </SelectContent>
+              </Select>
+              <Button size="sm" variant="outline" onClick={() => setSortAsc((s) => !s)}>
+                Sort: {sortAsc ? "Asc" : "Desc"}
+              </Button>
+            </div>
           </div>
         </CardContent>
       </Card>
@@ -212,9 +268,9 @@ export default function MembershipsPage() {
                 </tr>
               </thead>
               <tbody>
-                {memberships.map((membership) => (
-                  <tr key={membership._id} className="border-b border-gray-100 hover:bg-gray-50">
-                    <td className="py-3 px-4">{membership.fullName}</td>
+                {filteredMemberships.map((membership) => (
+                  <tr key={membership.id} className="border-b border-gray-100 hover:bg-gray-50">
+                    <td className="py-3 px-4">{membership.full_name}</td>
                     <td className="py-3 px-4 text-blue-600">{membership.email}</td>
                     <td className="py-3 px-4">{membership.mobile}</td>
                     <td className="py-3 px-4">
@@ -223,11 +279,11 @@ export default function MembershipsPage() {
                       </span>
                     </td>
                     <td className="py-3 px-4">
-                      <span className={`px-3 py-1 rounded-full text-xs font-semibold ${membership.feePaid ? "bg-green-100 text-green-800" : "bg-gray-100 text-gray-800"}`}>
-                        {membership.feePaid ? "Yes" : "No"}
+                      <span className={`px-3 py-1 rounded-full text-xs font-semibold ${membership.fee_paid ? "bg-green-100 text-green-800" : "bg-gray-100 text-gray-800"}`}>
+                        {membership.fee_paid ? "Yes" : "No"}
                       </span>
                     </td>
-                    <td className="py-3 px-4 text-gray-600">{formatDate(membership.createdAt)}</td>
+                    <td className="py-3 px-4 text-gray-600">{formatDate(membership.created_at)}</td>
                     <td className="py-3 px-4 flex gap-2">
                       <Button
                         size="sm"
@@ -237,18 +293,21 @@ export default function MembershipsPage() {
                       >
                         <Eye className="h-4 w-4" />
                       </Button>
-                      <Button asChild size="sm" variant="outline" className="text-bhagva-700 border-bhagva-200 bg-transparent">
-                        <Link href={`/admin/memberships/edit/${membership._id}`}>
-                          <Edit2 className="h-4 w-4" />
-                        </Link>
+                      <Button
+                        size="sm"
+                        variant="solid"
+                        onClick={() => handleAccept(membership.id)}
+                        className="bg-green-100 text-green-700"
+                      >
+                        Accept
                       </Button>
                       <Button
                         size="sm"
                         variant="outline"
-                        onClick={() => handleDelete(membership._id)}
+                        onClick={() => initiateReject(membership)}
                         className="text-red-600 border-red-200"
                       >
-                        <Trash2 className="h-4 w-4" />
+                        Reject
                       </Button>
                     </td>
                   </tr>
@@ -261,13 +320,13 @@ export default function MembershipsPage() {
 
       {/* Mobile Card View */}
       <div className="lg:hidden space-y-4">
-        {memberships.map((membership) => (
-          <Card key={membership._id} className="border-bhagva-200">
+        {filteredMemberships.map((membership) => (
+          <Card key={membership.id} className="border-bhagva-200">
             <CardContent className="pt-6">
               <div className="grid grid-cols-2 gap-4 mb-4">
                 <div>
                   <p className="text-sm text-gray-600">Name</p>
-                  <p className="font-semibold text-gray-900">{membership.fullName}</p>
+                  <p className="font-semibold text-gray-900">{membership.full_name}</p>
                 </div>
                 <div>
                   <p className="text-sm text-gray-600">Status</p>
@@ -284,10 +343,10 @@ export default function MembershipsPage() {
                   <span className="text-gray-600">Mobile:</span> {membership.mobile}
                 </p>
                 <p>
-                  <span className="text-gray-600">Fee Paid:</span> {membership.feePaid ? "Yes" : "No"}
+                  <span className="text-gray-600">Fee Paid:</span> {membership.fee_paid ? "Yes" : "No"}
                 </p>
                 <p>
-                  <span className="text-gray-600">Date:</span> {formatDate(membership.createdAt)}
+                  <span className="text-gray-600">Date:</span> {formatDate(membership.created_at)}
                 </p>
               </div>
               <div className="flex gap-2">
@@ -298,8 +357,20 @@ export default function MembershipsPage() {
                 >
                   View
                 </Button>
-                <Button asChild size="sm" variant="outline" className="flex-1 bg-transparent">
-                  <Link href={`/admin/memberships/edit/${membership._id}`}>Edit</Link>
+                <Button
+                  size="sm"
+                  className="flex-1 bg-green-100 text-green-700"
+                  onClick={() => handleAccept(membership.id)}
+                >
+                  Accept
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="flex-1 text-red-600 border-red-200"
+                  onClick={() => initiateReject(membership)}
+                >
+                  Reject
                 </Button>
               </div>
             </CardContent>
@@ -313,7 +384,7 @@ export default function MembershipsPage() {
           {selectedMembership && (
             <>
               <DialogHeader>
-                <DialogTitle>{selectedMembership.fullName}</DialogTitle>
+                <DialogTitle>{selectedMembership.full_name}</DialogTitle>
                 <DialogDescription>Membership Application Details</DialogDescription>
               </DialogHeader>
 
@@ -321,15 +392,15 @@ export default function MembershipsPage() {
                 <div className="grid md:grid-cols-2 gap-6">
                   <div>
                     <p className="text-sm text-gray-600">Full Name</p>
-                    <p className="font-semibold text-gray-900">{selectedMembership.fullName}</p>
+                    <p className="font-semibold text-gray-900">{selectedMembership.full_name}</p>
                   </div>
                   <div>
                     <p className="text-sm text-gray-600">Father/Spouse Name</p>
-                    <p className="font-semibold text-gray-900">{selectedMembership.fatherOrSpouseName}</p>
+                    <p className="font-semibold text-gray-900">{selectedMembership.father_or_spouse_name}</p>
                   </div>
                   <div>
                     <p className="text-sm text-gray-600">Date of Birth</p>
-                    <p className="font-semibold text-gray-900">{formatDate(selectedMembership.dateOfBirth)}</p>
+                    <p className="font-semibold text-gray-900">{formatDate(selectedMembership.date_of_birth)}</p>
                   </div>
                   <div>
                     <p className="text-sm text-gray-600">Mobile</p>
@@ -355,33 +426,47 @@ export default function MembershipsPage() {
                 <div className="grid md:grid-cols-3 gap-4">
                   <div className="bg-blue-50 p-4 rounded-lg">
                     <p className="text-sm text-gray-600">Registration Fee</p>
-                    <p className="text-2xl font-bold text-blue-600">₹{selectedMembership.registrationFeeAmount}</p>
+                    {/* registration fee not stored in model */}
+                    <p className="text-2xl font-bold text-blue-600">₹{selectedMembership.registration_fee_amount || "N/A"}</p>
                   </div>
                   <div className="bg-green-50 p-4 rounded-lg">
                     <p className="text-sm text-gray-600">Fee Status</p>
-                    <p className={`text-lg font-bold ${selectedMembership.feePaid ? "text-green-600" : "text-orange-600"}`}>
-                      {selectedMembership.feePaid ? "Paid" : "Pending"}
+                    <p className={`text-lg font-bold ${selectedMembership.fee_paid ? "text-green-600" : "text-orange-600"}`}>
+                      {selectedMembership.fee_paid ? "Paid" : "Pending"}
                     </p>
                   </div>
                   <div className="bg-purple-50 p-4 rounded-lg">
                     <p className="text-sm text-gray-600">Application Date</p>
-                    <p className="text-lg font-bold text-purple-600">{formatDate(selectedMembership.createdAt)}</p>
+                    <p className="text-lg font-bold text-purple-600">{formatDate(selectedMembership.created_at)}</p>
                   </div>
                 </div>
+                {selectedMembership.remark && (
+                  <div className="mt-4">
+                    <p className="text-sm text-gray-600">Remark</p>
+                    <p className="font-semibold text-gray-900 whitespace-pre-wrap">{selectedMembership.remark}</p>
+                  </div>
+                )}
 
                 <div className="flex gap-2 pt-4">
-                  <Button asChild className="flex-1 bg-bhagva-700 hover:bg-bhagva-800">
-                    <Link href={`/admin/memberships/edit/${selectedMembership._id}`}>Edit Application</Link>
+                  <Button
+                    size="sm"                    className="flex-1 bg-bhagva-700 hover:bg-bhagva-800"
+                    onClick={() => window.location.href = `/admin/memberships/edit/${selectedMembership.id}`}
+                  >
+                    Edit
                   </Button>
                   <Button
-                    onClick={() => {
-                      handleDelete(selectedMembership._id)
-                      setSelectedMembership(null)
-                    }}
-                    variant="destructive"
-                    className="flex-1"
+                    size="sm"                    className="flex-1 bg-green-100 text-green-700"
+                    onClick={() => handleAccept(selectedMembership.id)}
                   >
-                    Delete
+                    Accept
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="flex-1 text-red-600 border-red-200"
+                    onClick={() => initiateReject(selectedMembership)}
+                  >
+                    Reject
                   </Button>
                 </div>
               </div>
@@ -390,7 +475,38 @@ export default function MembershipsPage() {
         </DialogContent>
       </Dialog>
 
-      {memberships.length === 0 && (
+      {/* Reject confirmation dialog */}
+      <Dialog open={isRejectDialogOpen} onOpenChange={setIsRejectDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Confirm Rejection</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to reject this application?
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <p className="text-sm font-medium">Rejection remark (sent to applicant)</p>
+              <textarea
+                className="w-full border rounded px-2 py-1"
+                rows={3}
+                value={rejectRemark}
+                onChange={(e) => setRejectRemark(e.target.value)}
+              />
+            </div>
+            <div className="flex gap-2 justify-end pt-4">
+              <Button variant="outline" onClick={() => setIsRejectDialogOpen(false)}>
+                Cancel
+              </Button>
+              <Button variant="destructive" onClick={handleReject}>
+                Reject
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {filteredMemberships.length === 0 && (
         <Card className="border-gray-200">
           <CardContent className="py-12 text-center">
             <Users className="h-12 w-12 text-gray-300 mx-auto mb-4" />

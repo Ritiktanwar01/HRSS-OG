@@ -10,6 +10,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Search, MoreVertical, UserCog, Mail, UserX } from "lucide-react"
+import { getCookie } from "@/hooks/api"
 
 export default function MembersPage() {
   const [members, setMembers] = useState([])
@@ -19,6 +20,14 @@ export default function MembersPage() {
   const [isAssignDialogOpen, setIsAssignDialogOpen] = useState(false)
   const [currentMember, setCurrentMember] = useState(null)
   const [selectedDesignation, setSelectedDesignation] = useState("")
+
+  // message dialog state
+  const [isMessageDialogOpen, setIsMessageDialogOpen] = useState(false)
+  const [messageSubject, setMessageSubject] = useState("")
+  const [messageBody, setMessageBody] = useState("")
+
+  // delete confirmation state
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
   const { getAuthToken } = useAuth()
 
   // Fetch members and designations
@@ -26,19 +35,18 @@ export default function MembersPage() {
     const fetchData = async () => {
       try {
         setLoading(true)
-       
+
 
         // Fetch members
-        const membersResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/users/members`, {
-        method: "GET",
-        credentials: "include",
-      })
+        const membersResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/users/profiles`, {
+          method: "GET",
+          credentials: "include",
+        })
 
         // Fetch designations
         const designationsResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/users/designations`, {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("access_token")}`,
-          },
+          method: "GET",
+          credentials: "include",
         })
 
         if (membersResponse.ok && designationsResponse.ok) {
@@ -72,33 +80,60 @@ export default function MembersPage() {
   // Open assign designation dialog
   const openAssignDialog = (member) => {
     setCurrentMember(member)
-    setSelectedDesignation(member.designation || "")
+    setSelectedDesignation(member.designation?.title || "")
     setIsAssignDialogOpen(true)
+  }
+
+  // Open send message dialog
+  const openMessageDialog = (member) => {
+    setCurrentMember(member)
+    setMessageSubject("")
+    setMessageBody("")
+    setIsMessageDialogOpen(true)
+  }
+
+  // Open delete confirmation
+  const openDeleteDialog = (member) => {
+    setCurrentMember(member)
+    setIsDeleteDialogOpen(true)
   }
 
   // Handle assign designation
   const handleAssignDesignation = async () => {
     try {
-      const token = getAuthToken()
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/designations/assign`, {
+      // determine designation id from selected title (designations array)
+      const designationObj = designations.find((d) => d.title === selectedDesignation)
+      const designationId = designationObj ? designationObj.id : null
+
+      if (!designationId) {
+        console.error("No matching designation id found")
+        return
+      }
+
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/users/designations/assign/`, {
         method: "POST",
+        credentials: "include",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+          "X-CSRFToken": getCookie("csrftoken"),
         },
         body: JSON.stringify({
-          userId: currentMember._id,
-          designationName: selectedDesignation,
+          profileId: currentMember.id,
+          designationId,
         }),
       })
 
       if (response.ok) {
-        // Update member in state
+
         setMembers(
           members.map((member) =>
-            member._id === currentMember._id ? { ...member, designation: selectedDesignation } : member,
-          ),
-        )
+            member.id === currentMember.id
+              ? { ...member, designation: designationObj } 
+              : member
+          )
+        );
+
+
 
         setIsAssignDialogOpen(false)
         setCurrentMember(null)
@@ -106,6 +141,58 @@ export default function MembersPage() {
       }
     } catch (error) {
       console.error("Error assigning designation:", error)
+    }
+  }
+
+  // Handle send message
+  const handleSendMessage = async () => {
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/users/members/${currentMember?.id}/message/`,
+        {
+          method: "POST",
+          credentials: "include",
+          headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": getCookie("csrftoken"),
+          },
+          body: JSON.stringify({
+            subject: messageSubject,
+            message: messageBody,
+          }),
+        },
+      )
+      if (response.ok) {
+        setIsMessageDialogOpen(false)
+        setCurrentMember(null)
+        setMessageSubject("")
+        setMessageBody("")
+      }
+    } catch (error) {
+      console.error("Error sending message:", error)
+    }
+  }
+
+  // Handle delete member
+  const handleDeleteMember = async () => {
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/users/members/${currentMember?.id}/delete/`,
+        {
+          method: "DELETE",
+          credentials: "include",
+          headers: {
+            "X-CSRFToken": getCookie("csrftoken"),
+          },
+        },
+      )
+      if (response.ok) {
+        setMembers(members.filter((m) => m.id !== currentMember?.id))
+        setIsDeleteDialogOpen(false)
+        setCurrentMember(null)
+      }
+    } catch (error) {
+      console.error("Error deleting member:", error)
     }
   }
 
@@ -150,11 +237,11 @@ export default function MembersPage() {
             </TableHeader>
             <TableBody>
               {filteredMembers.map((member) => (
-                <TableRow key={member._id}>
+                <TableRow key={member.id}>
                   <TableCell>
                     <div className="flex items-center">
                       <Avatar className="h-8 w-8 mr-2">
-                        <AvatarImage src={member.profilePicture || "/placeholder.svg"} />
+                        <AvatarImage src={member.profile_pic || "/placeholder.svg"} />
                         <AvatarFallback>{member.name.substring(0, 2).toUpperCase()}</AvatarFallback>
                       </Avatar>
                       <span className="font-medium">{member.name}</span>
@@ -162,13 +249,9 @@ export default function MembersPage() {
                   </TableCell>
                   <TableCell>{member.email}</TableCell>
                   <TableCell>
-                    {member.designation ? (
-                      <span className="bg-muted px-2 py-1 rounded-full text-xs">{member.designation}</span>
-                    ) : (
-                      <span className="text-muted-foreground">None</span>
-                    )}
+                    {member.designation.title}
                   </TableCell>
-                  <TableCell>{new Date(member.createdAt).toLocaleDateString()}</TableCell>
+                  <TableCell>{member.joining_date}</TableCell>
                   <TableCell>
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
@@ -182,11 +265,11 @@ export default function MembersPage() {
                           <UserCog className="mr-2 h-4 w-4" />
                           Assign Designation
                         </DropdownMenuItem>
-                        <DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => openMessageDialog(member)}>
                           <Mail className="mr-2 h-4 w-4" />
                           Send Message
                         </DropdownMenuItem>
-                        <DropdownMenuItem className="text-destructive">
+                        <DropdownMenuItem className="text-destructive" onClick={() => openDeleteDialog(member)}>
                           <UserX className="mr-2 h-4 w-4" />
                           Remove Member
                         </DropdownMenuItem>
@@ -201,6 +284,59 @@ export default function MembersPage() {
       </div>
 
       {/* Assign Designation Dialog */}
+
+      {/* Send Message Dialog */}
+      <Dialog open={isMessageDialogOpen} onOpenChange={setIsMessageDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Send Message</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <p className="text-sm font-medium mb-2">Subject</p>
+              <Input
+                value={messageSubject}
+                onChange={(e) => setMessageSubject(e.target.value)}
+              />
+            </div>
+            <div>
+              <p className="text-sm font-medium mb-2">Message</p>
+              <textarea
+                className="w-full border rounded px-2 py-1"
+                rows={4}
+                value={messageBody}
+                onChange={(e) => setMessageBody(e.target.value)}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button type="button" variant="outline" onClick={() => setIsMessageDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button type="button" onClick={handleSendMessage}>
+              Send
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Confirm Removal</DialogTitle>
+          </DialogHeader>
+          <p>Are you sure you want to remove {currentMember?.name}?</p>
+          <DialogFooter>
+            <Button type="button" variant="outline" onClick={() => setIsDeleteDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button type="button" className="text-destructive" onClick={handleDeleteMember}>
+              Remove
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
       <Dialog open={isAssignDialogOpen} onOpenChange={setIsAssignDialogOpen}>
         <DialogContent>
           <DialogHeader>
@@ -211,7 +347,7 @@ export default function MembersPage() {
               <p className="text-sm font-medium mb-2">Member</p>
               <div className="flex items-center">
                 <Avatar className="h-8 w-8 mr-2">
-                  <AvatarImage src={currentMember?.profilePicture || "/placeholder.svg"} />
+                  <AvatarImage src={currentMember?.profile_pic || "/placeholder.svg"} />
                   <AvatarFallback>{currentMember?.name.substring(0, 2).toUpperCase()}</AvatarFallback>
                 </Avatar>
                 <div>
@@ -230,8 +366,8 @@ export default function MembersPage() {
                 <SelectContent>
                   <SelectItem value="none">None</SelectItem>
                   {designations.map((designation) => (
-                    <SelectItem key={designation._id} value={designation.name}>
-                      {designation.name}
+                    <SelectItem key={designation.id} value={designation.title}>
+                      {designation.title}
                     </SelectItem>
                   ))}
                 </SelectContent>
