@@ -20,6 +20,7 @@ const schema = z.object({
   date_of_birth: z.string(),
   fee_paid: z.boolean(),
   status: z.enum(["pending", "accepted", "rejected"]),
+  image: z.any().optional(),
   remark: z.string().optional(),
 })
 
@@ -27,6 +28,7 @@ export default function EditMembershipPage({ params }) {
   const { id } = useParams()
   const router = useRouter()
   const [loading, setLoading] = useState(true)
+  const [existingImage, setExistingImage] = useState(null)
   const form = useForm({
     resolver: zodResolver(schema),
     defaultValues: {},
@@ -67,11 +69,19 @@ export default function EditMembershipPage({ params }) {
 
   const onSubmit = async (data) => {
     try {
+      const formData = new FormData()
+      Object.entries(data).forEach(([key, value]) => {
+        if (value !== undefined && value !== null) {
+          formData.append(key, value)
+        }
+      })
+      if (data.image) {
+        formData.append('image', data.image)
+      }
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/users/membership-applications/${id}/`, {
         method: "PUT",
         credentials: "include",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
+        body: formData,
       })
       if (!res.ok) throw new Error()
       toast({ title: "Updated", description: "Membership updated" })
@@ -95,6 +105,28 @@ export default function EditMembershipPage({ params }) {
         <Input {...form.register("email")} placeholder="Email" />
         <Input {...form.register("mobile")} placeholder="Mobile" />
         <Input {...form.register("address")} placeholder="Address" />
+        <FormField
+          control={form.control}
+          name="image"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel className="text-gray-700 font-semibold">Applicant Photo</FormLabel>
+              <FormControl>
+                <Input
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => field.onChange(e.target.files[0])}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        {existingImage && (
+          <div className="mt-2">
+            <img src={existingImage} alt="current" className="h-20 w-20 rounded-full object-cover" />
+          </div>
+        )}
         <div className="flex gap-2">
           <Select value={form.watch("status") || "pending"} onValueChange={(v) => form.setValue("status", v)}>
             <SelectTrigger><SelectValue placeholder="Status" /></SelectTrigger>

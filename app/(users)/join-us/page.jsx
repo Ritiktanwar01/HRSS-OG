@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useRef } from "react"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
@@ -23,6 +23,7 @@ const membershipFormSchema = z.object({
   dateOfBirth: z.string().refine((date) => new Date(date) < new Date(), {
     message: "Date of birth must be in the past.",
   }),
+  image: z.any().optional(),
   agreeTerms: z.boolean().refine((val) => val === true, {
     message: "You must agree to the terms and conditions.",
   }),
@@ -32,6 +33,7 @@ export default function JoinUsPage() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [submitted, setSubmitted] = useState(false)
 
+  const imageInputRef = useRef(null)
   const form = useForm({
     resolver: zodResolver(membershipFormSchema),
     defaultValues: {
@@ -41,6 +43,7 @@ export default function JoinUsPage() {
       mobile: "",
       email: "",
       dateOfBirth: "",
+      image: null,
       agreeTerms: false,
     },
   })
@@ -48,21 +51,21 @@ export default function JoinUsPage() {
   const onSubmit = async (data) => {
     setIsSubmitting(true)
     try {
+      const formData = new FormData()
+      formData.append("full_name", data.fullName)
+      formData.append("father_or_spouse_name", data.fatherOrSpouseName)
+      formData.append("address", data.address)
+      formData.append("mobile", data.mobile)
+      formData.append("email", data.email)
+      formData.append("date_of_birth", data.dateOfBirth)
+      formData.append("fee_paid", "false")
+      formData.append("status", "pending")
+      if (data.image) {
+        formData.append("image", data.image)
+      }
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/users/membership-applications/`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          full_name: data.fullName,
-          father_or_spouse_name: data.fatherOrSpouseName,
-          address: data.address,
-          mobile: data.mobile,
-          email: data.email,
-          date_of_birth: data.dateOfBirth,
-          fee_paid: false,
-          status: "pending",
-        }),
+        body: formData,
       })
 
       if (!response.ok) {
@@ -76,6 +79,8 @@ export default function JoinUsPage() {
       })
 
       form.reset()
+      // clear file input element
+      if (imageInputRef.current) imageInputRef.current.value = ''
       setTimeout(() => setSubmitted(false), 5000)
     } catch (error) {
       console.error("Error:", error)
@@ -266,6 +271,26 @@ export default function JoinUsPage() {
                           placeholder="Enter your email address"
                           className="border-gray-300 focus:border-bhagva-500 focus:ring-bhagva-500"
                           {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                {/* Photo */}
+                <FormField
+                  control={form.control}
+                  name="image"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-gray-700 font-semibold">Choose a photo</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="file"
+                          accept="image/*"
+                          ref={imageInputRef}
+                          onChange={(e) => field.onChange(e.target.files[0])}
                         />
                       </FormControl>
                       <FormMessage />

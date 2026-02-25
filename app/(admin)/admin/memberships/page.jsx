@@ -270,8 +270,16 @@ export default function MembershipsPage() {
               <tbody>
                 {filteredMemberships.map((membership) => (
                   <tr key={membership.id} className="border-b border-gray-100 hover:bg-gray-50">
-                    <td className="py-3 px-4">{membership.full_name}</td>
-                    <td className="py-3 px-4 text-blue-600">{membership.email}</td>
+                    <td className="py-3 px-4 flex items-center">
+                      {membership.image && (
+                        <img
+                          src={membership.image}
+                          alt="photo"
+                          className="h-6 w-6 rounded-full mr-2 object-cover"
+                        />
+                      )}
+                      {membership.full_name}
+                    </td>                    <td className="py-3 px-4 text-blue-600">{membership.email}</td>
                     <td className="py-3 px-4">{membership.mobile}</td>
                     <td className="py-3 px-4">
                       <span className={`px-3 py-1 rounded-full text-xs font-semibold ${getStatusBadge(membership.status)}`}>
@@ -324,9 +332,18 @@ export default function MembershipsPage() {
           <Card key={membership.id} className="border-bhagva-200">
             <CardContent className="pt-6">
               <div className="grid grid-cols-2 gap-4 mb-4">
-                <div>
-                  <p className="text-sm text-gray-600">Name</p>
-                  <p className="font-semibold text-gray-900">{membership.full_name}</p>
+                <div className="flex items-center">
+                  {membership.image && (
+                    <img
+                      src={membership.image}
+                      alt="photo"
+                      className="h-6 w-6 rounded-full mr-2 object-cover"
+                    />
+                  )}
+                  <div>
+                    <p className="text-sm text-gray-600">Name</p>
+                    <p className="font-semibold text-gray-900">{membership.full_name}</p>
+                  </div>
                 </div>
                 <div>
                   <p className="text-sm text-gray-600">Status</p>
@@ -387,6 +404,15 @@ export default function MembershipsPage() {
                 <DialogTitle>{selectedMembership.full_name}</DialogTitle>
                 <DialogDescription>Membership Application Details</DialogDescription>
               </DialogHeader>
+              {selectedMembership.image && (
+                <div className="text-center mb-4">
+                  <img
+                    src={selectedMembership.image}
+                    alt="Applicant photo"
+                    className="mx-auto h-32 w-32 rounded-full object-cover"
+                  />
+                </div>
+              )}
 
               <div className="space-y-6 py-4">
                 <div className="grid md:grid-cols-2 gap-6">
