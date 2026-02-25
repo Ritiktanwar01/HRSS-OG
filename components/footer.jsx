@@ -7,6 +7,7 @@ const Footer = () => {
   const fetchData = async () => {
     try {
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/trust/contact/`)
+      console.log(response)
       if (!response.ok) {
         throw new Error("Network response was not ok")
       }
