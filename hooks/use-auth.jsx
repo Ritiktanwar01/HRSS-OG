@@ -29,8 +29,10 @@ export function AuthProvider({ children }) {
       if (response.ok) {
         const userData = await response.json()
         setUser(userData)
+        router.push("/admin/login")
       } else {
         setUser(null)
+        router.push("/admin/login")
       }
     } catch (error) {
       console.error("Auth check error:", error)
@@ -98,6 +100,8 @@ export function AuthProvider({ children }) {
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
 }
+
+export { checkAuth }
 
 export function useAuth() {
   return useContext(AuthContext)
