@@ -12,6 +12,7 @@ const Footer = () => {
         throw new Error("Network response was not ok")
       }
       const data = await response.json()
+      console.log(data)
       return data[0]
     } catch (error) {
       console.error("Error fetching footer data:", error)
