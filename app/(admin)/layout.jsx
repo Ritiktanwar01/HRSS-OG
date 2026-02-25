@@ -9,7 +9,6 @@ import { AuthProvider } from "@/hooks/use-auth"
 import "../globals.css"
 import { Inter } from "next/font/google"
 import { ThemeProvider } from "@/components/theme-provider"
-import { checkAuth } from "../../hooks/use-auth"
 
 const inter = Inter({ subsets: ["latin"] })
 
@@ -25,10 +24,6 @@ export default function AdminLayout({ children }) {
   const closeSidebar = () => {
     setSidebarOpen(false)
   }
-  useEffect(()=>{
-    checkAuth()
-  },[])
-
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={inter.className}>

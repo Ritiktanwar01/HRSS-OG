@@ -64,7 +64,6 @@ export function AuthProvider({ children }) {
         return { success: true }
       } else {
         const error = await response.json()
-        console.log({ success: false, message: error.message })
         return { success: false, message: error.message }
       }
     } catch (error) {
@@ -100,8 +99,6 @@ export function AuthProvider({ children }) {
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
 }
-
-export { checkAuth }
 
 export function useAuth() {
   return useContext(AuthContext)
