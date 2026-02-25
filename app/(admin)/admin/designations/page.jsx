@@ -1,7 +1,6 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { useAuth } from "@/hooks/use-auth"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -10,6 +9,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { Plus, MoreVertical, Pencil, Trash2 } from "lucide-react"
+import { toast } from "@/components/ui/use-toast"
+import { getCookie } from "@/hooks/api"
 
 export default function DesignationsPage() {
   const [designations, setDesignations] = useState([])
@@ -19,22 +20,20 @@ export default function DesignationsPage() {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
   const [currentDesignation, setCurrentDesignation] = useState(null)
   const [formData, setFormData] = useState({
-    name: "",
+    title: "",
     description: "",
+    order: 0,
   })
-  const { getAuthToken } = useAuth()
 
   // Fetch designations
   useEffect(() => {
     const fetchDesignations = async () => {
       try {
         setLoading(true)
-        const token = getAuthToken()
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/designations`, {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("access_token")}`,
-          },
-        })
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/users/designations`, {
+        method: "GET",
+        credentials: "include",
+      })
 
         if (response.ok) {
           const data = await response.json()
@@ -48,7 +47,7 @@ export default function DesignationsPage() {
     }
 
     fetchDesignations()
-  }, [getAuthToken])
+  }, [])
 
   // Handle form input change
   const handleInputChange = (e) => {
@@ -59,85 +58,130 @@ export default function DesignationsPage() {
     })
   }
 
-  // Handle add designation
-  const handleAddDesignation = async (e) => {
-    e.preventDefault()
+const handleAddDesignation = async (e) => {
+  e.preventDefault();
 
-    try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/designations`, {
+  try {
+    const response = await fetch(
+      `${process.env.NEXT_PUBLIC_API_URL}/api/users/designations/`,
+      {
         method: "POST",
+        credentials: "include",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+          "X-CSRFToken": getCookie("csrftoken"),
         },
-        body: JSON.stringify(formData),
-      })
-
-      if (response.ok) {
-        const newDesignation = await response.json()
-        setDesignations([...designations, newDesignation])
-        setIsAddDialogOpen(false)
-        setFormData({ name: "", description: "" })
+        body: JSON.stringify(formData), 
       }
-    } catch (error) {
-      console.error("Error adding designation:", error)
+    );
+
+    if (response.ok) {
+      const newDesignation = await response.json();
+      setDesignations([...designations, newDesignation]);
+      setIsAddDialogOpen(false);
+      setFormData({ title: "", description: "", order: 0 });
+      toast({
+        title: "Designation added",
+        description: "New designation created",
+      });
+    } else {
+      const err = await response.json().catch(() => ({}));
+      toast({
+        title: "Error",
+        description: err.detail || "Cannot add designation",
+        variant: "destructive",
+      });
     }
+  } catch (error) {
+    console.error("Error adding designation:", error);
   }
+};
+
 
   // Handle edit designation
   const handleEditDesignation = async (e) => {
-    e.preventDefault()
+  e.preventDefault();
 
-    try {
-      const token = getAuthToken()
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/designations/${currentDesignation._id}`, {
+  try {
+    const response = await fetch(
+      `${process.env.NEXT_PUBLIC_API_URL}/api/users/designations/${currentDesignation.id}/`,
+      {
         method: "PUT",
+        credentials: "include", // ✅ ensures sessionid + csrftoken cookies are sent
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+          "X-CSRFToken": getCookie("csrftoken"), // ✅ same helper you used before
         },
-        body: JSON.stringify(formData),
-      })
-
-      if (response.ok) {
-        const updatedDesignation = await response.json()
-        setDesignations(designations.map((d) => (d._id === updatedDesignation._id ? updatedDesignation : d)))
-        setIsEditDialogOpen(false)
-        setCurrentDesignation(null)
-        setFormData({ name: "", description: "" })
+        body: JSON.stringify(formData), // ✅ send plain JSON
       }
-    } catch (error) {
-      console.error("Error updating designation:", error)
+    );
+
+    if (response.ok) {
+      const updatedDesignation = await response.json();
+      setDesignations(
+        designations.map((d) =>
+          d.id === updatedDesignation.id ? updatedDesignation : d
+        )
+      );
+      setIsEditDialogOpen(false);
+      setCurrentDesignation(null);
+      setFormData({ title: "", description: "", order: 0 });
+      toast({ title: "Updated", description: "Designation updated" });
+    } else {
+      const err = await response.json().catch(() => ({}));
+      toast({
+        title: "Error",
+        description: err.detail || "Cannot update",
+        variant: "destructive",
+      });
     }
+  } catch (error) {
+    console.error("Error updating designation:", error);
   }
+};
 
   // Handle delete designation
   const handleDeleteDesignation = async () => {
-    try {
-      const token = getAuthToken()
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/designations/${currentDesignation._id}`, {
+  try {
+    const response = await fetch(
+      `${process.env.NEXT_PUBLIC_API_URL}/api/users/designations/${currentDesignation.id}/`,
+      {
         method: "DELETE",
+        credentials: "include", // ✅ ensures sessionid + csrftoken cookies are sent
         headers: {
-          Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+          "X-CSRFToken": getCookie("csrftoken"), // ✅ same helper you used before
         },
-      })
-
-      if (response.ok) {
-        setDesignations(designations.filter((d) => d._id !== currentDesignation._id))
-        setIsDeleteDialogOpen(false)
-        setCurrentDesignation(null)
       }
-    } catch (error) {
-      console.error("Error deleting designation:", error)
+    );
+
+    if (response.ok) {
+      setDesignations(
+        designations.filter((d) => d.id !== currentDesignation.id)
+      );
+      setIsDeleteDialogOpen(false);
+      setCurrentDesignation(null);
+      toast({ title: "Deleted", description: "Designation removed" });
+    } else {
+      const err = await response.json().catch(() => ({}));
+      toast({
+        title: "Error",
+        description: err.detail || "Cannot delete",
+        variant: "destructive",
+      });
     }
+  } catch (error) {
+    console.error("Error deleting designation:", error);
   }
+};
+
 
   // Open edit dialog
   const openEditDialog = (designation) => {
     setCurrentDesignation(designation)
     setFormData({
-      name: designation.name,
+      title: designation.title,
       description: designation.description || "",
+      order: designation.order ?? 0,
     })
     setIsEditDialogOpen(true)
   }
@@ -169,11 +213,22 @@ export default function DesignationsPage() {
             </DialogHeader>
             <form onSubmit={handleAddDesignation} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="name">Designation Name</Label>
+                <Label htmlFor="order">Designation Order</Label>
                 <Input
-                  id="name"
-                  name="name"
-                  value={formData.name}
+                  id="order"
+                  name="order"
+                  value={formData.order}
+                  onChange={handleInputChange}
+                  placeholder="e.g. 0-99 (higher number = lower priority)"
+                  required
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="title">Designation Name</Label>
+                <Input
+                  id="title"
+                  name="title"
+                  value={formData.title}
                   onChange={handleInputChange}
                   placeholder="e.g. Secretary, Treasurer"
                   required
@@ -226,8 +281,8 @@ export default function DesignationsPage() {
             </TableHeader>
             <TableBody>
               {designations.map((designation) => (
-                <TableRow key={designation._id}>
-                  <TableCell className="font-medium">{designation.name}</TableCell>
+                <TableRow key={designation.id}>
+                  <TableCell className="font-medium">{designation.title}</TableCell>
                   <TableCell>{designation.description || "-"}</TableCell>
                   <TableCell>{new Date(designation.createdAt).toLocaleDateString()}</TableCell>
                   <TableCell>

@@ -21,9 +21,9 @@ const { user } = useAuth()   // no need for getAuthToken anymore
 useEffect(() => {
   const fetchDashboardData = async () => {
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/dashboard/`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/users/dashboard/`, {
         method: "GET",
-        credentials: "include",   // send session cookies
+        credentials: "include",
       })
 
       if (response.ok) {

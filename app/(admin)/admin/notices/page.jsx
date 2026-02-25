@@ -5,10 +5,12 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Label } from "@/components/ui/label"
+import { Textarea } from "@/components/ui/textarea"
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog"
 import { Loader2, Plus, Search, Eye, Edit2, Trash2, FileText } from "lucide-react"
 import { toast } from "@/components/ui/use-toast"
-import Link from "next/link"
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { getCookie } from "@/hooks/api"
 
 export default function NoticesPage() {
   const [notices, setNotices] = useState([])
@@ -17,24 +19,49 @@ export default function NoticesPage() {
   const [categoryFilter, setCategoryFilter] = useState("all")
   const [selectedNotice, setSelectedNotice] = useState(null)
 
+  // dialog state & form data for create/update/delete
+  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
+  const [currentNotice, setCurrentNotice] = useState(null)
+  const [formData, setFormData] = useState({
+    title: "",
+    description: "",
+    content: "",
+    fileUrl: "",
+    fileName: "",
+    category: "general",
+    isPublished: true,
+    expiryDate: "",
+  })
+
+  const handleInputChange = (e) => {
+    const { name, value, type, checked } = e.target
+    setFormData((prev) => ({
+      ...prev,
+      [name]: type === "checkbox" ? checked : value,
+    }))
+  }
+
   useEffect(() => {
     fetchNotices()
   }, [categoryFilter])
 
   const fetchNotices = async () => {
     try {
-      const category = categoryFilter !== "all" ? `&category=${categoryFilter}` : ""
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/notices?search=${searchTerm}${category}`,
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("adminToken")}`,
-          },
-        }
-      )
+      let url = `${process.env.NEXT_PUBLIC_API_URL}/api/users/public-notices/`
+      if (categoryFilter !== "all") url += `category=${categoryFilter}&`
+      if (searchTerm) url += `search=${encodeURIComponent(searchTerm)}&`
+      const response = await fetch(url, {
+        credentials: "include",
+        headers: {
+          "X-CSRFToken": getCookie("csrftoken"),
+        },
+      })
+
       if (!response.ok) throw new Error("Failed to fetch")
       const data = await response.json()
-      setNotices(data.notices)
+      setNotices(data)
     } catch (error) {
       console.error("Error:", error)
       toast({
@@ -48,15 +75,17 @@ export default function NoticesPage() {
   }
 
   const handleDelete = async (id) => {
-    if (!confirm("Are you sure you want to delete this notice?")) return
-
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/notices/${id}`, {
-        method: "DELETE",
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("adminToken")}`,
-        },
-      })
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/users/public-notices/${id}/`,
+        {
+          method: "DELETE",
+          credentials: "include",
+          headers: {
+            "X-CSRFToken": getCookie("csrftoken"),
+          },
+        }
+      )
 
       if (!response.ok) throw new Error("Failed to delete")
 
@@ -64,6 +93,10 @@ export default function NoticesPage() {
         title: "Success",
         description: "Notice deleted successfully",
       })
+
+      // clear selection if it matches
+      if (selectedNotice?._id === id) setSelectedNotice(null)
+      if (currentNotice?._id === id) setCurrentNotice(null)
 
       fetchNotices()
     } catch (error) {
@@ -75,7 +108,129 @@ export default function NoticesPage() {
     }
   }
 
+  const handleAddNotice = async (e) => {
+    e.preventDefault()
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/users/public-notices/`,
+        {
+          method: "POST",
+          credentials: "include",
+          headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": getCookie("csrftoken"),
+          },
+          body: JSON.stringify(formData),
+        }
+      )
+      if (response.ok) {
+        const newNotice = await response.json()
+        setNotices([newNotice, ...notices])
+        setIsAddDialogOpen(false)
+        setFormData({
+          title: "",
+          description: "",
+          content: "",
+          fileUrl: "",
+          fileName: "",
+          category: "general",
+          isPublished: true,
+          expiryDate: "",
+        })
+        toast({ title: "Success", description: "Notice created" })
+      } else {
+        const err = await response.json().catch(() => ({}))
+        toast({
+          title: "Error",
+          description: err.detail || "Failed to create notice",
+          variant: "destructive",
+        })
+      }
+    } catch (error) {
+      console.error("Error adding notice:", error)
+    }
+  }
+
+  const handleEditNotice = async (e) => {
+    e.preventDefault()
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/users/public-notices/${currentNotice._id}/`,
+        {
+          method: "PUT",
+          credentials: "include",
+          headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": getCookie("csrftoken"),
+          },
+          body: JSON.stringify(formData),
+        }
+      )
+      if (response.ok) {
+        const updated = await response.json()
+        setNotices(
+          notices.map((n) => (n._id === updated._id ? updated : n))
+        )
+        setIsEditDialogOpen(false)
+        setCurrentNotice(null)
+        setFormData({
+          title: "",
+          description: "",
+          content: "",
+          fileUrl: "",
+          fileName: "",
+          category: "general",
+          isPublished: true,
+          expiryDate: "",
+        })
+        toast({ title: "Success", description: "Notice updated" })
+      } else {
+        const err = await response.json().catch(() => ({}))
+        toast({
+          title: "Error",
+          description: err.detail || "Failed to update notice",
+          variant: "destructive",
+        })
+      }
+    } catch (error) {
+      console.error("Error updating notice:", error)
+    }
+  }
+
+  const openEditDialog = (notice) => {
+    setCurrentNotice(notice)
+    setFormData({
+      title: notice.title || "",
+      description: notice.description || "",
+      content: notice.content || "",
+      fileUrl: notice.fileUrl || "",
+      fileName: notice.fileName || "",
+      category: notice.category || "general",
+      isPublished: notice.isPublished,
+      expiryDate: notice.expiryDate ? notice.expiryDate.split("T")[0] : "",
+    })
+    setIsEditDialogOpen(true)
+  }
+
+  const openDeleteDialog = (notice) => {
+    setCurrentNotice(notice)
+    setIsDeleteDialogOpen(true)
+  }
+
   const formatDate = (date) => new Date(date).toLocaleDateString("en-IN")
+
+  // apply filters locally so we don't rely on backend query params
+  const filteredNotices = notices.filter((n) => {
+    if (categoryFilter !== "all" && n.category !== categoryFilter) return false
+    if (searchTerm) {
+      const term = searchTerm.toLowerCase()
+      return (
+        n.title.toLowerCase().includes(term) ||
+        n.description.toLowerCase().includes(term)
+      )
+    }
+    return true
+  })
 
   const getCategoryBadge = (category) => {
     const styles = {
@@ -102,12 +257,118 @@ export default function NoticesPage() {
           <h1 className="text-4xl font-bold text-gray-900">Public Notices</h1>
           <p className="text-gray-600 mt-2">Manage public notices and announcements</p>
         </div>
-        <Button asChild className="mt-4 md:mt-0 bg-bhagva-700 hover:bg-bhagva-800">
-          <Link href="/admin/notices/create">
+        <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+        <DialogTrigger asChild>
+          <Button className="mt-4 md:mt-0 bg-bhagva-700 hover:bg-bhagva-800">
             <Plus className="mr-2 h-4 w-4" />
             Create Notice
-          </Link>
-        </Button>
+          </Button>
+        </DialogTrigger>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Add Notice</DialogTitle>
+          </DialogHeader>
+          <form onSubmit={handleAddNotice} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="title">Title</Label>
+              <Input
+                id="title"
+                name="title"
+                value={formData.title}
+                onChange={handleInputChange}
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="description">Description</Label>
+              <Textarea
+                id="description"
+                name="description"
+                value={formData.description}
+                onChange={handleInputChange}
+                rows={3}
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="content">Content</Label>
+              <Textarea
+                id="content"
+                name="content"
+                value={formData.content}
+                onChange={handleInputChange}
+                rows={4}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="fileUrl">File URL</Label>
+              <Input
+                id="fileUrl"
+                name="fileUrl"
+                value={formData.fileUrl}
+                onChange={handleInputChange}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="fileName">File Name</Label>
+              <Input
+                id="fileName"
+                name="fileName"
+                value={formData.fileName}
+                onChange={handleInputChange}
+              />
+            </div>
+            <div className="flex gap-4">
+              <div className="flex-1">
+                <Label htmlFor="category">Category</Label>
+                <Select
+                  value={formData.category}
+                  onValueChange={(val) => setFormData((p) => ({ ...p, category: val }))}
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Select category" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="general">General</SelectItem>
+                    <SelectItem value="important">Important</SelectItem>
+                    <SelectItem value="urgent">Urgent</SelectItem>
+                    <SelectItem value="announcement">Announcement</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="flex-1">
+                <Label htmlFor="expiryDate">Expiry date</Label>
+                <Input
+                  type="date"
+                  id="expiryDate"
+                  name="expiryDate"
+                  value={formData.expiryDate}
+                  onChange={handleInputChange}
+                />
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <input
+                id="isPublished"
+                name="isPublished"
+                type="checkbox"
+                checked={formData.isPublished}
+                onChange={handleInputChange}
+                className="checkbox"
+              />
+              <Label htmlFor="isPublished" className="mb-0">
+                Published
+              </Label>
+            </div>
+            <DialogFooter>
+              <Button type="button" variant="outline" onClick={() => setIsAddDialogOpen(false)}>
+                Cancel
+              </Button>
+              <Button type="submit">Save</Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
       </div>
 
       {/* Search and Filter */}
@@ -119,10 +380,7 @@ export default function NoticesPage() {
               <Input
                 placeholder="Search notices..."
                 value={searchTerm}
-                onChange={(e) => {
-                  setSearchTerm(e.target.value)
-                  fetchNotices()
-                }}
+                onChange={(e) => setSearchTerm(e.target.value)}
                 className="pl-10"
               />
             </div>
@@ -180,15 +438,18 @@ export default function NoticesPage() {
                       >
                         <Eye className="h-4 w-4" />
                       </Button>
-                      <Button asChild size="sm" variant="outline" className="text-bhagva-700 border-bhagva-200 bg-transparent">
-                        <Link href={`/admin/notices/edit/${notice._id}`}>
-                          <Edit2 className="h-4 w-4" />
-                        </Link>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => openEditDialog(notice)}
+                        className="text-bhagva-700 border-bhagva-200"
+                      >
+                        <Edit2 className="h-4 w-4" />
                       </Button>
                       <Button
                         size="sm"
                         variant="outline"
-                        onClick={() => handleDelete(notice._id)}
+                        onClick={() => openDeleteDialog(notice)}
                         className="text-red-600 border-red-200"
                       >
                         <Trash2 className="h-4 w-4" />
@@ -204,7 +465,7 @@ export default function NoticesPage() {
 
       {/* Mobile Card View */}
       <div className="lg:hidden space-y-4">
-        {notices.map((notice) => (
+        {filteredNotices.map((notice) => (
           <Card key={notice._id} className="border-bhagva-200">
             <CardContent className="pt-6">
               <div className="mb-4">
@@ -227,8 +488,21 @@ export default function NoticesPage() {
                 >
                   View
                 </Button>
-                <Button asChild size="sm" variant="outline" className="flex-1 bg-transparent">
-                  <Link href={`/admin/notices/edit/${notice._id}`}>Edit</Link>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="flex-1 bg-transparent"
+                  onClick={() => openEditDialog(notice)}
+                >
+                  Edit
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="flex-1 text-red-600 border-red-200"
+                  onClick={() => openDeleteDialog(notice)}
+                >
+                  Delete
                 </Button>
               </div>
             </CardContent>
@@ -282,7 +556,9 @@ export default function NoticesPage() {
 
                 <div className="flex gap-2 pt-4">
                   <Button asChild className="flex-1 bg-bhagva-700 hover:bg-bhagva-800">
-                    <Link href={`/admin/notices/edit/${selectedNotice._id}`}>Edit Notice</Link>
+                    <button type="button" onClick={() => openEditDialog(selectedNotice)} className="w-full text-left">
+                    Edit Notice
+                  </button>
                   </Button>
                   <Button
                     onClick={() => {
@@ -301,14 +577,149 @@ export default function NoticesPage() {
         </DialogContent>
       </Dialog>
 
-      {notices.length === 0 && (
+      {/* Edit Dialog */}
+      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Edit Notice</DialogTitle>
+          </DialogHeader>
+          <form onSubmit={handleEditNotice} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="edit-title">Title</Label>
+              <Input
+                id="edit-title"
+                name="title"
+                value={formData.title}
+                onChange={handleInputChange}
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="edit-description">Description</Label>
+              <Textarea
+                id="edit-description"
+                name="description"
+                value={formData.description}
+                onChange={handleInputChange}
+                rows={3}
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="edit-content">Content</Label>
+              <Textarea
+                id="edit-content"
+                name="content"
+                value={formData.content}
+                onChange={handleInputChange}
+                rows={4}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="edit-fileUrl">File URL</Label>
+              <Input
+                id="edit-fileUrl"
+                name="fileUrl"
+                value={formData.fileUrl}
+                onChange={handleInputChange}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="edit-fileName">File Name</Label>
+              <Input
+                id="edit-fileName"
+                name="fileName"
+                value={formData.fileName}
+                onChange={handleInputChange}
+              />
+            </div>
+            <div className="flex gap-4">
+              <div className="flex-1">
+                <Label htmlFor="edit-category">Category</Label>
+                <Select
+                  value={formData.category}
+                  onValueChange={(val) => setFormData((p) => ({ ...p, category: val }))}
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Select category" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="general">General</SelectItem>
+                    <SelectItem value="important">Important</SelectItem>
+                    <SelectItem value="urgent">Urgent</SelectItem>
+                    <SelectItem value="announcement">Announcement</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="flex-1">
+                <Label htmlFor="edit-expiryDate">Expiry date</Label>
+                <Input
+                  type="date"
+                  id="edit-expiryDate"
+                  name="expiryDate"
+                  value={formData.expiryDate}
+                  onChange={handleInputChange}
+                />
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <input
+                id="edit-isPublished"
+                name="isPublished"
+                type="checkbox"
+                checked={formData.isPublished}
+                onChange={handleInputChange}
+                className="checkbox"
+              />
+              <Label htmlFor="edit-isPublished" className="mb-0">
+                Published
+              </Label>
+            </div>
+            <DialogFooter>
+              <Button type="button" variant="outline" onClick={() => setIsEditDialogOpen(false)}>
+                Cancel
+              </Button>
+              <Button type="submit">Save</Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Delete Notice</DialogTitle>
+          </DialogHeader>
+          <p>
+            Are you sure you want to delete the notice "{currentNotice?.title}"?
+          </p>
+          <DialogFooter>
+            <Button type="button" variant="outline" onClick={() => setIsDeleteDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button
+              type="button"
+              variant="destructive"
+              onClick={() => {
+                handleDelete(currentNotice._id)
+                setIsDeleteDialogOpen(false)
+              }}
+            >
+              Delete
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {filteredNotices.length === 0 && (
         <Card className="border-gray-200">
           <CardContent className="py-12 text-center">
             <FileText className="h-12 w-12 text-gray-300 mx-auto mb-4" />
             <h3 className="text-lg font-semibold text-gray-900 mb-2">No Notices Found</h3>
             <p className="text-gray-600 mb-4">No notices found for the selected filters.</p>
-            <Button asChild className="bg-bhagva-700 hover:bg-bhagva-800">
-              <Link href="/admin/notices/create">Create First Notice</Link>
+            <Button className="bg-bhagva-700 hover:bg-bhagva-800" onClick={() => setIsAddDialogOpen(true)}>
+              Create First Notice
             </Button>
           </CardContent>
         </Card>

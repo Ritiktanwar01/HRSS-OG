@@ -19,107 +19,108 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea"
 import { toast } from "@/components/ui/use-toast"
 import { Plus, Trash2, Edit, ImageIcon, Video, Upload, X } from "lucide-react"
-import { useAuth } from "@/hooks/use-auth"
+import { getCookie } from "@/hooks/api"
 
 export default function AdminGalleryPage() {
-  const [galleryItems, setGalleryItems] = useState({ images: [], videos: [] })
-  const [activeTab, setActiveTab] = useState("images")
-  const [isAddingItem, setIsAddingItem] = useState(false)
-  const [editingItem, setEditingItem] = useState(null)
-  const [isLoading, setIsLoading] = useState(false)
-  const { getAuthToken } = useAuth()
+
+  const [galleryItems, setGalleryItems] = useState({ images: [], videos: [] });
+  const [activeTab, setActiveTab] = useState("images");
+  const [isAddingItem, setIsAddingItem] = useState(false);
+  const [editingItem, setEditingItem] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   const [newItem, setNewItem] = useState({
     title: "",
     description: "",
     category: "events",
     type: "image",
-    url: "",              // existing media URL (when editing)
-    thumbnail: "",        // existing thumbnail URL for video
-    imageFile: null,        // new file objects
+    url: "",
+    thumbnail: "",
+    imageFile: null,
     videoFile: null,
     thumbnailFile: null,
-  })
+  });
 
+  // Fetch gallery items
   useEffect(() => {
     const fetchGalleryItems = async () => {
       try {
-        // const token = await getAuthToken()
-        // if (!token) {
-        //   throw new Error("Authentication failed")
-        // }
-
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/trust/galleryitem/`, {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("access_token")}`,
-            "Content-Type": "application/json",
-          },
-        })
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/api/trust/galleryitem/`,
+          {
+            credentials: "include",
+            headers: {
+              "X-CSRFToken": getCookie("csrftoken"),
+            },
+          }
+        );
 
         if (response.ok) {
-          const data = await response.json()
+          const data = await response.json();
           setGalleryItems({
             images: data.filter((item) => item.type === "image"),
             videos: data.filter((item) => item.type === "video"),
-          })
+          });
+        } else {
+          throw new Error("Failed to fetch");
         }
       } catch (error) {
-        console.error("Error fetching gallery items:", error)
+        console.error("Error fetching gallery items:", error);
         toast({
           title: "Error",
           description: "Failed to load gallery items",
           variant: "destructive",
-        })
+        });
       }
-    }
+    };
 
-    fetchGalleryItems()
-  }, [getAuthToken])
+    fetchGalleryItems();
+  }, []);
 
   const handleAddItem = () => {
-    setIsAddingItem(true)
-    setEditingItem(null)
+    setIsAddingItem(true);
+    setEditingItem(null);
     setNewItem({
       title: "",
       description: "",
       category: "events",
       type: activeTab === "images" ? "image" : "video",
-      url: "",              // existing media URL (when editing)
-      thumbnail: activeTab === "videos" ? "/placeholder.svg?height=300&width=400" : "",        // existing thumbnail URL for video
-      imageFile: null,        // new file objects
+      url: "",
+      thumbnail:
+        activeTab === "videos"
+          ? "/placeholder.svg?height=300&width=400"
+          : "",
+      imageFile: null,
       videoFile: null,
       thumbnailFile: null,
-    })
-  }
+    });
+  };
 
   const backendToFrontendCategory = (cat) => {
-    if (!cat) return "events"
+    if (!cat) return "events";
     switch (cat.toLowerCase()) {
       case "event":
       case "event & celebration":
       case "events":
-      case "event":
-        return "events"
+        return "events";
       case "service":
       case "serviceproject":
       case "serviceprojects":
-        return "serviceProjects"
+        return "serviceProjects";
       case "volunteer":
       case "volunteers":
-        return "volunteers"
-      case "event":
+        return "volunteers";
       default:
-        // if uppercase code like EVENT/SERVICE/VOLUNTEER
-        if (cat === "EVENT") return "events"
-        if (cat === "SERVICE") return "serviceProjects"
-        if (cat === "VOLUNTEER") return "volunteers"
-        return "events"
+        if (cat === "EVENT") return "events";
+        if (cat === "SERVICE") return "serviceProjects";
+        if (cat === "VOLUNTEER") return "volunteers";
+        return "events";
     }
-  }
+  };
 
   const handleEditItem = (item) => {
-    setIsAddingItem(false)
-    setEditingItem(item)
+    setIsAddingItem(false);
+    setEditingItem(item);
     setNewItem({
       title: item.title,
       description: item.description,
@@ -130,177 +131,177 @@ export default function AdminGalleryPage() {
       imageFile: null,
       videoFile: null,
       thumbnailFile: null,
-    })
-  }
+    });
+  };
 
   const handleDeleteItem = async (id, type) => {
     try {
-      // const token = await getAuthToken()
-      // if (!token) {
-      //   throw new Error("Authentication failed")
-      // }
-
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/trust/galleryitem/${id}/`, {
-        method: "DELETE",
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("access_token")}`,
-        },
-      })
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/trust/galleryitem/${id}/`,
+        {
+          method: "DELETE",
+          credentials: "include",
+          headers: {
+            "X-CSRFToken": getCookie("csrftoken"),
+          },
+        }
+      );
 
       if (response.ok) {
         if (type === "image") {
           setGalleryItems({
             ...galleryItems,
-            images: galleryItems.images.filter((item) => item._id !== id),
-          })
+            images: galleryItems.images.filter((item) => item.id !== id),
+          });
         } else {
           setGalleryItems({
             ...galleryItems,
-            videos: galleryItems.videos.filter((item) => item._id !== id),
-          })
+            videos: galleryItems.videos.filter((item) => item.id !== id),
+          });
         }
 
         toast({
           title: "Item Deleted",
           description: "The gallery item has been successfully removed.",
-        })
+        });
       } else {
-        throw new Error("Failed to delete gallery item")
+        throw new Error("Failed to delete gallery item");
       }
     } catch (error) {
-      console.error("Error deleting gallery item:", error)
+      console.error("Error deleting gallery item:", error);
       toast({
         title: "Error",
         description: "Failed to delete gallery item",
         variant: "destructive",
-      })
+      });
     }
-  }
+  };
 
   const handleUploadFile = (e, fileType) => {
-    const file = e.target.files[0]
-    if (!file) return
+    const file = e.target.files[0];
+    if (!file) return;
 
     if (fileType === "image") {
       setNewItem({
         ...newItem,
         imageFile: file,
         url: URL.createObjectURL(file),
-      })
+      });
     } else if (fileType === "video") {
       setNewItem({
         ...newItem,
         videoFile: file,
         url: URL.createObjectURL(file),
-      })
+      });
     } else if (fileType === "thumbnail") {
       setNewItem({
         ...newItem,
         thumbnailFile: file,
         thumbnail: URL.createObjectURL(file),
-      })
+      });
     }
-  }
+  };
 
   const handleSubmit = async (e) => {
-    e.preventDefault()
-    setIsLoading(true)
+    e.preventDefault();
+    setIsLoading(true);
 
     try {
-      const form = new FormData()
-      form.append("title", newItem.title)
-      form.append("description", newItem.description)
-      form.append("gallery_type", newItem.category)
-      form.append("type", newItem.type)
+      const form = new FormData();
+      form.append("title", newItem.title);
+      form.append("description", newItem.description);
+      form.append("gallery_type", newItem.category);
+      form.append("type", newItem.type);
 
       if (newItem.type === "image") {
         if (newItem.imageFile) {
-          form.append("image_file", newItem.imageFile)
+          form.append("image_file", newItem.imageFile);
         } else if (newItem.url) {
-          form.append("url", newItem.url)
+          form.append("url", newItem.url);
         }
       } else {
-        // video
         if (newItem.videoFile) {
-          form.append("video_file", newItem.videoFile)
+          form.append("video_file", newItem.videoFile);
         }
         if (newItem.thumbnailFile) {
-          form.append("thumbnail_file", newItem.thumbnailFile)
+          form.append("thumbnail_file", newItem.thumbnailFile);
         } else if (newItem.thumbnail) {
-          form.append("thumbnail", newItem.thumbnail)
+          form.append("thumbnail", newItem.thumbnail);
         }
         if (newItem.url) {
-          form.append("url", newItem.url)
+          form.append("url", newItem.url);
         }
       }
 
-      let response
       const endpoint = `${process.env.NEXT_PUBLIC_API_URL}/api/trust/galleryitem/${
-        editingItem ? editingItem._id + "/" : ""
-      }`
-      response = await fetch(endpoint, {
+        editingItem ? editingItem.id + "/" : ""
+      }`;
+
+      const response = await fetch(endpoint, {
         method: editingItem ? "PUT" : "POST",
+        credentials: "include",
         headers: {
-          Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+          "X-CSRFToken": getCookie("csrftoken"),
         },
         body: form,
-      })
+      });
 
       if (response.ok) {
-        const result = await response.json()
+        const result = await response.json();
 
         if (editingItem) {
-          // Update existing item in state
           if (newItem.type === "image") {
             setGalleryItems({
               ...galleryItems,
-              images: galleryItems.images.map((item) => (item._id === editingItem._id ? result : item)),
-            })
+              images: galleryItems.images.map((item) =>
+                item.id === editingItem.id ? result : item
+              ),
+            });
           } else {
             setGalleryItems({
               ...galleryItems,
-              videos: galleryItems.videos.map((item) => (item._id === editingItem._id ? result : item)),
-            })
+              videos: galleryItems.videos.map((item) =>
+                item.id === editingItem.id ? result : item
+              ),
+            });
           }
 
           toast({
             title: "Item Updated",
             description: "The gallery item has been successfully updated.",
-          })
+          });
         } else {
-          // Add new item to state
           if (newItem.type === "image") {
             setGalleryItems({
               ...galleryItems,
               images: [...galleryItems.images, result],
-            })
+            });
           } else {
             setGalleryItems({
               ...galleryItems,
               videos: [...galleryItems.videos, result],
-            })
+            });
           }
 
           toast({
             title: "Item Added",
             description: "The new gallery item has been successfully added.",
-          })
+          });
         }
 
-        // Close dialog
-        document.querySelector("[data-radix-dialog-close]")?.click()
+        document.querySelector("[data-radix-dialog-close]")?.click();
       } else {
-        throw new Error("Failed to save gallery item")
+        throw new Error("Failed to save gallery item");
       }
     } catch (error) {
-      console.error("Error saving gallery item:", error)
+      console.error("Error saving gallery item:", error);
       toast({
         title: "Error",
         description: "Failed to save gallery item",
         variant: "destructive",
-      })
+      });
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
   }
 
@@ -440,8 +441,8 @@ export default function AdminGalleryPage() {
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {galleryItems.images.map((item) => (
-                  <div key={item._id} className="relative group overflow-hidden rounded-md border">
-                    <img src={item.url || "/placeholder.svg"} alt={item.title} className="w-full h-48 object-cover" />
+                  <div key={item.id} className="relative group overflow-hidden rounded-md border">
+                    <img src={process.env.NEXT_PUBLIC_API_URL + item.url || "/placeholder.svg"} alt={item.title} className="w-full h-48 object-cover" />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent flex flex-col justify-end p-4 text-white">
                       <h3 className="font-semibold text-lg">{item.title}</h3>
                       <p className="text-sm text-white/90">{item.description}</p>
@@ -462,7 +463,7 @@ export default function AdminGalleryPage() {
                           variant="destructive"
                           size="icon"
                           className="h-8 w-8"
-                          onClick={() => handleDeleteItem(item._id, "image")}
+                          onClick={() => handleDeleteItem(item.id, "image")}
                         >
                           <Trash2 className="h-4 w-4" />
                         </Button>
@@ -610,7 +611,7 @@ export default function AdminGalleryPage() {
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {galleryItems.videos.map((item) => (
-                  <div key={item._id} className="relative group overflow-hidden rounded-md border">
+                  <div key={item.id} className="relative group overflow-hidden rounded-md border">
                     <div className="relative">
                       <img
                         src={item.thumbnail || "/placeholder.svg"}
@@ -638,7 +639,7 @@ export default function AdminGalleryPage() {
                           variant="outline"
                           size="sm"
                           className="text-red-500 hover:text-red-700"
-                          onClick={() => handleDeleteItem(item._id, "video")}
+                          onClick={() => handleDeleteItem(item.id, "video")}
                         >
                           <Trash2 className="mr-2 h-4 w-4" /> Delete
                         </Button>

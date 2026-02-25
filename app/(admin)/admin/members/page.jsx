@@ -26,17 +26,16 @@ export default function MembersPage() {
     const fetchData = async () => {
       try {
         setLoading(true)
-        const token = getAuthToken()
+       
 
         // Fetch members
         const membersResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/users/members`, {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("access_token")}`,
-          },
-        })
+        method: "GET",
+        credentials: "include",
+      })
 
         // Fetch designations
-        const designationsResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/designations`, {
+        const designationsResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/users/designations`, {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("access_token")}`,
           },
