@@ -56,7 +56,7 @@ export function AuthProvider({ children }) {
         body: JSON.stringify({ email, password }),
         credentials: "include",
       })
-      console.log(response)
+
       if (response.ok) {
         await checkAuth()
         return { success: true }
