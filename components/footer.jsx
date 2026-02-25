@@ -6,13 +6,11 @@ import { useEffect, useState } from "react"
 const Footer = () => {
   const fetchData = async () => {
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/trust/contact/`)
-      console.log(response)
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/trust/contact`)
       if (!response.ok) {
         throw new Error("Network response was not ok")
       }
       const data = await response.json()
-      console.log("found",data)
       return data[0]
     } catch (error) {
       console.error("Error fetching footer data:", error)

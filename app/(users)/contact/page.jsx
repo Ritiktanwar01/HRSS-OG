@@ -45,10 +45,10 @@ export default function ContactPage() {
   useEffect(() => {
     const fetchContactInfo = async () => {
       try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/trust/contact`)
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/trust/contact/`)
         if (response.ok) {
           const data = await response.json()
-        
+        console.log(data)
           setContactInfo(data[0])
         }
       } catch (error) {
