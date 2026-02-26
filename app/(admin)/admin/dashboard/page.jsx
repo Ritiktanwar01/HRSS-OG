@@ -5,6 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Users, ImageIcon, Mail, DollarSign, Calendar, FileText, BarChart3, TrendingUp } from "lucide-react"
 import { useAuth } from "@/hooks/use-auth"
+import { getCookie } from "@/hooks/api"
 
 export default function AdminDashboardPage() {
   const [stats, setStats] = useState({
@@ -24,6 +25,10 @@ useEffect(() => {
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/users/dashboard/`, {
         method: "GET",
         credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+          "X-CSRFToken": getCookie("csrftoken"),
+        },
       })
 
       if (response.ok) {
