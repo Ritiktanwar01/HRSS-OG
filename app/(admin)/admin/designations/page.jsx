@@ -43,6 +43,7 @@ export default function DesignationsPage() {
 
         if (response.ok) {
           const data = await response.json()
+          console.log("Fetched designations:", data)
           setDesignations(data)
         }
       } catch (error) {
