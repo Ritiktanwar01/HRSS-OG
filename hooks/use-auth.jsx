@@ -31,12 +31,12 @@ export function AuthProvider({ children }) {
         setUser(userData)
       } else {
         setUser(null)
-        router.push("/admin/login")
+        // router.push("/admin/login")
       }
     } catch (error) {
       console.error("Auth check error:", error)
       setUser(null)
-      router.push("/admin/login")
+      // router.push("/admin/login")
     } finally {
       setLoading(false)
     }
