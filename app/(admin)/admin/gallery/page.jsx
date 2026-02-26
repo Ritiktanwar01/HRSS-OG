@@ -45,13 +45,15 @@ export default function AdminGalleryPage() {
   useEffect(() => {
     const fetchGalleryItems = async () => {
       try {
+        const csrfToken = await fetchCsrfToken()
         const response = await fetch(
           `${process.env.NEXT_PUBLIC_API_URL}/api/trust/galleryitem/`,
           {
             credentials: "include",
             headers: {
-              "X-CSRFToken": getCookie("csrftoken"),
-            },
+          "Content-Type": "application/json",
+          ...(csrfToken && { "X-CSRFToken": csrfToken }),
+        },
           }
         );
 

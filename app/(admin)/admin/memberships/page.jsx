@@ -8,7 +8,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Loader2, Search, Eye, Edit2, Trash2, Users } from "lucide-react"
 import { toast } from "@/components/ui/use-toast"
-import { getCookie } from "@/hooks/api"
 import { fetchCsrfToken } from "@/hooks/use-auth"
 
 export default function MembershipsPage() {
@@ -30,13 +29,16 @@ export default function MembershipsPage() {
 
   const fetchMemberships = async () => {
     try {
+      const csrfToken = await fetchCsrfToken()
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/api/users/membership-applications/list/`,
         {
           method: "GET",
           credentials: "include",
           headers: {
-            "X-CSRFToken": getCookie("csrftoken"),          },
+          "Content-Type": "application/json",
+          ...(csrfToken && { "X-CSRFToken": csrfToken }),
+        },
         }
       )
       if (!response.ok) throw new Error("Failed to fetch")
@@ -72,30 +74,36 @@ export default function MembershipsPage() {
 
   // Accept an application
   const handleAccept = async (id) => {
-    try {
-      const csrfToken = await fetchCsrfToken()
-      const formData = new FormData()
-      formData.append("status", "accepted")
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/users/membership-applications/${id}/`,
-        {
-          method: "PUT",
-          credentials: "include",
-          headers: {
+  try {
+    const csrfToken = await fetchCsrfToken()
+
+    const response = await fetch(
+      `${process.env.NEXT_PUBLIC_API_URL}/api/users/membership-applications/${id}/`,
+      {
+        method: "PUT", // PATCH is safer for partial updates
+        credentials: "include",
+        headers: {
           "Content-Type": "application/json",
           ...(csrfToken && { "X-CSRFToken": csrfToken }),
         },
-          body: formData,
-        }
-      )
-      if (!response.ok) throw new Error("Failed to accept")
-      toast({title: "Success", description: "Application accepted"})
-      fetchMemberships()
-      setSelectedMembership(null)
-    } catch (error) {
-      toast({title: "Error", description: "Unable to accept", variant: "destructive"})
-    }
+        body: JSON.stringify({ status: "accepted" }),
+      }
+    )
+
+    if (!response.ok) throw new Error("Failed to accept")
+
+    toast({ title: "Success", description: "Application accepted" })
+    fetchMemberships()
+    setSelectedMembership(null)
+  } catch (error) {
+    toast({
+      title: "Error",
+      description: "Unable to accept",
+      variant: "destructive",
+    })
   }
+}
+
 
   // Reject an application (opens confirmation)
   const initiateReject = (membership) => {

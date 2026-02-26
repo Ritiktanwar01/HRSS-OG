@@ -10,7 +10,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog"
 import { Loader2, Plus, Search, Eye, Edit2, Trash2, FileText } from "lucide-react"
 import { toast } from "@/components/ui/use-toast"
-import { getCookie } from "@/hooks/api"
+import { fetchCsrfToken } from "@/hooks/use-auth"
 
 export default function NoticesPage() {
   const [notices, setNotices] = useState([])
@@ -63,13 +63,15 @@ export default function NoticesPage() {
 
   const fetchNotices = async () => {
     try {
+      const csrfToken = await fetchCsrfToken()
       let url = `${process.env.NEXT_PUBLIC_API_URL}/api/users/public-notices/`
       if (categoryFilter !== "all") url += `category=${categoryFilter}&`
       if (searchTerm) url += `search=${encodeURIComponent(searchTerm)}&`
       const response = await fetch(url, {
         credentials: "include",
         headers: {
-          "X-CSRFToken": getCookie("csrftoken"),
+          "Content-Type": "application/json",
+          ...(csrfToken && { "X-CSRFToken": csrfToken }),
         },
       })
 
@@ -90,14 +92,16 @@ export default function NoticesPage() {
 
   const handleDelete = async (id) => {
     try {
+      const csrfToken = await fetchCsrfToken()
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/api/users/public-notices/${id}/`,
         {
           method: "DELETE",
           credentials: "include",
           headers: {
-            "X-CSRFToken": getCookie("csrftoken"),
-          },
+          "Content-Type": "application/json",
+          ...(csrfToken && { "X-CSRFToken": csrfToken }),
+        },
         }
       )
 
@@ -109,8 +113,8 @@ export default function NoticesPage() {
       })
 
       // clear selection if it matches
-      if (selectedNotice?._id === id) setSelectedNotice(null)
-      if (currentNotice?._id === id) setCurrentNotice(null)
+      if (selectedNotice?.id === id) setSelectedNotice(null)
+      if (currentNotice?.id === id) setCurrentNotice(null)
 
       fetchNotices()
     } catch (error) {
@@ -125,6 +129,7 @@ export default function NoticesPage() {
   const handleAddNotice = async (e) => {
     e.preventDefault()
     try {
+      const csrfToken = await fetchCsrfToken()
       const data = { ...formData }
       if (uploadedFile) {
         // in real scenario with backend support
@@ -136,9 +141,9 @@ export default function NoticesPage() {
           method: "POST",
           credentials: "include",
           headers: {
-            "Content-Type": "application/json",
-            "X-CSRFToken": getCookie("csrftoken"),
-          },
+          "Content-Type": "application/json",
+          ...(csrfToken && { "X-CSRFToken": csrfToken }),
+        },
           body: JSON.stringify(data),
         }
       )
@@ -175,26 +180,27 @@ export default function NoticesPage() {
   const handleEditNotice = async (e) => {
     e.preventDefault()
     try {
+      const csrfToken = await fetchCsrfToken()
       const data = { ...formData }
       if (uploadedFile) {
         // handle file upload if needed
       }
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/users/public-notices/${currentNotice._id}/`,
+        `${process.env.NEXT_PUBLIC_API_URL}/api/users/public-notices/${currentNotice.id}/`,
         {
           method: "PUT",
           credentials: "include",
           headers: {
-            "Content-Type": "application/json",
-            "X-CSRFToken": getCookie("csrftoken"),
-          },
+          "Content-Type": "application/json",
+          ...(csrfToken && { "X-CSRFToken": csrfToken }),
+        },
           body: JSON.stringify(data),
         }
       )
       if (response.ok) {
         const updated = await response.json()
         setNotices(
-          notices.map((n) => (n._id === updated._id ? updated : n))
+          notices.map((n) => (n.id === updated.id ? updated : n))
         )
         setIsEditDialogOpen(false)
         setCurrentNotice(null)
@@ -455,7 +461,7 @@ export default function NoticesPage() {
               </thead>
               <tbody>
                 {notices.map((notice) => (
-                  <tr key={notice._id} className="border-b border-gray-100 hover:bg-gray-50">
+                  <tr key={notice.id} className="border-b border-gray-100 hover:bg-gray-50">
                     <td className="py-3 px-4 font-medium text-gray-900">{notice.title}</td>
                     <td className="py-3 px-4">
                       <span className={`px-3 py-1 rounded-full text-xs font-semibold ${getCategoryBadge(notice.category)}`}>
@@ -467,7 +473,7 @@ export default function NoticesPage() {
                         {notice.isPublished ? "Published" : "Draft"}
                       </span>
                     </td>
-                    <td className="py-3 px-4 text-gray-600">{formatDate(notice.createdAt)}</td>
+                    <td className="py-3 px-4 text-gray-600">{formatDate(notice.published_at)}</td>
                     <td className="py-3 px-4 flex gap-2">
                       <Button
                         size="sm"
@@ -505,7 +511,7 @@ export default function NoticesPage() {
       {/* Mobile Card View */}
       <div className="lg:hidden space-y-4">
         {filteredNotices.map((notice) => (
-          <Card key={notice._id} className="border-bhagva-200">
+          <Card key={notice.id} className="border-bhagva-200">
             <CardContent className="pt-6">
               <div className="mb-4">
                 <p className="font-semibold text-gray-900 mb-2">{notice.title}</p>
@@ -601,7 +607,7 @@ export default function NoticesPage() {
                   </Button>
                   <Button
                     onClick={() => {
-                      handleDelete(selectedNotice._id)
+                      handleDelete(selectedNotice.id)
                       setSelectedNotice(null)
                     }}
                     variant="destructive"
@@ -741,7 +747,7 @@ export default function NoticesPage() {
               type="button"
               variant="destructive"
               onClick={() => {
-                handleDelete(currentNotice._id)
+                handleDelete(currentNotice.id)
                 setIsDeleteDialogOpen(false)
               }}
             >
