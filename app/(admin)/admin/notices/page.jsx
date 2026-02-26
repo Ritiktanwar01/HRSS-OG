@@ -18,6 +18,8 @@ export default function NoticesPage() {
   const [searchTerm, setSearchTerm] = useState("")
   const [categoryFilter, setCategoryFilter] = useState("all")
   const [selectedNotice, setSelectedNotice] = useState(null)
+  const [isAddingFile, setIsAddingFile] = useState(false)
+  const [uploadedFile, setUploadedFile] = useState(null)
 
   // dialog state & form data for create/update/delete
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
@@ -41,6 +43,18 @@ export default function NoticesPage() {
       ...prev,
       [name]: type === "checkbox" ? checked : value,
     }))
+  }
+
+  const handleFileChange = async (e) => {
+    const file = e.target.files[0]
+    if (!file) return
+    // in real scenario, upload to server or use FormData
+    setUploadedFile(file)
+    setFormData((prev) => ({
+      ...prev,
+      fileName: file.name,
+    }))
+    toast({ title: 'File selected', description: file.name })
   }
 
   useEffect(() => {
@@ -111,6 +125,11 @@ export default function NoticesPage() {
   const handleAddNotice = async (e) => {
     e.preventDefault()
     try {
+      const data = { ...formData }
+      if (uploadedFile) {
+        // in real scenario with backend support
+        // create FormData and send
+      }
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/api/users/public-notices/`,
         {
@@ -120,13 +139,15 @@ export default function NoticesPage() {
             "Content-Type": "application/json",
             "X-CSRFToken": getCookie("csrftoken"),
           },
-          body: JSON.stringify(formData),
+          body: JSON.stringify(data),
         }
       )
       if (response.ok) {
         const newNotice = await response.json()
         setNotices([newNotice, ...notices])
         setIsAddDialogOpen(false)
+        setUploadedFile(null)
+        setIsAddingFile(false)
         setFormData({
           title: "",
           description: "",
@@ -154,6 +175,10 @@ export default function NoticesPage() {
   const handleEditNotice = async (e) => {
     e.preventDefault()
     try {
+      const data = { ...formData }
+      if (uploadedFile) {
+        // handle file upload if needed
+      }
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/api/users/public-notices/${currentNotice._id}/`,
         {
@@ -163,7 +188,7 @@ export default function NoticesPage() {
             "Content-Type": "application/json",
             "X-CSRFToken": getCookie("csrftoken"),
           },
-          body: JSON.stringify(formData),
+          body: JSON.stringify(data),
         }
       )
       if (response.ok) {
@@ -173,6 +198,8 @@ export default function NoticesPage() {
         )
         setIsEditDialogOpen(false)
         setCurrentNotice(null)
+        setUploadedFile(null)
+        setIsAddingFile(false)
         setFormData({
           title: "",
           description: "",
@@ -301,23 +328,35 @@ export default function NoticesPage() {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="fileUrl">File URL</Label>
-              <Input
-                id="fileUrl"
-                name="fileUrl"
-                value={formData.fileUrl}
-                onChange={handleInputChange}
-              />
+              <Label className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  checked={isAddingFile}
+                  onChange={(e) => {
+                    setIsAddingFile(e.target.checked)
+                    if (!e.target.checked) setUploadedFile(null)
+                  }}
+                  className="checkbox"
+                />
+                Add File
+              </Label>
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="fileName">File Name</Label>
-              <Input
-                id="fileName"
-                name="fileName"
-                value={formData.fileName}
-                onChange={handleInputChange}
-              />
-            </div>
+            {isAddingFile && (
+              <>
+                <div className="space-y-2">
+                  <Label htmlFor="file">Upload File</Label>
+                  <Input
+                    id="file"
+                    type="file"
+                    onChange={handleFileChange}
+                    accept=".pdf,.doc,.docx,.txt,.xlsx,.zip"
+                  />
+                  {uploadedFile && (
+                    <p className="text-sm text-gray-600">Selected: {uploadedFile.name}</p>
+                  )}
+                </div>
+              </>
+            )}
             <div className="flex gap-4">
               <div className="flex-1">
                 <Label htmlFor="category">Category</Label>

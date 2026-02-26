@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { toast } from "@/components/ui/use-toast"
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 
 // schema for admin edit
 const schema = z.object({
@@ -56,6 +57,9 @@ export default function EditMembershipPage({ params }) {
             status: app.status,
             remark: app.remark || "",
           })
+          if (app.image) {
+            setExistingImage(process.env.NEXT_PUBLIC_API_URL + app.image)
+          }
         }
       } catch (e) {
         console.error(e)

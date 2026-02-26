@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Loader2, Search, Eye, Edit2, Trash2, Users } from "lucide-react"
 import { toast } from "@/components/ui/use-toast"
-import Link from "next/link"
+import { getCookie } from "@/hooks/api"
 
 export default function MembershipsPage() {
   const [memberships, setMemberships] = useState([])
@@ -35,13 +35,11 @@ export default function MembershipsPage() {
           method: "GET",
           credentials: "include",
           headers: {
-            // Authorization: `Bearer ${localStorage.getItem("adminToken")}`,
-          },
+            "X-CSRFToken": getCookie("csrftoken"),          },
         }
       )
       if (!response.ok) throw new Error("Failed to fetch")
       const data = await response.json()
-    console.log("Fetched memberships:", data)
       setMemberships(data)
       setLoading(false) // ensure loading false after fetch
     } catch (error) {
@@ -74,13 +72,18 @@ export default function MembershipsPage() {
   // Accept an application
   const handleAccept = async (id) => {
     try {
+      const formData = new FormData()
+      formData.append("status", "accepted")
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/api/users/membership-applications/${id}/`,
         {
           method: "PUT",
           credentials: "include",
-          headers: {"Content-Type": "application/json"},
-          body: JSON.stringify({status: "accepted"}),
+          headers: {
+            // do not set Content-Type when sending FormData; browser handles it
+            "X-CSRFToken": getCookie("csrftoken"),
+          },
+          body: formData,
         }
       )
       if (!response.ok) throw new Error("Failed to accept")
@@ -101,13 +104,19 @@ export default function MembershipsPage() {
   const handleReject = async () => {
     if (!selectedMembership) return
     try {
+      const formData = new FormData()
+      formData.append("status", "rejected")
+      formData.append("remark", rejectRemark)
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/api/users/membership-applications/${selectedMembership.id}/`,
         {
           method: "PUT",
           credentials: "include",
-          headers: {"Content-Type": "application/json"},
-          body: JSON.stringify({status: "rejected", remark: rejectRemark}),
+          headers: {
+            // omit Content-Type for FormData
+            "X-CSRFToken": getCookie("csrftoken"),
+          },
+          body: formData,
         }
       )
       if (!response.ok) throw new Error("Failed to reject")
@@ -267,60 +276,9 @@ export default function MembershipsPage() {
                   <th className="text-left py-3 px-4 font-semibold">Actions</th>
                 </tr>
               </thead>
-              <tbody>
-                {filteredMemberships.map((membership) => (
-                  <tr key={membership.id} className="border-b border-gray-100 hover:bg-gray-50">
-                    <td className="py-3 px-4 flex items-center">
-                      {membership.image && (
-                        <img
-                          src={membership.image}
-                          alt="photo"
-                          className="h-6 w-6 rounded-full mr-2 object-cover"
-                        />
-                      )}
-                      {membership.full_name}
-                    </td>                    <td className="py-3 px-4 text-blue-600">{membership.email}</td>
-                    <td className="py-3 px-4">{membership.mobile}</td>
-                    <td className="py-3 px-4">
-                      <span className={`px-3 py-1 rounded-full text-xs font-semibold ${getStatusBadge(membership.status)}`}>
-                        {membership.status.charAt(0).toUpperCase() + membership.status.slice(1)}
-                      </span>
-                    </td>
-                    <td className="py-3 px-4">
-                      <span className={`px-3 py-1 rounded-full text-xs font-semibold ${membership.fee_paid ? "bg-green-100 text-green-800" : "bg-gray-100 text-gray-800"}`}>
-                        {membership.fee_paid ? "Yes" : "No"}
-                      </span>
-                    </td>
-                    <td className="py-3 px-4 text-gray-600">{formatDate(membership.created_at)}</td>
-                    <td className="py-3 px-4 flex gap-2">
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => setSelectedMembership(membership)}
-                        className="text-bhagva-700 border-bhagva-200"
-                      >
-                        <Eye className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="solid"
-                        onClick={() => handleAccept(membership.id)}
-                        className="bg-green-100 text-green-700"
-                      >
-                        Accept
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => initiateReject(membership)}
-                        className="text-red-600 border-red-200"
-                      >
-                        Reject
-                      </Button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
+              <tbody>{filteredMemberships.map((membership) => (
+                  <tr key={membership.id} className="border-b border-gray-100 hover:bg-gray-50"><td className="py-3 px-4 flex items-center">{membership.image && (<img src={process.env.NEXT_PUBLIC_API_URL + membership.image} alt="photo" className="h-6 w-6 rounded-full mr-2 object-cover" />)}{membership.full_name}</td><td className="py-3 px-4 text-blue-600">{membership.email}</td><td className="py-3 px-4">{membership.mobile}</td><td className="py-3 px-4"><span className={`px-3 py-1 rounded-full text-xs font-semibold ${getStatusBadge(membership.status)}`}>{membership.status.charAt(0).toUpperCase() + membership.status.slice(1)}</span></td><td className="py-3 px-4"><span className={`px-3 py-1 rounded-full text-xs font-semibold ${membership.fee_paid ? "bg-green-100 text-green-800" : "bg-gray-100 text-gray-800"}`}>{membership.fee_paid ? "Yes" : "No"}</span></td><td className="py-3 px-4 text-gray-600">{formatDate(membership.created_at)}</td><td className="py-3 px-4 flex gap-2"><Button size="sm" variant="outline" onClick={() => setSelectedMembership(membership)} className="text-bhagva-700 border-bhagva-200"><Eye className="h-4 w-4" /></Button><Button size="sm" variant="solid" onClick={() => handleAccept(membership.id)} className="bg-green-100 text-green-700">Accept</Button><Button size="sm" variant="outline" onClick={() => initiateReject(membership)} className="text-red-600 border-red-200">Reject</Button></td></tr>
+                ))}</tbody>
             </table>
           </div>
         </CardContent>
@@ -335,7 +293,7 @@ export default function MembershipsPage() {
                 <div className="flex items-center">
                   {membership.image && (
                     <img
-                      src={membership.image}
+                      src={process.env.NEXT_PUBLIC_API_URL + membership.image}
                       alt="photo"
                       className="h-6 w-6 rounded-full mr-2 object-cover"
                     />
@@ -407,7 +365,7 @@ export default function MembershipsPage() {
               {selectedMembership.image && (
                 <div className="text-center mb-4">
                   <img
-                    src={selectedMembership.image}
+                    src={process.env.NEXT_PUBLIC_API_URL+ selectedMembership.image}
                     alt="Applicant photo"
                     className="mx-auto h-32 w-32 rounded-full object-cover"
                   />

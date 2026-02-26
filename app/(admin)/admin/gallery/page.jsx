@@ -58,8 +58,8 @@ export default function AdminGalleryPage() {
         if (response.ok) {
           const data = await response.json();
           setGalleryItems({
-            images: data.filter((item) => item.type === "image"),
-            videos: data.filter((item) => item.type === "video"),
+            images: data.filter((item) => item.media_type === "image" || item.type === "image"),
+            videos: data.filter((item) => item.media_type === "video" || item.type === "video"),
           });
         } else {
           throw new Error("Failed to fetch");
@@ -210,7 +210,7 @@ export default function AdminGalleryPage() {
       const form = new FormData();
       form.append("title", newItem.title);
       form.append("description", newItem.description);
-      form.append("gallery_type", newItem.category);
+      form.append("gallery_type", newItem.category === "events" ? "EVENT" : newItem.category === "serviceProjects" ? "SERVICE" : "VOLUNTEER");
       form.append("type", newItem.type);
 
       if (newItem.type === "image") {
@@ -442,7 +442,7 @@ export default function AdminGalleryPage() {
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {galleryItems.images.map((item) => (
                   <div key={item.id} className="relative group overflow-hidden rounded-md border">
-                    <img src={process.env.NEXT_PUBLIC_API_URL + item.url || "/placeholder.svg"} alt={item.title} className="w-full h-48 object-cover" />
+                    <img src={(item.image || item.url) && !item.image?.startsWith('http') ? process.env.NEXT_PUBLIC_API_URL + (item.image || item.url) : (item.image || item.url) || "/placeholder.svg"} alt={item.title} className="w-full h-48 object-cover" />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent flex flex-col justify-end p-4 text-white">
                       <h3 className="font-semibold text-lg">{item.title}</h3>
                       <p className="text-sm text-white/90">{item.description}</p>

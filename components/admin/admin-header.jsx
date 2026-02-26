@@ -1,5 +1,6 @@
 "use client"
 
+import { useState, useEffect } from "react"
 import { Menu, Bell, User } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
@@ -15,6 +16,41 @@ import { useAuth } from "@/hooks/use-auth"
 
 export default function AdminHeader({ toggleSidebar }) {
   const { user, logout } = useAuth()
+  const [notifications, setNotifications] = useState([])
+  const [showNotifications, setShowNotifications] = useState(false)
+
+  useEffect(() => {
+    fetchNotifications()
+  }, [])
+
+  const fetchNotifications = async () => {
+    try {
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/users/notifications/`,
+        { credentials: 'include' }
+      )
+      if (!res.ok) throw new Error()
+      const data = await res.json()
+      setNotifications(data)
+    } catch (e) {
+      console.error('failed to load notifications', e)
+    }
+  }
+
+  const markRead = async (id) => {
+    try {
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/users/notifications/${id}/read/`,
+        { method: 'PUT', credentials: 'include' }
+      )
+      if (!res.ok) throw new Error()
+      setNotifications((nots) =>
+        nots.map((n) => (n.id === id ? { ...n, is_read: true } : n))
+      )
+    } catch (e) {
+      console.error('mark read failed', e)
+    }
+  }
 
   return (
     <header
@@ -36,11 +72,54 @@ export default function AdminHeader({ toggleSidebar }) {
       {/* Right side - Notifications and user menu */}
       <div className="flex items-center gap-2">
         {/* Notifications */}
-        <Button variant="ghost" size="icon" className="relative">
-          <Bell className="h-5 w-5" />
-          <span className="absolute -top-1 -right-1 h-3 w-3 rounded-full bg-red-500"></span>
-          <span className="sr-only">Notifications</span>
-        </Button>
+        <div className="relative">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="relative"
+            onClick={() => {
+              setShowNotifications((v) => {
+                const next = !v
+                if (next) fetchNotifications()
+                return next
+              })
+            }}
+          >
+            <Bell className="h-5 w-5" />
+            {notifications.some((n) => !n.is_read) && (
+              <span className="absolute -top-1 -right-1 h-3 w-3 rounded-full bg-red-500"></span>
+            )}
+            <span className="sr-only">Notifications</span>
+          </Button>
+          {showNotifications && (
+            <div className="absolute right-0 mt-2 w-80 max-h-96 overflow-y-auto bg-white shadow-lg z-50">
+              {notifications.length === 0 ? (
+                <p className="p-4 text-center text-sm text-gray-500">
+                  No notifications
+                </p>
+              ) : (
+                notifications.map((n) => (
+                  <div
+                    key={n.id}
+                    className={`p-2 border-b last:border-b-0 ${
+                      n.is_read ? "" : "font-semibold bg-gray-50"
+                    }`}
+                  >
+                    <p className="text-sm">{n.message}</p>
+                    {!n.is_read && (
+                      <button
+                        className="text-xs text-blue-600"
+                        onClick={() => markRead(n.id)}
+                      >
+                        Mark read
+                      </button>
+                    )}
+                  </div>
+                ))
+              )}
+            </div>
+          )}
+        </div>
 
         {/* User menu */}
         <DropdownMenu>
@@ -48,7 +127,7 @@ export default function AdminHeader({ toggleSidebar }) {
             <Button variant="ghost" className="relative h-8 w-8 rounded-full">
               <Avatar className="h-8 w-8">
                 <AvatarFallback className="bg-bhagva-100 text-bhagva-700">
-                  {user?.name?.charAt(0) || "B"}
+                  {user?.username?.charAt(0) || "B"}
                 </AvatarFallback>
               </Avatar>
             </Button>

@@ -2,6 +2,8 @@
 import Link from "next/link"
 import { Facebook, Twitter, Instagram, Youtube, Mail, Phone, MapPin } from "lucide-react"
 import { useEffect, useState } from "react"
+import { toast } from "@/components/ui/use-toast"
+import { getCookie } from "@/hooks/api"
 
 const Footer = () => {
   const fetchData = async () => {
@@ -22,6 +24,8 @@ const Footer = () => {
     email: "",
     officeHours: "",
   })
+  const [subscribeEmail, setSubscribeEmail] = useState("")
+  const [isSubscribing, setIsSubscribing] = useState(false)
   useEffect(() => {
     const getData = async () => {
       const data = await fetchData()
@@ -29,6 +33,30 @@ const Footer = () => {
     }
     getData()
   }, [])
+
+  const handleSubscribe = async (e) => {
+    e.preventDefault()
+    if (!subscribeEmail) return
+    setIsSubscribing(true)
+    try {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/users/subscribe/`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': getCookie('csrftoken'),
+        },
+        body: JSON.stringify({ email: subscribeEmail }),
+      })
+      if (!res.ok) throw new Error()
+      toast({ title: 'Success', description: 'Subscribed to public notices!' })
+      setSubscribeEmail('')
+    } catch (e) {
+      toast({ title: 'Error', description: 'Failed to subscribe', variant: 'destructive' })
+    } finally {
+      setIsSubscribing(false)
+    }
+  }
   return (
     <footer className="bg-gray-900 text-white">
       <div className="container mx-auto px-4 py-12">
@@ -116,18 +144,22 @@ const Footer = () => {
           <div>
             <h3 className="font-semibold text-lg mb-4">Newsletter</h3>
             <p className="text-gray-400 mb-4">Subscribe to our newsletter for updates on our activities and events.</p>
-            <form className="space-y-2">
+            <form className="space-y-2" onSubmit={handleSubscribe}>
               <div className="flex">
                 <input
                   type="email"
                   placeholder="Your email"
+                  value={subscribeEmail}
+                  onChange={(e) => setSubscribeEmail(e.target.value)}
+                  required
                   className="px-3 py-2 bg-gray-800 text-white rounded-l-md w-full focus:outline-none focus:ring-1 focus:ring-bhagva-500"
                 />
                 <button
                   type="submit"
-                  className="bg-bhagva-700 hover:bg-bhagva-800 px-4 py-2 rounded-r-md transition-colors"
+                  disabled={isSubscribing}
+                  className="bg-bhagva-700 hover:bg-bhagva-800 disabled:opacity-50 px-4 py-2 rounded-r-md transition-colors"
                 >
-                  Subscribe
+                  {isSubscribing ? 'Subscribing...' : 'Subscribe'}
                 </button>
               </div>
             </form>
