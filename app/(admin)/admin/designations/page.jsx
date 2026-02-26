@@ -32,7 +32,7 @@ export default function DesignationsPage() {
       try {
         setLoading(true)
         const csrfToken = await fetchCsrfToken()
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/users/designations`, {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/users/designations/`, {
         method: "GET",
         credentials: "include",
         headers: {
@@ -40,7 +40,7 @@ export default function DesignationsPage() {
           ...(csrfToken && { "X-CSRFToken": csrfToken }),
         }
       })
-
+console.log("Fetching designations, response status:", response)
         if (response.ok) {
           const data = await response.json()
           console.log("Fetched designations:", data)
