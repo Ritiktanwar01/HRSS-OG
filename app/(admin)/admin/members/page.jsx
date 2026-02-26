@@ -36,17 +36,25 @@ export default function MembersPage() {
       try {
         setLoading(true)
 
-
+        const csrfToken = await fetchCsrfToken()
         // Fetch members
         const membersResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/users/profiles`, {
           method: "GET",
           credentials: "include",
+          headers: {
+            "Content-Type": "application/json",
+            ...(csrfToken && { "X-CSRFToken": csrfToken }),
+          },
         })
 
         // Fetch designations
         const designationsResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/users/designations`, {
           method: "GET",
           credentials: "include",
+          headers: {
+            "Content-Type": "application/json",
+            ...(csrfToken && { "X-CSRFToken": csrfToken }),
+          },
         })
 
         if (membersResponse.ok && designationsResponse.ok) {
