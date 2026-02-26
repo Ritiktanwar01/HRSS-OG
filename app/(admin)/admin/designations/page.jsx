@@ -40,10 +40,8 @@ export default function DesignationsPage() {
           ...(csrfToken && { "X-CSRFToken": csrfToken }),
         }
       })
-console.log("Fetching designations, response status:", response)
         if (response.ok) {
           const data = await response.json()
-          console.log("Fetched designations:", data)
           setDesignations(data)
         }
       } catch (error) {

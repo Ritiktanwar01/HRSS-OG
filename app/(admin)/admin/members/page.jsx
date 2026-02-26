@@ -38,7 +38,7 @@ export default function MembersPage() {
 
         const csrfToken = await fetchCsrfToken()
         // Fetch members
-        const membersResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/users/profiles`, {
+        const membersResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/users/profiles/`, {
           method: "GET",
           credentials: "include",
           headers: {
@@ -48,7 +48,7 @@ export default function MembersPage() {
         })
 
         // Fetch designations
-        const designationsResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/users/designations`, {
+        const designationsResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/users/designations/`, {
           method: "GET",
           credentials: "include",
           headers: {
