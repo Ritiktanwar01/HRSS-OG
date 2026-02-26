@@ -29,7 +29,6 @@ export function AuthProvider({ children }) {
       if (response.ok) {
         const userData = await response.json()
         setUser(userData)
-        router.push("/admin/login")
       } else {
         setUser(null)
         router.push("/admin/login")
@@ -37,6 +36,7 @@ export function AuthProvider({ children }) {
     } catch (error) {
       console.error("Auth check error:", error)
       setUser(null)
+      router.push("/admin/login")
     } finally {
       setLoading(false)
     }
