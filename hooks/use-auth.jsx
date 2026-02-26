@@ -10,13 +10,18 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true)
   const router = useRouter()
 
-  // Helper: get CSRF token from cookies
-  const getCsrfToken = () => {
-    if (typeof document !== "undefined") {
-      const match = document.cookie.match(/csrftoken=([^;]+)/)
-      return match ? match[1] : null
+  // Fetch CSRF token from backend
+  const fetchCsrfToken = async () => {
+    try {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/csrf/`, {
+        credentials: "include",
+      })
+      const data = await res.json()
+      return data.csrfToken
+    } catch (err) {
+      console.error("Failed to fetch CSRF token:", err)
+      return null
     }
-    return null
   }
 
   // Check if user is logged in
@@ -29,7 +34,6 @@ export function AuthProvider({ children }) {
       if (response.ok) {
         const userData = await response.json()
         setUser(userData)
-        router.push("/admin/login")
       } else {
         setUser(null)
         router.push("/admin/login")
@@ -49,11 +53,12 @@ export function AuthProvider({ children }) {
   // Login
   const Login = async (email, password) => {
     try {
+      const csrfToken = await fetchCsrfToken()
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/users/auth/login/`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "X-CSRFToken": getCsrfToken(),
+          ...(csrfToken && { "X-CSRFToken": csrfToken }),
         },
         body: JSON.stringify({ email, password }),
         credentials: "include",
@@ -64,7 +69,7 @@ export function AuthProvider({ children }) {
         return { success: true }
       } else {
         const error = await response.json()
-        return { success: false, message: error.message }
+        return { success: false, message: error.message || "Login failed" }
       }
     } catch (error) {
       console.error("Login error:", error)
@@ -75,10 +80,11 @@ export function AuthProvider({ children }) {
   // Logout
   const Logout = async () => {
     try {
-      await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/logout/`, {
+      const csrfToken = await fetchCsrfToken()
+      await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/users/auth/logout/`, {
         method: "POST",
         headers: {
-          "X-CSRFToken": getCsrfToken(),
+          ...(csrfToken && { "X-CSRFToken": csrfToken }),
         },
         credentials: "include",
       })
