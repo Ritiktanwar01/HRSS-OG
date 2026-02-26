@@ -9,6 +9,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { Loader2, Search, Eye, Edit2, Trash2, Users } from "lucide-react"
 import { toast } from "@/components/ui/use-toast"
 import { getCookie } from "@/hooks/api"
+import { fetchCsrfToken } from "@/hooks/use-auth"
 
 export default function MembershipsPage() {
   const [memberships, setMemberships] = useState([])
@@ -72,6 +73,7 @@ export default function MembershipsPage() {
   // Accept an application
   const handleAccept = async (id) => {
     try {
+      const csrfToken = await fetchCsrfToken()
       const formData = new FormData()
       formData.append("status", "accepted")
       const response = await fetch(
@@ -80,9 +82,9 @@ export default function MembershipsPage() {
           method: "PUT",
           credentials: "include",
           headers: {
-            // do not set Content-Type when sending FormData; browser handles it
-            "X-CSRFToken": getCookie("csrftoken"),
-          },
+          "Content-Type": "application/json",
+          ...(csrfToken && { "X-CSRFToken": csrfToken }),
+        },
           body: formData,
         }
       )
@@ -104,6 +106,7 @@ export default function MembershipsPage() {
   const handleReject = async () => {
     if (!selectedMembership) return
     try {
+      const csrfToken = await fetchCsrfToken()
       const formData = new FormData()
       formData.append("status", "rejected")
       formData.append("remark", rejectRemark)
@@ -113,9 +116,9 @@ export default function MembershipsPage() {
           method: "PUT",
           credentials: "include",
           headers: {
-            // omit Content-Type for FormData
-            "X-CSRFToken": getCookie("csrftoken"),
-          },
+          "Content-Type": "application/json",
+          ...(csrfToken && { "X-CSRFToken": csrfToken }),
+        },
           body: formData,
         }
       )

@@ -5,13 +5,8 @@ import { useRouter } from "next/navigation"
 
 const AuthContext = createContext()
 
-export function AuthProvider({ children }) {
-  const [user, setUser] = useState(null)
-  const [loading, setLoading] = useState(true)
-  const router = useRouter()
 
-  // Fetch CSRF token from backend
-  const fetchCsrfToken = async () => {
+export const fetchCsrfToken = async () => {
     try {
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/csrf/`, {
         credentials: "include",
@@ -23,6 +18,14 @@ export function AuthProvider({ children }) {
       return null
     }
   }
+
+export function AuthProvider({ children }) {
+  const [user, setUser] = useState(null)
+  const [loading, setLoading] = useState(true)
+  const router = useRouter()
+
+  // Fetch CSRF token from backend
+  
 
   // Check if user is logged in
   const checkAuth = async () => {

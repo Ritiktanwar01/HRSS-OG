@@ -10,7 +10,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Search, MoreVertical, UserCog, Mail, UserX } from "lucide-react"
-import { getCookie } from "@/hooks/api"
+import { fetchCsrfToken } from "@/hooks/use-auth"
 
 export default function MembersPage() {
   const [members, setMembers] = useState([])
@@ -109,13 +109,13 @@ export default function MembersPage() {
         console.error("No matching designation id found")
         return
       }
-
+      const csrfToken = await fetchCsrfToken()
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/users/designations/assign/`, {
         method: "POST",
         credentials: "include",
         headers: {
           "Content-Type": "application/json",
-          "X-CSRFToken": getCookie("csrftoken"),
+          ...(csrfToken && { "X-CSRFToken": csrfToken }),
         },
         body: JSON.stringify({
           profileId: currentMember.id,
@@ -128,7 +128,7 @@ export default function MembersPage() {
         setMembers(
           members.map((member) =>
             member.id === currentMember.id
-              ? { ...member, designation: designationObj } 
+              ? { ...member, designation: designationObj }
               : member
           )
         );
@@ -147,6 +147,7 @@ export default function MembersPage() {
   // Handle send message
   const handleSendMessage = async () => {
     try {
+      const csrfToken = await fetchCsrfToken()
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/api/users/members/${currentMember?.id}/message/`,
         {
@@ -154,7 +155,7 @@ export default function MembersPage() {
           credentials: "include",
           headers: {
             "Content-Type": "application/json",
-            "X-CSRFToken": getCookie("csrftoken"),
+            ...(csrfToken && { "X-CSRFToken": csrfToken }),
           },
           body: JSON.stringify({
             subject: messageSubject,
@@ -176,13 +177,15 @@ export default function MembersPage() {
   // Handle delete member
   const handleDeleteMember = async () => {
     try {
+      const csrfToken = await fetchCsrfToken()
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/api/users/members/${currentMember?.id}/delete/`,
         {
           method: "DELETE",
           credentials: "include",
           headers: {
-            "X-CSRFToken": getCookie("csrftoken"),
+            "Content-Type": "application/json",
+            ...(csrfToken && { "X-CSRFToken": csrfToken }),
           },
         },
       )

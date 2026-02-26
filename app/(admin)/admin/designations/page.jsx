@@ -10,7 +10,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, Dialog
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { Plus, MoreVertical, Pencil, Trash2 } from "lucide-react"
 import { toast } from "@/components/ui/use-toast"
-import { getCookie } from "@/hooks/api"
+import {fetchCsrfToken} from "@/hooks/use-auth"
 
 export default function DesignationsPage() {
   const [designations, setDesignations] = useState([])
@@ -24,6 +24,7 @@ export default function DesignationsPage() {
     description: "",
     order: 0,
   })
+
 
   // Fetch designations
   useEffect(() => {
@@ -62,6 +63,7 @@ const handleAddDesignation = async (e) => {
   e.preventDefault();
 
   try {
+    const csrfToken = await fetchCsrfToken()
     const response = await fetch(
       `${process.env.NEXT_PUBLIC_API_URL}/api/users/designations/`,
       {
@@ -69,7 +71,7 @@ const handleAddDesignation = async (e) => {
         credentials: "include",
         headers: {
           "Content-Type": "application/json",
-          "X-CSRFToken": getCookie("csrftoken"),
+          ...(csrfToken && { "X-CSRFToken": csrfToken }),
         },
         body: JSON.stringify(formData), 
       }
@@ -103,6 +105,7 @@ const handleAddDesignation = async (e) => {
   e.preventDefault();
 
   try {
+    const csrfToken = await fetchCsrfToken()
     const response = await fetch(
       `${process.env.NEXT_PUBLIC_API_URL}/api/users/designations/${currentDesignation.id}/`,
       {
@@ -110,7 +113,7 @@ const handleAddDesignation = async (e) => {
         credentials: "include", // ✅ ensures sessionid + csrftoken cookies are sent
         headers: {
           "Content-Type": "application/json",
-          "X-CSRFToken": getCookie("csrftoken"), // ✅ same helper you used before
+          ...(csrfToken && { "X-CSRFToken": csrfToken }),
         },
         body: JSON.stringify(formData), // ✅ send plain JSON
       }
@@ -143,14 +146,16 @@ const handleAddDesignation = async (e) => {
   // Handle delete designation
   const handleDeleteDesignation = async () => {
   try {
+    const csrfToken = await fetchCsrfToken()
     const response = await fetch(
       `${process.env.NEXT_PUBLIC_API_URL}/api/users/designations/${currentDesignation.id}/`,
       {
         method: "DELETE",
         credentials: "include", // ✅ ensures sessionid + csrftoken cookies are sent
         headers: {
-          "X-CSRFToken": getCookie("csrftoken"), // ✅ same helper you used before
-        },
+          "Content-Type": "application/json",
+          ...(csrfToken && { "X-CSRFToken": csrfToken }),
+        }
       }
     );
 

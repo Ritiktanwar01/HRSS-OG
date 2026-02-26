@@ -19,7 +19,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea"
 import { toast } from "@/components/ui/use-toast"
 import { Plus, Trash2, Edit, ImageIcon, Video, Upload, X } from "lucide-react"
-import { getCookie } from "@/hooks/api"
+import { fetchCsrfToken } from "@/hooks/use-auth"
 
 export default function AdminGalleryPage() {
 
@@ -136,14 +136,16 @@ export default function AdminGalleryPage() {
 
   const handleDeleteItem = async (id, type) => {
     try {
+      const csrfToken = await fetchCsrfToken()
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/api/trust/galleryitem/${id}/`,
         {
           method: "DELETE",
           credentials: "include",
           headers: {
-            "X-CSRFToken": getCookie("csrftoken"),
-          },
+          "Content-Type": "application/json",
+          ...(csrfToken && { "X-CSRFToken": csrfToken }),
+        },
         }
       );
 
@@ -237,11 +239,13 @@ export default function AdminGalleryPage() {
         editingItem ? editingItem.id + "/" : ""
       }`;
 
+        const csrfToken = await fetchCsrfToken()
       const response = await fetch(endpoint, {
         method: editingItem ? "PUT" : "POST",
         credentials: "include",
         headers: {
-          "X-CSRFToken": getCookie("csrftoken"),
+          "Content-Type": "application/json",
+          ...(csrfToken && { "X-CSRFToken": csrfToken }),
         },
         body: form,
       });
