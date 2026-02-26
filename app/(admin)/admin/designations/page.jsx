@@ -31,9 +31,14 @@ export default function DesignationsPage() {
     const fetchDesignations = async () => {
       try {
         setLoading(true)
+        const csrfToken = await fetchCsrfToken()
         const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/users/designations`, {
         method: "GET",
         credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+          ...(csrfToken && { "X-CSRFToken": csrfToken }),
+        }
       })
 
         if (response.ok) {
