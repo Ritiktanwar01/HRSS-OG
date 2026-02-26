@@ -23,293 +23,289 @@ import { fetchCsrfToken } from "@/hooks/use-auth"
 
 export default function AdminGalleryPage() {
 
-  const [galleryItems, setGalleryItems] = useState({ images: [], videos: [] });
-  const [activeTab, setActiveTab] = useState("images");
-  const [isAddingItem, setIsAddingItem] = useState(false);
-  const [editingItem, setEditingItem] = useState(null);
-  const [isLoading, setIsLoading] = useState(false);
+const [galleryItems, setGalleryItems] = useState({ images: [], videos: [] });
+const [activeTab, setActiveTab] = useState("images");
+const [isAddingItem, setIsAddingItem] = useState(false);
+const [editingItem, setEditingItem] = useState(null);
+const [isLoading, setIsLoading] = useState(false);
 
-  const [newItem, setNewItem] = useState({
-    title: "",
-    description: "",
-    category: "events",
-    type: "image",
-    url: "",
-    thumbnail: "",
-    imageFile: null,
-    videoFile: null,
-    thumbnailFile: null,
-  });
+const [newItem, setNewItem] = useState({
+  title: "",
+  description: "",
+  category: "events",
+  type: "image", // serializer expects "type" (maps to media_type)
+  url: "",
+  thumbnail: "",
+  imageFile: null,
+  videoFile: null,
+  thumbnailFile: null,
+});
 
-  // Fetch gallery items
-  useEffect(() => {
-    const fetchGalleryItems = async () => {
-      try {
-        const csrfToken = await fetchCsrfToken()
-        const response = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/api/trust/galleryitem/`,
-          {
-            credentials: "include",
-            headers: {
-          "Content-Type": "application/json",
-          ...(csrfToken && { "X-CSRFToken": csrfToken }),
-        },
-          }
-        );
-
-        if (response.ok) {
-          const data = await response.json();
-          setGalleryItems({
-            images: data.filter((item) => item.media_type === "image" || item.type === "image"),
-            videos: data.filter((item) => item.media_type === "video" || item.type === "video"),
-          });
-        } else {
-          throw new Error("Failed to fetch");
-        }
-      } catch (error) {
-        console.error("Error fetching gallery items:", error);
-        toast({
-          title: "Error",
-          description: "Failed to load gallery items",
-          variant: "destructive",
-        });
-      }
-    };
-
-    fetchGalleryItems();
-  }, []);
-
-  const handleAddItem = () => {
-    setIsAddingItem(true);
-    setEditingItem(null);
-    setNewItem({
-      title: "",
-      description: "",
-      category: "events",
-      type: activeTab === "images" ? "image" : "video",
-      url: "",
-      thumbnail:
-        activeTab === "videos"
-          ? "/placeholder.svg?height=300&width=400"
-          : "",
-      imageFile: null,
-      videoFile: null,
-      thumbnailFile: null,
-    });
-  };
-
-  const backendToFrontendCategory = (cat) => {
-    if (!cat) return "events";
-    switch (cat.toLowerCase()) {
-      case "event":
-      case "event & celebration":
-      case "events":
-        return "events";
-      case "service":
-      case "serviceproject":
-      case "serviceprojects":
-        return "serviceProjects";
-      case "volunteer":
-      case "volunteers":
-        return "volunteers";
-      default:
-        if (cat === "EVENT") return "events";
-        if (cat === "SERVICE") return "serviceProjects";
-        if (cat === "VOLUNTEER") return "volunteers";
-        return "events";
-    }
-  };
-
-  const handleEditItem = (item) => {
-    setIsAddingItem(false);
-    setEditingItem(item);
-    setNewItem({
-      title: item.title,
-      description: item.description,
-      category: backendToFrontendCategory(item.gallery_type || item.category),
-      type: item.type,
-      url: item.url,
-      thumbnail: item.thumbnail || "",
-      imageFile: null,
-      videoFile: null,
-      thumbnailFile: null,
-    });
-  };
-
-  const handleDeleteItem = async (id, type) => {
+// Fetch gallery items
+useEffect(() => {
+  const fetchGalleryItems = async () => {
     try {
-      const csrfToken = await fetchCsrfToken()
+      const csrfToken = await fetchCsrfToken();
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/trust/galleryitem/${id}/`,
+        `${process.env.NEXT_PUBLIC_API_URL}/api/trust/galleryitem/`,
         {
-          method: "DELETE",
           credentials: "include",
           headers: {
-          "Content-Type": "application/json",
-          ...(csrfToken && { "X-CSRFToken": csrfToken }),
-        },
+            ...(csrfToken && { "X-CSRFToken": csrfToken }),
+          },
         }
       );
 
       if (response.ok) {
-        if (type === "image") {
-          setGalleryItems({
-            ...galleryItems,
-            images: galleryItems.images.filter((item) => item.id !== id),
-          });
-        } else {
-          setGalleryItems({
-            ...galleryItems,
-            videos: galleryItems.videos.filter((item) => item.id !== id),
-          });
-        }
-
-        toast({
-          title: "Item Deleted",
-          description: "The gallery item has been successfully removed.",
+        const data = await response.json();
+        setGalleryItems({
+          images: data.filter((item) => item.media_type === "image" || item.type === "image"),
+          videos: data.filter((item) => item.media_type === "video" || item.type === "video"),
         });
       } else {
-        throw new Error("Failed to delete gallery item");
+        throw new Error("Failed to fetch");
       }
     } catch (error) {
-      console.error("Error deleting gallery item:", error);
+      console.error("Error fetching gallery items:", error);
       toast({
         title: "Error",
-        description: "Failed to delete gallery item",
+        description: "Failed to load gallery items",
         variant: "destructive",
       });
     }
   };
 
-  const handleUploadFile = (e, fileType) => {
-    const file = e.target.files[0];
-    if (!file) return;
+  fetchGalleryItems();
+}, []);
 
-    if (fileType === "image") {
-      setNewItem({
-        ...newItem,
-        imageFile: file,
-        url: URL.createObjectURL(file),
-      });
-    } else if (fileType === "video") {
-      setNewItem({
-        ...newItem,
-        videoFile: file,
-        url: URL.createObjectURL(file),
-      });
-    } else if (fileType === "thumbnail") {
-      setNewItem({
-        ...newItem,
-        thumbnailFile: file,
-        thumbnail: URL.createObjectURL(file),
-      });
-    }
-  };
+const handleAddItem = () => {
+  setIsAddingItem(true);
+  setEditingItem(null);
+  setNewItem({
+    title: "",
+    description: "",
+    category: "events",
+    type: activeTab === "images" ? "image" : "video",
+    url: "",
+    thumbnail: activeTab === "videos" ? "/placeholder.svg?height=300&width=400" : "",
+    imageFile: null,
+    videoFile: null,
+    thumbnailFile: null,
+  });
+};
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setIsLoading(true);
+const backendToFrontendCategory = (cat) => {
+  if (!cat) return "events";
+  switch (cat.toLowerCase()) {
+    case "event":
+    case "event & celebration":
+    case "events":
+      return "events";
+    case "service":
+    case "serviceproject":
+    case "serviceprojects":
+      return "serviceProjects";
+    case "volunteer":
+    case "volunteers":
+      return "volunteers";
+    default:
+      if (cat === "EVENT") return "events";
+      if (cat === "SERVICE") return "serviceProjects";
+      if (cat === "VOLUNTEER") return "volunteers";
+      return "events";
+  }
+};
 
-    try {
-      const form = new FormData();
-      form.append("title", newItem.title);
-      form.append("description", newItem.description);
-      form.append("gallery_type", newItem.category === "events" ? "EVENT" : newItem.category === "serviceProjects" ? "SERVICE" : "VOLUNTEER");
-      form.append("type", newItem.type);
+const handleEditItem = (item) => {
+  setIsAddingItem(false);
+  setEditingItem(item);
+  setNewItem({
+    title: item.title,
+    description: item.description,
+    category: backendToFrontendCategory(item.gallery_type || item.category),
+    type: item.type, // serializer exposes "type"
+    url: item.url || item.video_url || "",
+    thumbnail: item.thumbnail || "",
+    imageFile: null,
+    videoFile: null,
+    thumbnailFile: null,
+  });
+};
 
-      if (newItem.type === "image") {
-        if (newItem.imageFile) {
-          form.append("image_file", newItem.imageFile);
-        } else if (newItem.url) {
-          form.append("url", newItem.url);
-        }
-      } else {
-        if (newItem.videoFile) {
-          form.append("video_file", newItem.videoFile);
-        }
-        if (newItem.thumbnailFile) {
-          form.append("thumbnail_file", newItem.thumbnailFile);
-        } else if (newItem.thumbnail) {
-          form.append("thumbnail", newItem.thumbnail);
-        }
-        if (newItem.url) {
-          form.append("url", newItem.url);
-        }
-      }
-
-      const endpoint = `${process.env.NEXT_PUBLIC_API_URL}/api/trust/galleryitem/${
-        editingItem ? editingItem.id + "/" : ""
-      }`;
-
-        const csrfToken = await fetchCsrfToken()
-      const response = await fetch(endpoint, {
-        method: editingItem ? "PUT" : "POST",
+const handleDeleteItem = async (id, type) => {
+  try {
+    const csrfToken = await fetchCsrfToken();
+    const response = await fetch(
+      `${process.env.NEXT_PUBLIC_API_URL}/api/trust/galleryitem/${id}/`,
+      {
+        method: "DELETE",
         credentials: "include",
         headers: {
-          "Content-Type": "application/json",
           ...(csrfToken && { "X-CSRFToken": csrfToken }),
         },
-        body: form,
-      });
-
-      if (response.ok) {
-        const result = await response.json();
-
-        if (editingItem) {
-          if (newItem.type === "image") {
-            setGalleryItems({
-              ...galleryItems,
-              images: galleryItems.images.map((item) =>
-                item.id === editingItem.id ? result : item
-              ),
-            });
-          } else {
-            setGalleryItems({
-              ...galleryItems,
-              videos: galleryItems.videos.map((item) =>
-                item.id === editingItem.id ? result : item
-              ),
-            });
-          }
-
-          toast({
-            title: "Item Updated",
-            description: "The gallery item has been successfully updated.",
-          });
-        } else {
-          if (newItem.type === "image") {
-            setGalleryItems({
-              ...galleryItems,
-              images: [...galleryItems.images, result],
-            });
-          } else {
-            setGalleryItems({
-              ...galleryItems,
-              videos: [...galleryItems.videos, result],
-            });
-          }
-
-          toast({
-            title: "Item Added",
-            description: "The new gallery item has been successfully added.",
-          });
-        }
-
-        document.querySelector("[data-radix-dialog-close]")?.click();
-      } else {
-        throw new Error("Failed to save gallery item");
       }
-    } catch (error) {
-      console.error("Error saving gallery item:", error);
+    );
+
+    if (response.ok) {
+      if (type === "image") {
+        setGalleryItems({
+          ...galleryItems,
+          images: galleryItems.images.filter((item) => item.id !== id),
+        });
+      } else {
+        setGalleryItems({
+          ...galleryItems,
+          videos: galleryItems.videos.filter((item) => item.id !== id),
+        });
+      }
+
       toast({
-        title: "Error",
-        description: "Failed to save gallery item",
-        variant: "destructive",
+        title: "Item Deleted",
+        description: "The gallery item has been successfully removed.",
       });
-    } finally {
-      setIsLoading(false);
+    } else {
+      throw new Error("Failed to delete gallery item");
     }
+  } catch (error) {
+    console.error("Error deleting gallery item:", error);
+    toast({
+      title: "Error",
+      description: "Failed to delete gallery item",
+      variant: "destructive",
+    });
   }
+};
+
+const handleUploadFile = (e, fileType) => {
+  const file = e.target.files[0];
+  if (!file) return;
+
+  if (fileType === "image") {
+    setNewItem({
+      ...newItem,
+      imageFile: file,
+      url: URL.createObjectURL(file),
+    });
+  } else if (fileType === "video") {
+    setNewItem({
+      ...newItem,
+      videoFile: file,
+      url: URL.createObjectURL(file),
+    });
+  } else if (fileType === "thumbnail") {
+    setNewItem({
+      ...newItem,
+      thumbnailFile: file,
+      thumbnail: URL.createObjectURL(file),
+    });
+  }
+};
+
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  setIsLoading(true);
+
+  try {
+    const form = new FormData();
+    form.append("title", newItem.title);
+    form.append("description", newItem.description);
+    form.append(
+      "gallery_type",
+      newItem.category === "events"
+        ? "EVENT"
+        : newItem.category === "serviceProjects"
+        ? "SERVICE"
+        : "VOLUNTEER"
+    );
+    form.append("type", newItem.type); // serializer expects "type"
+
+    if (newItem.type === "image") {
+      if (newItem.imageFile) {
+        form.append("image_file", newItem.imageFile); // serializer maps this to model.image
+      }
+    } else {
+      if (newItem.url) {
+        form.append("url", newItem.url); // serializer maps this to model.video_url
+      }
+      if (newItem.thumbnailFile) {
+        form.append("thumbnail_file", newItem.thumbnailFile);
+      } else if (newItem.thumbnail) {
+        form.append("thumbnail", newItem.thumbnail);
+      }
+    }
+
+    const endpoint = `${process.env.NEXT_PUBLIC_API_URL}/api/trust/galleryitem/${
+      editingItem ? editingItem.id + "/" : ""
+    }`;
+
+    const csrfToken = await fetchCsrfToken();
+    const response = await fetch(endpoint, {
+      method: editingItem ? "PUT" : "POST",
+      credentials: "include",
+      headers: {
+        ...(csrfToken && { "X-CSRFToken": csrfToken }),
+        // ❌ no Content-Type here, browser sets it automatically
+      },
+      body: form,
+    });
+
+    if (!response.ok) throw new Error("Failed to save gallery item");
+
+    const result = await response.json();
+
+    if (editingItem) {
+      if (newItem.type === "image") {
+        setGalleryItems({
+          ...galleryItems,
+          images: galleryItems.images.map((item) =>
+            item.id === editingItem.id ? result : item
+          ),
+        });
+      } else {
+        setGalleryItems({
+          ...galleryItems,
+          videos: galleryItems.videos.map((item) =>
+            item.id === editingItem.id ? result : item
+          ),
+        });
+      }
+
+      toast({
+        title: "Item Updated",
+        description: "The gallery item has been successfully updated.",
+      });
+    } else {
+      if (newItem.type === "image") {
+        setGalleryItems({
+          ...galleryItems,
+          images: [...galleryItems.images, result],
+        });
+      } else {
+        setGalleryItems({
+          ...galleryItems,
+          videos: [...galleryItems.videos, result],
+        });
+      }
+
+      toast({
+        title: "Item Added",
+        description: "The new gallery item has been successfully added.",
+      });
+    }
+
+    document.querySelector("[data-radix-dialog-close]")?.click();
+  } catch (error) {
+    console.error("Error saving gallery item:", error);
+    toast({
+      title: "Error",
+      description: "Failed to save gallery item",
+      variant: "destructive",
+    });
+  } finally {
+    setIsLoading(false);
+  }
+};
+
 
   return (
     <div className="space-y-6">
