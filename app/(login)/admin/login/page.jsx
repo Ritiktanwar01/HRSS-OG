@@ -6,13 +6,15 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { toast } from "@/components/ui/use-toast"
 import { AlertCircle } from "lucide-react"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import {Login} from "@/hooks/use-auth"
+
+// ✅ Import the standalone helper
+import { loginUser } from "@/hooks/use-auth"
 
 const loginFormSchema = z.object({
   email: z.string().email({ message: "Please enter a valid email address" }),
@@ -32,35 +34,19 @@ export default function AdminLoginPage() {
     },
   })
 
-  // Update the login function to handle authentication properly
   async function onSubmit(data) {
     setIsLoading(true)
     setError(null)
 
     try {
-      // const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/login`, {
-      //   method: "POST",
-      //   headers: {
-      //     "Content-Type": "application/json",
-      //   },
-      //   body: JSON.stringify({
-      //     email: data.email,
-      //     password: data.password,
-      //     role: "admin",
-      //   }),
-      //   credentials: "include", // Important for cookies
-      // })
-
-      // const result = await response.json()
-      const { success, message } = await Login(data.email, data.password, "admin")
+      // ✅ Call the helper directly
+      const { success, message } = await loginUser(data.email, data.password)
 
       if (success) {
         toast({
           title: "Login Successful",
           description: "Welcome to the admin dashboard",
         })
-
-        // Redirect to admin dashboard
         router.push("/admin/dashboard")
       } else {
         setError(message || "Invalid credentials. Please try again.")
@@ -125,7 +111,11 @@ export default function AdminLoginPage() {
                 )}
               />
 
-              <Button type="submit" className="w-full bg-bhagva-700 hover:bg-bhagva-800" disabled={isLoading}>
+              <Button
+                type="submit"
+                className="w-full bg-bhagva-700 hover:bg-bhagva-800"
+                disabled={isLoading}
+              >
                 {isLoading ? "Logging in..." : "Login"}
               </Button>
             </form>
