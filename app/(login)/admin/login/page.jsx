@@ -12,7 +12,7 @@ import { Input } from "@/components/ui/input"
 import { toast } from "@/components/ui/use-toast"
 import { AlertCircle } from "lucide-react"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { useAuth } from "@/hooks/use-auth"
+import {Login} from "@/hooks/use-auth"
 
 const loginFormSchema = z.object({
   email: z.string().email({ message: "Please enter a valid email address" }),
@@ -23,7 +23,6 @@ export default function AdminLoginPage() {
   const router = useRouter()
   const [error, setError] = useState(null)
   const [isLoading, setIsLoading] = useState(false)
-  const { Login } = useAuth()
 
   const form = useForm({
     resolver: zodResolver(loginFormSchema),

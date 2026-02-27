@@ -19,6 +19,32 @@ export const fetchCsrfToken = async () => {
     }
   }
 
+  export const Login = async (email, password) => {
+    try {
+      const csrfToken = await fetchCsrfToken()
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/users/auth/login/`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          ...(csrfToken && { "X-CSRFToken": csrfToken }),
+        },
+        body: JSON.stringify({ email, password }),
+        credentials: "include",
+      })
+
+      if (response.ok) {
+        await checkAuth()
+        return { success: true }
+      } else {
+        const error = await response.json()
+        return { success: false, message: error.message || "Login failed" }
+      }
+    } catch (error) {
+      console.error("Login error:", error)
+      return { success: false, message: "An error occurred during login" }
+    }
+  }
+
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null)
   const [loading, setLoading] = useState(true)
@@ -54,31 +80,7 @@ export function AuthProvider({ children }) {
   }, [])
 
   // Login
-  const Login = async (email, password) => {
-    try {
-      const csrfToken = await fetchCsrfToken()
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/users/auth/login/`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          ...(csrfToken && { "X-CSRFToken": csrfToken }),
-        },
-        body: JSON.stringify({ email, password }),
-        credentials: "include",
-      })
-
-      if (response.ok) {
-        await checkAuth()
-        return { success: true }
-      } else {
-        const error = await response.json()
-        return { success: false, message: error.message || "Login failed" }
-      }
-    } catch (error) {
-      console.error("Login error:", error)
-      return { success: false, message: "An error occurred during login" }
-    }
-  }
+  
 
   // Logout
   const Logout = async () => {

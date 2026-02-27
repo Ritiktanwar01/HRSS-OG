@@ -1,12 +1,10 @@
 import { ThemeProvider } from "@/components/theme-provider"
-import { AuthProvider } from "@/hooks/use-auth"
 import "../globals.css"
 
 export default function LoginLayout({ children }) {
   return (
     <html lang="en" suppressHydrationWarning>
       <body>
-        <AuthProvider>
           <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
             <div className="flex h-screen bg-gray-100">
               <div className="flex-1 flex flex-col overflow-hidden">
@@ -14,7 +12,6 @@ export default function LoginLayout({ children }) {
               </div>
             </div>
           </ThemeProvider>
-        </AuthProvider>
       </body>
     </html>
   )
