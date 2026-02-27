@@ -92,25 +92,30 @@ export default function AboutPage() {
         <div className="mb-12">
           <h2 className="text-2xl font-semibold text-bhagva-700 mb-6">Leadership</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {profiles.map((member) => (
-              <div
-                key={member.id} id={member.id}
-                className="flex bg-white p-4 rounded-lg shadow-sm hover:shadow-md transition-shadow"
-              >
-                <img
-                  src={member.profile_pic || "/placeholder.svg?height=100&width=100"}
-                  alt={member.name}
-                  className="w-24 h-24 rounded-full mr-4 object-cover border-2 border-bhagva-100"
-                  width={100}
-                  height={100}
-                />
-                <div>
-                  <h3 className="text-xl font-semibold text-bhagva-700">{member.name}</h3>
-                  <p className="text-gray-500 mb-2">{member.designation.title}</p>
-                  <p className="text-gray-700 text-sm">{member.bio}</p>
+            {profiles
+              .slice() // make a shallow copy so we don’t mutate state directly
+              .sort((a, b) => a.designation.order - b.designation.order) // ascending order
+              .map((member) => (
+                <div
+                  key={member.id}
+                  id={member.id}
+                  className="flex bg-white p-4 rounded-lg shadow-sm hover:shadow-md transition-shadow"
+                >
+                  <img
+                    src={member.profile_pic || "/placeholder.svg?height=100&width=100"}
+                    alt={member.name}
+                    className="w-24 h-24 rounded-full mr-4 object-cover border-2 border-bhagva-100"
+                    width={100}
+                    height={100}
+                  />
+                  <div>
+                    <h3 className="text-xl font-semibold text-bhagva-700">{member.name}</h3>
+                    <p className="text-gray-500 mb-2">{member.designation.title}</p>
+                    <p className="text-gray-700 text-sm">{member.bio}</p>
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))}
+
           </div>
         </div>
 
