@@ -3,57 +3,72 @@
 import { createContext, useContext, useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 
-const AuthContext = createContext()
-
+// ------------------ Standalone Helpers ------------------
 
 export const fetchCsrfToken = async () => {
-    try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/csrf/`, {
-        credentials: "include",
-      })
-      const data = await res.json()
-      return data.csrfToken
-    } catch (err) {
-      console.error("Failed to fetch CSRF token:", err)
-      return null
-    }
+  try {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/csrf/`, {
+      credentials: "include",
+    })
+    const data = await res.json()
+    return data.csrfToken
+  } catch (err) {
+    console.error("Failed to fetch CSRF token:", err)
+    return null
   }
+}
 
-  export const Login = async (email, password) => {
-    try {
-      const csrfToken = await fetchCsrfToken()
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/users/auth/login/`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          ...(csrfToken && { "X-CSRFToken": csrfToken }),
-        },
-        body: JSON.stringify({ email, password }),
-        credentials: "include",
-      })
+export const loginUser = async (email, password) => {
+  try {
+    const csrfToken = await fetchCsrfToken()
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/users/auth/login/`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        ...(csrfToken && { "X-CSRFToken": csrfToken }),
+      },
+      body: JSON.stringify({ email, password }),
+      credentials: "include",
+    })
 
-      if (response.ok) {
-        await checkAuth()
-        return { success: true }
-      } else {
-        const error = await response.json()
-        return { success: false, message: error.message || "Login failed" }
-      }
-    } catch (error) {
-      console.error("Login error:", error)
-      return { success: false, message: "An error occurred during login" }
+    if (response.ok) {
+      return { success: true }
+    } else {
+      const error = await response.json()
+      return { success: false, message: error.message || "Login failed" }
     }
+  } catch (error) {
+    console.error("Login error:", error)
+    return { success: false, message: "An error occurred during login" }
   }
+}
+
+export const logoutUser = async () => {
+  try {
+    const csrfToken = await fetchCsrfToken()
+    await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/users/auth/logout/`, {
+      method: "POST",
+      headers: {
+        ...(csrfToken && { "X-CSRFToken": csrfToken }),
+      },
+      credentials: "include",
+    })
+    return { success: true }
+  } catch (error) {
+    console.error("Logout error:", error)
+    return { success: false, message: "An error occurred during logout" }
+  }
+}
+
+// ------------------ Context Provider ------------------
+
+const AuthContext = createContext()
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null)
   const [loading, setLoading] = useState(true)
   const router = useRouter()
 
-  // Fetch CSRF token from backend
-  
-
-  // Check if user is logged in
   const checkAuth = async () => {
     try {
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/users/auth/me/`, {
@@ -75,30 +90,26 @@ export function AuthProvider({ children }) {
     }
   }
 
+  const Login = async (email, password) => {
+    const result = await loginUser(email, password)
+    if (result.success) {
+      await checkAuth()
+    }
+    return result
+  }
+
+  const Logout = async () => {
+    const result = await logoutUser()
+    if (result.success) {
+      setUser(null)
+      router.push("/admin/login")
+    }
+    return result
+  }
+
   useEffect(() => {
     checkAuth()
   }, [])
-
-  // Login
-  
-
-  // Logout
-  const Logout = async () => {
-    try {
-      const csrfToken = await fetchCsrfToken()
-      await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/users/auth/logout/`, {
-        method: "POST",
-        headers: {
-          ...(csrfToken && { "X-CSRFToken": csrfToken }),
-        },
-        credentials: "include",
-      })
-      setUser(null)
-      router.push("/admin/login")
-    } catch (error) {
-      console.error("Logout error:", error)
-    }
-  }
 
   const value = {
     user,
