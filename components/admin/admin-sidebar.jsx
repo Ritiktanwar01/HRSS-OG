@@ -86,6 +86,11 @@ export default function AdminSidebar({ isOpen, onLinkClick }) {
       icon: <FileText className="h-5 w-5" />,
     },
     {
+      name: "Polls",
+      href: "/admin/polls",
+      icon: <FileText className="h-5 w-5" />,
+    },
+    {
       name: "Contact",
       href: "/admin/contact",
       icon: <Phone className="h-5 w-5" />,

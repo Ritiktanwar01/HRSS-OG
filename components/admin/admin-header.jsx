@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { useAuth } from "@/hooks/use-auth"
+import { fetchCsrfToken } from "@/hooks/use-auth"
 
 export default function AdminHeader({ toggleSidebar }) {
   const { user, logout } = useAuth()
@@ -39,9 +40,17 @@ export default function AdminHeader({ toggleSidebar }) {
 
   const markRead = async (id) => {
     try {
+      const csrfToken = await fetchCsrfToken()
       const res = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/api/users/notifications/${id}/read/`,
-        { method: 'PUT', credentials: 'include' }
+        {
+          method: 'PUT',
+          credentials: 'include',
+          headers: {
+            "Content-Type": "application/json",
+            ...(csrfToken && { "X-CSRFToken": csrfToken }),
+          }
+        }
       )
       if (!res.ok) throw new Error()
       setNotifications((nots) =>
@@ -93,32 +102,31 @@ export default function AdminHeader({ toggleSidebar }) {
           </Button>
           {showNotifications && (
             <div className="absolute right-0 mt-2 w-80 max-h-96 overflow-y-auto bg-white shadow-lg z-50">
-              {notifications.length === 0 ? (
+              {notifications.filter((n) => !n.is_read).length === 0 ? (
                 <p className="p-4 text-center text-sm text-gray-500">
                   No notifications
                 </p>
               ) : (
-                notifications.map((n) => (
-                  <div
-                    key={n.id}
-                    className={`p-2 border-b last:border-b-0 ${
-                      n.is_read ? "" : "font-semibold bg-gray-50"
-                    }`}
-                  >
-                    <p className="text-sm">{n.message}</p>
-                    {!n.is_read && (
+                notifications
+                  .filter((n) => !n.is_read)
+                  .map((n) => (
+                    <div
+                      key={n.id}
+                      className={`p-2 border-b last:border-b-0 font-semibold bg-gray-50`}
+                    >
+                      <p className="text-sm">{n.message}</p>
                       <button
                         className="text-xs text-blue-600"
                         onClick={() => markRead(n.id)}
                       >
                         Mark read
                       </button>
-                    )}
-                  </div>
-                ))
+                    </div>
+                  ))
               )}
             </div>
           )}
+
         </div>
 
         {/* User menu */}
@@ -135,14 +143,14 @@ export default function AdminHeader({ toggleSidebar }) {
           <DropdownMenuContent className="w-56" align="end" forceMount>
             <DropdownMenuLabel className="font-normal">
               <div className="flex flex-col space-y-1">
-                <p className="text-sm font-medium leading-none">{user?.name || "Admin"}</p>
+                <p className="text-sm font-medium leading-none">{user?.first_name + ' ' + user?.last_name || "Admin"}</p>
                 <p className="text-xs leading-none text-muted-foreground">{user?.email || "admin@example.com"}</p>
               </div>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuItem>
               <User className="mr-2 h-4 w-4" />
-              <span onClick={()=>window.location.href = "/admin/settings"}>Profile</span>
+              <span onClick={() => window.location.href = "/admin/settings"}>Profile</span>
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={logout}>
