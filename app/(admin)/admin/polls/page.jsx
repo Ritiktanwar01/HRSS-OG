@@ -1,10 +1,7 @@
 'use client'
 
 import { AlertDialogFooter } from "@/components/ui/alert-dialog"
-import { Alert } from "@/components/ui/alert"
-
 import { useEffect, useState } from 'react'
-import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -15,6 +12,20 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog'
 import { Plus, Edit2, Trash2, Eye, AlertCircle, BarChart3, CheckCircle2 } from 'lucide-react'
 import { toast } from 'sonner'
+import { fetchCsrfToken } from '@/hooks/use-auth'
+
+const apiRequest = async (url, method = 'GET', body = null) => {
+  const csrfToken = await fetchCsrfToken()
+  const response = await fetch(url, {
+    method,
+    headers: {
+      "Content-Type": "application/json",
+      "X-CSRFToken": csrfToken,
+    }, ...(body && { body: JSON.stringify(body) }),
+  })
+  if (!response.ok) throw new Error(`Request failed: ${response.status}`)
+  return response.json()
+}
 
 export default function AdminPollsPage() {
   const [polls, setPolls] = useState([])
@@ -24,114 +35,50 @@ export default function AdminPollsPage() {
   const [deleteAlertOpen, setDeleteAlertOpen] = useState(false)
   const [deletingPollId, setDeletingPollId] = useState(null)
   const [viewingPoll, setViewingPoll] = useState(null)
-  const [token, setToken] = useState('')
-  const router = useRouter()
-
-  const [formData, setFormData] = useState({
-    title: '',
-    description: '',
-    options: ['', ''],
-    category: 'general',
-    multipleVotes: false,
-    endDate: '',
-  })
-
-  useEffect(() => {
-    const authToken = localStorage.getItem('token')
-    setToken(authToken)
-    fetchPolls(authToken)
-  }, [])
-
-  const fetchPolls = async (authToken) => {
+  const [formData, setFormData] = useState({ title: '', description: '', options: ['', ''], category: 'general', multipleVotes: false, endDate: '', })
+  const fetchPolls = async () => {
     try {
       setLoading(true)
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/polls/admin/all`, {
-        headers: { Authorization: `Bearer ${authToken}` },
-      })
-      if (!response.ok) throw new Error('Failed to fetch polls')
-      const data = await response.json()
-      setPolls(data.data || [])
+      const data = await apiRequest(`${process.env.NEXT_PUBLIC_API_URL}/api/users/polls/`)
+      setPolls(data || [])
     } catch (error) {
       toast.error('Failed to load polls')
       console.error(error)
-    } finally {
-      setLoading(false)
-    }
+    } finally { setLoading(false) }
   }
-
   const handleCreateOrUpdate = async () => {
     if (!formData.title.trim() || formData.options.filter(o => o.trim()).length < 2) {
       toast.error('Title and at least 2 options are required')
       return
-    }
-
-    try {
-      const url = editingPoll
-        ? `${process.env.NEXT_PUBLIC_API_URL}/api/polls/${editingPoll._id}`
-        : `${process.env.NEXT_PUBLIC_API_URL}/api/polls`
-
+    } try {
+      const url = editingPoll ? `${process.env.NEXT_PUBLIC_API_URL}/api/users/polls/${editingPoll.id}` : `${process.env.NEXT_PUBLIC_API_URL}/api/users/polls/`
       const method = editingPoll ? 'PUT' : 'POST'
-
-      const response = await fetch(url, {
-        method,
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          ...formData,
-          options: formData.options.filter(o => o.trim()),
-        }),
-      })
-
-      if (!response.ok) throw new Error('Failed to save poll')
-
-      const data = await response.json()
+      const payload = { ...formData, options: formData.options.filter(o => o.trim()), }
+      const data = await apiRequest(url, method, payload)
       toast.success(editingPoll ? 'Poll updated' : 'Poll created')
-      
-      if (editingPoll) {
-        setPolls(polls.map(p => p._id === data.data._id ? data.data : p))
-      } else {
-        setPolls([data.data, ...polls])
-      }
-      
+      setPolls(editingPoll ? polls.map(p => p.id === data.data.id ? data.data : p) : [data.data, ...polls])
       setOpenDialog(false)
       setEditingPoll(null)
-      setFormData({ title: '', description: '', options: ['', ''], category: 'general', multipleVotes: false, endDate: '' })
+      setFormData({ title: '', description: '', options: ['', ''], category: 'general', multipleVotes: false, endDate: '', })
     } catch (error) {
       toast.error('Failed to save poll')
       console.error(error)
     }
   }
-
   const handleEdit = (poll) => {
     setEditingPoll(poll)
-    setFormData({
-      title: poll.title,
-      description: poll.description || '',
-      options: poll.options.map(o => o.text),
-      category: poll.category,
-      multipleVotes: poll.multipleVotes,
-      endDate: poll.endDate ? new Date(poll.endDate).toISOString().slice(0, 16) : '',
-    })
+    setFormData({ title: poll.title, description: poll.description || '', options: poll.options?.map(o => o.text) || ['', ''], category: poll.category, multipleVotes: poll.multipleVotes, endDate: poll.endDate ? new Date(poll.endDate).toISOString().slice(0, 16) : '', })
     setOpenDialog(true)
   }
-
   const handleDeleteClick = (pollId) => {
     setDeletingPollId(pollId)
     setDeleteAlertOpen(true)
   }
-
   const handleDelete = async () => {
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/polls/${deletingPollId}`, {
-        method: 'DELETE',
-        headers: { Authorization: `Bearer ${token}` },
-      })
-
-      if (!response.ok) throw new Error('Failed to delete poll')
-
-      setPolls(polls.filter(p => p._id !== deletingPollId))
+      await apiRequest(`${process.env.NEXT_PUBLIC_API_URL}/api/users/polls/${deletingPollId}`,
+        'DELETE')
+      setPolls(polls.filter(p => p.id !== deletingPollId))
       toast.success('Poll deleted')
       setDeleteAlertOpen(false)
       setDeletingPollId(null)
@@ -140,32 +87,18 @@ export default function AdminPollsPage() {
       console.error(error)
     }
   }
-
-  const handleAddOption = () => {
-    setFormData({ ...formData, options: [...formData.options, ''] })
-  }
-
+  const handleAddOption = () => { setFormData({ ...formData, options: [...formData.options, ''] }) }
   const handleRemoveOption = (index) => {
     if (formData.options.length > 2) {
       setFormData({ ...formData, options: formData.options.filter((_, i) => i !== index) })
     }
   }
-
   const handleOptionChange = (index, value) => {
     const newOptions = [...formData.options]
     newOptions[index] = value
     setFormData({ ...formData, options: newOptions })
   }
-
-  if (loading) {
-    return (
-      <div className="space-y-4">
-        {[1, 2, 3].map(i => (
-          <div key={i} className="h-32 bg-gray-200 rounded-lg animate-pulse" />
-        ))}
-      </div>
-    )
-  }
+  useEffect(() => { fetchPolls() }, [])
 
   return (
     <div className="space-y-6">
@@ -179,7 +112,7 @@ export default function AdminPollsPage() {
             </h1>
             <p className="text-gray-600 mt-1">Create and manage community polls</p>
           </div>
-          <Button 
+          <Button
             onClick={() => {
               setEditingPoll(null)
               setFormData({ title: '', description: '', options: ['', ''], category: 'general', multipleVotes: false, endDate: '' })
@@ -208,7 +141,7 @@ export default function AdminPollsPage() {
             <CardTitle className="text-sm font-medium text-green-900">Active</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-2xl font-bold text-green-700">{polls.filter(p => p.isActive).length}</p>
+            <p className="text-2xl font-bold text-green-700">{polls.filter(p => p.is_active).length}</p>
           </CardContent>
         </Card>
         <Card className="bg-gradient-to-br from-yellow-50 to-yellow-100 border-yellow-200">
@@ -216,7 +149,7 @@ export default function AdminPollsPage() {
             <CardTitle className="text-sm font-medium text-yellow-900">Total Votes</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-2xl font-bold text-yellow-700">{polls.reduce((sum, p) => sum + p.totalVotes, 0)}</p>
+            <p className="text-2xl font-bold text-yellow-700">{polls.reduce((sum, p) => sum + p.total_votes, 0)}</p>
           </CardContent>
         </Card>
       </div>
@@ -230,8 +163,8 @@ export default function AdminPollsPage() {
       ) : (
         <div className="grid gap-4">
           {polls.map((poll, index) => (
-            <motion.div 
-              key={poll._id}
+            <motion.div
+              key={poll.id}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.05 }}
@@ -248,7 +181,7 @@ export default function AdminPollsPage() {
                         <span className="inline-block px-3 py-1 rounded-full text-xs font-medium bg-bhagva-100 text-bhagva-800">
                           {poll.category}
                         </span>
-                        {poll.isActive ? (
+                        {poll.is_active ? (
                           <span className="inline-block px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800 flex items-center gap-1">
                             <CheckCircle2 className="w-3 h-3" />
                             Active
@@ -271,8 +204,8 @@ export default function AdminPollsPage() {
                     )}
                   </div>
                   <div className="flex flex-wrap gap-2">
-                    <Button 
-                      variant="outline" 
+                    <Button
+                      variant="outline"
                       size="sm"
                       onClick={() => setViewingPoll(poll)}
                       className="flex-1 md:flex-none"
@@ -280,8 +213,8 @@ export default function AdminPollsPage() {
                       <Eye className="w-4 h-4 mr-2" />
                       View
                     </Button>
-                    <Button 
-                      variant="outline" 
+                    <Button
+                      variant="outline"
                       size="sm"
                       onClick={() => handleEdit(poll)}
                       className="flex-1 md:flex-none"
@@ -289,10 +222,10 @@ export default function AdminPollsPage() {
                       <Edit2 className="w-4 h-4 mr-2" />
                       Edit
                     </Button>
-                    <Button 
-                      variant="outline" 
+                    <Button
+                      variant="outline"
                       size="sm"
-                      onClick={() => handleDeleteClick(poll._id)}
+                      onClick={() => handleDeleteClick(poll.id)}
                       className="text-red-600 hover:text-red-700 flex-1 md:flex-none"
                     >
                       <Trash2 className="w-4 h-4 mr-2" />
@@ -312,7 +245,7 @@ export default function AdminPollsPage() {
           <DialogHeader>
             <DialogTitle>{editingPoll ? 'Edit Poll' : 'Create New Poll'}</DialogTitle>
           </DialogHeader>
-          
+
           <div className="space-y-4">
             <div>
               <label className="text-sm font-medium text-gray-700">Poll Title</label>
@@ -423,7 +356,7 @@ export default function AdminPollsPage() {
             <DialogHeader>
               <DialogTitle>{viewingPoll.title}</DialogTitle>
             </DialogHeader>
-            
+
             <div className="space-y-4">
               {viewingPoll.description && (
                 <p className="text-gray-600">{viewingPoll.description}</p>
@@ -453,7 +386,7 @@ export default function AdminPollsPage() {
               <div className="text-sm text-gray-600 pt-4 border-t space-y-1">
                 <p><strong>Category:</strong> {viewingPoll.category}</p>
                 <p><strong>Total Votes:</strong> {viewingPoll.totalVotes}</p>
-                <p><strong>Status:</strong> {viewingPoll.isActive ? 'Active' : 'Inactive'}</p>
+                <p><strong>Status:</strong> {viewingPoll.is_active ? 'Active' : 'Inactive'}</p>
               </div>
             </div>
 
