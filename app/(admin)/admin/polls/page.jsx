@@ -18,13 +18,25 @@ const apiRequest = async (url, method = 'GET', body = null) => {
   const csrfToken = await fetchCsrfToken()
   const response = await fetch(url, {
     method,
+    credentials: "include",
     headers: {
       "Content-Type": "application/json",
       "X-CSRFToken": csrfToken,
     }, ...(body && { body: JSON.stringify(body) }),
   })
-  if (!response.ok) throw new Error(`Request failed: ${response.status}`)
-  return response.json()
+  let json = null
+  try {
+    json = await response.json()
+  } catch (err) {
+    // non-json response
+  }
+  if (!response.ok) {
+    console.error('API error', response.status, json)
+    // surface server message if available
+    const msg = json && (json.detail || JSON.stringify(json))
+    throw new Error(msg || `Request failed: ${response.status}`)
+  }
+  return json
 }
 
 export default function AdminPollsPage() {
@@ -36,30 +48,61 @@ export default function AdminPollsPage() {
   const [deletingPollId, setDeletingPollId] = useState(null)
   const [viewingPoll, setViewingPoll] = useState(null)
   const [formData, setFormData] = useState({ title: '', description: '', options: ['', ''], category: 'general', multipleVotes: false, endDate: '', })
+  // convert server poll object into the shape our UI expects
+  const normalizePoll = p => ({
+    ...p,
+    totalVotes: p.total_votes,
+    endDate: p.end_date,
+    multipleVotes: p.multiple_votes,
+    options: (p.options||[]).map(o=>({text:o.text,votes:o.votes,id:o.id})),
+  })
+
   const fetchPolls = async () => {
     try {
       setLoading(true)
       const data = await apiRequest(`${process.env.NEXT_PUBLIC_API_URL}/api/users/polls/`)
-      setPolls(data || [])
+      const list = Array.isArray(data) ? data : data.data
+      setPolls((list || []).map(normalizePoll))
     } catch (error) {
       toast.error('Failed to load polls')
       console.error(error)
     } finally { setLoading(false) }
   }
+  // build payload matching API snake_case expectations
+  const buildPayload = form => ({
+    title: form.title,
+    description: form.description||null,
+    category: form.category,
+    multiple_votes: form.multipleVotes,
+    end_date: form.endDate||null,
+    options: form.options
+      .filter(o=>o.trim())
+      .map(text=>({text})),
+  })
+
   const handleCreateOrUpdate = async () => {
-    if (!formData.title.trim() || formData.options.filter(o => o.trim()).length < 2) {
+    if (!formData.title.trim() || formData.options.filter((o) => o.trim()).length < 2) {
       toast.error('Title and at least 2 options are required')
       return
-    } try {
-      const url = editingPoll ? `${process.env.NEXT_PUBLIC_API_URL}/api/users/polls/${editingPoll.id}` : `${process.env.NEXT_PUBLIC_API_URL}/api/users/polls/`
+    }
+
+    try {
+      const url = editingPoll
+        ? `${process.env.NEXT_PUBLIC_API_URL}/api/users/polls/${editingPoll.id}/`
+        : `${process.env.NEXT_PUBLIC_API_URL}/api/users/polls/`
       const method = editingPoll ? 'PUT' : 'POST'
-      const payload = { ...formData, options: formData.options.filter(o => o.trim()), }
+      const payload = buildPayload(formData)
       const data = await apiRequest(url, method, payload)
       toast.success(editingPoll ? 'Poll updated' : 'Poll created')
-      setPolls(editingPoll ? polls.map(p => p.id === data.data.id ? data.data : p) : [data.data, ...polls])
+      const newPoll = normalizePoll(data.data || data)
+      setPolls(
+        editingPoll
+          ? polls.map((p) => (p.id === newPoll.id ? newPoll : p))
+          : [newPoll, ...polls]
+      )
       setOpenDialog(false)
       setEditingPoll(null)
-      setFormData({ title: '', description: '', options: ['', ''], category: 'general', multipleVotes: false, endDate: '', })
+      setFormData({ title: '', description: '', options: ['', ''], category: 'general', multipleVotes: false, endDate: '' })
     } catch (error) {
       toast.error('Failed to save poll')
       console.error(error)
@@ -67,7 +110,14 @@ export default function AdminPollsPage() {
   }
   const handleEdit = (poll) => {
     setEditingPoll(poll)
-    setFormData({ title: poll.title, description: poll.description || '', options: poll.options?.map(o => o.text) || ['', ''], category: poll.category, multipleVotes: poll.multipleVotes, endDate: poll.endDate ? new Date(poll.endDate).toISOString().slice(0, 16) : '', })
+    setFormData({
+      title: poll.title,
+      description: poll.description || '',
+      options: poll.options.map((o) => o.text),
+      category: poll.category,
+      multipleVotes: poll.multipleVotes,
+      endDate: poll.endDate ? new Date(poll.endDate).toISOString().slice(0, 16) : '',
+    })
     setOpenDialog(true)
   }
   const handleDeleteClick = (pollId) => {
@@ -76,9 +126,8 @@ export default function AdminPollsPage() {
   }
   const handleDelete = async () => {
     try {
-      await apiRequest(`${process.env.NEXT_PUBLIC_API_URL}/api/users/polls/${deletingPollId}`,
-        'DELETE')
-      setPolls(polls.filter(p => p.id !== deletingPollId))
+      await apiRequest(`${process.env.NEXT_PUBLIC_API_URL}/api/users/polls/${deletingPollId}/`, 'DELETE')
+      setPolls(polls.filter((p) => p.id !== deletingPollId))
       toast.success('Poll deleted')
       setDeleteAlertOpen(false)
       setDeletingPollId(null)
