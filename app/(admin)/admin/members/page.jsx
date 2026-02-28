@@ -260,7 +260,7 @@ export default function MembersPage() {
                   </TableCell>
                   <TableCell>{member.email}</TableCell>
                   <TableCell>
-                    {member.designation.title}
+                   {member.designation ? member.designation.title : "No Designation"}
                   </TableCell>
                   <TableCell>{member.joining_date}</TableCell>
                   <TableCell>
