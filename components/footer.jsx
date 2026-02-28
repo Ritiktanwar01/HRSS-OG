@@ -3,7 +3,7 @@ import Link from "next/link"
 import { Facebook, Twitter, Instagram, Youtube, Mail, Phone, MapPin } from "lucide-react"
 import { useEffect, useState } from "react"
 import { toast } from "@/components/ui/use-toast"
-import { getCookie } from "@/hooks/api"
+import { fetchCsrfToken } from "@/hooks/use-auth"
 
 const Footer = () => {
   const fetchData = async () => {
@@ -39,12 +39,13 @@ const Footer = () => {
     if (!subscribeEmail) return
     setIsSubscribing(true)
     try {
+      const csrfToken = await fetchCsrfToken()
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/users/subscribe/`, {
         method: 'POST',
         credentials: 'include',
         headers: {
-          'Content-Type': 'application/json',
-          'X-CSRFToken': getCookie('csrftoken'),
+          "Content-Type": "application/json",
+          ...(csrfToken && { "X-CSRFToken": csrfToken }),
         },
         body: JSON.stringify({ email: subscribeEmail }),
       })
