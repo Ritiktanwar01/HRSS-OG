@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>https://www.yourdomain.com/</loc>
+  </url>
+  <url>
+    <loc>https://www.yourdomain.com/about</loc>
+  </url>
+  <url>
+    <loc>https://www.yourdomain.com/gallery</loc>
+  </url>
+  <url>
+    <loc>https://www.yourdomain.com/contact</loc>
+  </url>
+  <url>
+    <loc>https://www.yourdomain.com/public-notices</loc>
+  </url>
+  <url>
+    <loc>https://www.yourdomain.com/join-us</loc>
+  </url>
+  <url>
+    <loc>https://www.yourdomain.com/donate</loc>
+  </url>
+</urlset>

@@ -11,7 +11,7 @@ import { Input } from "@/components/ui/input"
 import { toast } from "@/components/ui/use-toast"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Eye, EyeOff, User, Upload } from "lucide-react"
-import { useAuth } from "@/hooks/use-auth"
+import { useAuth, fetchCsrfToken } from "@/hooks/use-auth"
 
 // Form schema for profile update
 const profileFormSchema = z.object({
@@ -64,9 +64,13 @@ export default function AdminSettingsPage() {
   useEffect(() => {
     const fetchUserProfile = async () => {
       try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/users/auth/me/`, {
+        const csrfToken = await fetchCsrfToken()
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/users/auth/me/`, {
+          method: "GET",
+          credentials: "include",
           headers: {
-            Authorization: `Bearer ${localStorage.getItem('access_token')}`,
+            "Content-Type": "application/json",
+            ...(csrfToken && { "X-CSRFToken": csrfToken }),
           },
         })
 
@@ -95,11 +99,13 @@ export default function AdminSettingsPage() {
     setIsLoading(true)
     try {
       const token = getAuthToken()
+      const csrfToken = await fetchCsrfToken()
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/update-profile`, {
         method: "PUT",
+        credentials: "include",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem('access_token')}`,
+          ...(csrfToken && { "X-CSRFToken": csrfToken }),
         },
         body: JSON.stringify(data),
       })
@@ -128,11 +134,13 @@ export default function AdminSettingsPage() {
     setIsLoading(true)
     try {
       const token = getAuthToken()
+      const csrfToken = await fetchCsrfToken()
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/change-password`, {
         method: "PUT",
+        credentials: "include",
         headers: {
           "Content-Type": "application/json",
-           Authorization: `Bearer ${localStorage.getItem('access_token')}`,
+          ...(csrfToken && { "X-CSRFToken": csrfToken }),
         },
         body: JSON.stringify({
           currentPassword: data.currentPassword,
@@ -176,9 +184,12 @@ export default function AdminSettingsPage() {
     formData.append("type", "profile")
 
     try {
+      const csrfToken = await fetchCsrfToken()
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/upload`, {
         method: "POST",
+        credentials: "include",
         headers: {
+          ...(csrfToken && { "X-CSRFToken": csrfToken }),
           Authorization: `Bearer ${localStorage.getItem("access_token")}`,
         },
         body: formData,

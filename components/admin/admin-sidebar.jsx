@@ -31,6 +31,22 @@ export default function AdminSidebar({ isOpen, onLinkClick }) {
     }
   }
 
+  const handleLogout = async () => {
+    try {
+      // call API to log out (server should clear session/cookie)
+      await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/logout`, {
+        method: "POST",
+        credentials: "include",
+      })
+    } catch (err) {
+      console.error("Logout API error", err)
+    } finally {
+      // clear client tokens and redirect to login
+      localStorage.removeItem("access_token")
+      window.location.href = "/admin/login"
+    }
+  }
+
   // Close sidebar when clicking outside on mobile
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -64,11 +80,6 @@ export default function AdminSidebar({ isOpen, onLinkClick }) {
       name: "Designations",
       href: "/admin/designations",
       icon: <Award className="h-5 w-5" />,
-    },
-    {
-      name: "About",
-      href: "/admin/about",
-      icon: <Info className="h-5 w-5" />,
     },
     {
       name: "Certificates",
@@ -161,14 +172,18 @@ export default function AdminSidebar({ isOpen, onLinkClick }) {
 
           {/* Footer */}
           <div className="border-t p-4">
-            <Link
-              href="/admin/login"
-              onClick={handleLinkClick}
+            <a
+              href="#"
+              onClick={(e) => {
+                e.preventDefault()
+                handleLinkClick()
+                handleLogout()
+              }}
               className="flex w-full items-center justify-center rounded-md bg-red-100 px-3 py-2 text-sm font-medium text-red-700 hover:bg-red-200 transition-colors"
             >
               <LogOut className="mr-2 h-5 w-5" />
               <span>Logout</span>
-            </Link>
+            </a>
           </div>
         </div>
       </div>

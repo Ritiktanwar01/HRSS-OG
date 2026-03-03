@@ -4,13 +4,14 @@ import { useState, useEffect } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { Button } from "@/components/ui/button"
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
+import { Sheet, SheetContent, SheetTrigger} from "@/components/ui/sheet"
 import { Menu } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { DialogTitle } from "@radix-ui/react-dialog"
 
 const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false)
+  const [openMobile, setOpenMobile] = useState(false) // control mobile sheet
   const pathname = usePathname()
 
   useEffect(() => {
@@ -51,6 +52,7 @@ const Navbar = () => {
             <Link
               key={item.name}
               href={item.href}
+              
               className={cn(
                 "px-3 py-2 rounded-md text-sm font-medium transition-colors",
                 pathname === item.href
@@ -71,7 +73,7 @@ const Navbar = () => {
 
         {/* Mobile Navigation - Only visible on small screens */}
         <div className="md:hidden">
-          <Sheet>
+          <Sheet open={openMobile} onOpenChange={setOpenMobile}>
             <SheetTrigger asChild>
               <Button variant="ghost" size="icon" className="md:hidden">
                 <Menu className="h-6 w-6" />
@@ -79,7 +81,7 @@ const Navbar = () => {
               </Button>
             </SheetTrigger>
             <SheetContent side="right" className="w-[250px] sm:w-[300px]">
-              <DialogTitle>SideBar</DialogTitle>
+              <DialogTitle>{''}</DialogTitle>
               {/* Add an accessible title for the dialog */}
               <h2 className="sr-only">Navigation Menu</h2> {/* Screen-reader-only title */}
               <div className="flex flex-col mt-6 space-y-2">
@@ -87,6 +89,7 @@ const Navbar = () => {
                   <Link
                     key={item.name}
                     href={item.href}
+                    onClick={() => setOpenMobile(false)}
                     className={cn(
                       "px-4 py-2 rounded-md text-sm font-medium transition-colors",
                       pathname === item.href
@@ -98,10 +101,10 @@ const Navbar = () => {
                   </Link>
                 ))}
                 <Button asChild className="mt-4 bg-bhagva-700 hover:bg-bhagva-800 w-full">
-                  <Link href="/join-us">Join Us</Link>
+                  <Link href="/join-us" onClick={() => setOpenMobile(false)}>Join Us</Link>
                 </Button>
                 <Button asChild className="mt-2 bg-bhagva-600 hover:bg-bhagva-700 w-full">
-                  <Link href="/donate">Donate Now</Link>
+                  <Link href="/donate" onClick={() => setOpenMobile(false)}>Donate Now</Link>
                 </Button>
               </div>
             </SheetContent>

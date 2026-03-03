@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { toast } from "@/components/ui/use-toast"
 import { Download, Search, Filter } from "lucide-react"
 import { format } from "date-fns"
+import {fetchCsrfToken} from "@/hooks/use-auth"
 
 export default function DonationsPage() {
   const [donations, setDonations] = useState([])
@@ -21,9 +22,12 @@ export default function DonationsPage() {
   useEffect(() => {
     const fetchDonations = async () => {
       try {
-        const response = await fetch(`${`${process.env.NEXT_PUBLIC_API_URL}/api` || "/api"}/donations`, {
+        const csrfToken = await fetchCsrfToken()
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/donations/donations`, {
+          method: "GET",
+          credentials: "include",
           headers: {
-            Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+            ...(csrfToken && { "X-CSRFToken": csrfToken }),
           },
         })
 
@@ -32,7 +36,8 @@ export default function DonationsPage() {
         }
 
         const data = await response.json()
-        setDonations(data.donations || [])
+        setDonations(data || [])
+        console.log(data)
       } catch (error) {
         console.error("Error fetching donations:", error)
         toast({
@@ -53,9 +58,9 @@ export default function DonationsPage() {
     const matchesSearch =
       donation.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       donation.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      donation.transactionId?.toLowerCase().includes(searchTerm.toLowerCase())
+      donation.transaction_id?.toLowerCase().includes(searchTerm.toLowerCase())
 
-    const matchesStatus = statusFilter === "all" || donation.paymentStatus === statusFilter
+    const matchesStatus = statusFilter === "all" || donation.payment_status === statusFilter
 
     return matchesSearch && matchesStatus
   })
@@ -63,9 +68,9 @@ export default function DonationsPage() {
   // Sort donations
   const sortedDonations = [...filteredDonations].sort((a, b) => {
     if (sortBy === "date-desc") {
-      return new Date(b.createdAt) - new Date(a.createdAt)
+      return new Date(b.created_at) - new Date(a.created_at)
     } else if (sortBy === "date-asc") {
-      return new Date(a.createdAt) - new Date(b.createdAt)
+      return new Date(a.created_at) - new Date(b.created_at)
     } else if (sortBy === "amount-desc") {
       return b.amount - a.amount
     } else if (sortBy === "amount-asc") {
@@ -83,10 +88,10 @@ export default function DonationsPage() {
       donation.email,
       donation.phone,
       donation.amount,
-      donation.donationType === "oneTime" ? "One-time" : "Monthly",
-      donation.paymentStatus,
-      donation.transactionId || "N/A",
-      new Date(donation.createdAt).toLocaleDateString(),
+      donation.donation_type === "oneTime" ? "One-time" : "Monthly",
+      donation.payment_status,
+      donation.transaction_id || "N/A",
+      new Date(donation.created_at).toLocaleDateString(),
     ])
 
     const csvContent = [headers.join(","), ...csvData.map((row) => row.join(","))].join("\n")
@@ -105,11 +110,11 @@ export default function DonationsPage() {
   // Get status badge color
   const getStatusBadge = (status) => {
     switch (status) {
-      case "success":
+      case "SUCCESS":
         return <Badge className="bg-green-500 text-white">Success</Badge>
-      case "failed":
+      case "FAILED":
         return <Badge variant="destructive">Failed</Badge>
-      case "pending":
+      case "PENDING":
         return (
           <Badge variant="outline" className="text-yellow-600 border-yellow-300 bg-yellow-50">
             Pending
@@ -122,7 +127,7 @@ export default function DonationsPage() {
 
   // Calculate total donations
   const totalSuccessfulDonations = donations
-    .filter((d) => d.paymentStatus === "success")
+    .filter((d) => d.payment_status === "success")
     .reduce((sum, donation) => sum + donation.amount, 0)
 
   return (
@@ -159,7 +164,7 @@ export default function DonationsPage() {
           </CardHeader>
           <CardContent className="px-0 pb-0">
             <p className="text-xl sm:text-2xl lg:text-3xl font-bold text-green-600">
-              {donations.filter((d) => d.paymentStatus === "success").length}
+              {donations.filter((d) => d.payment_status === "success").length}
             </p>
           </CardContent>
         </Card>
@@ -171,7 +176,7 @@ export default function DonationsPage() {
           </CardHeader>
           <CardContent className="px-0 pb-0">
             <p className="text-xl sm:text-2xl lg:text-3xl font-bold text-red-600">
-              {donations.filter((d) => d.paymentStatus === "failed").length}
+              {donations.filter((d) => d.payment_status === "failed").length}
             </p>
           </CardContent>
         </Card>
@@ -252,17 +257,17 @@ export default function DonationsPage() {
                   </TableHeader>
                   <TableBody>
                     {sortedDonations.map((donation) => (
-                      <TableRow key={donation._id}>
+                      <TableRow key={donation.id}>
                         <TableCell className="font-medium text-sm">{donation.name}</TableCell>
                         <TableCell className="text-sm">{donation.email}</TableCell>
                         <TableCell className="text-sm font-semibold">₹{donation.amount}</TableCell>
                         <TableCell className="text-sm">
-                          {donation.donationType === "oneTime" ? "One-time" : "Monthly"}
+                          {donation.donation_type === "ONE_TIME" ? "One Time" : "MONTHLY"}
                         </TableCell>
-                        <TableCell>{getStatusBadge(donation.paymentStatus)}</TableCell>
-                        <TableCell className="font-mono text-xs">{donation.transactionId || "N/A"}</TableCell>
+                        <TableCell>{getStatusBadge(donation.payment_status)}</TableCell>
+                        <TableCell className="font-mono text-xs">{donation.transaction_id || "N/A"}</TableCell>
                         <TableCell className="text-sm">
-                          {donation.createdAt ? format(new Date(donation.createdAt), "dd MMM yyyy") : "N/A"}
+                          {donation.created_at ? format(new Date(donation.created_at), "dd MMM yyyy") : "N/A"}
                         </TableCell>
                       </TableRow>
                     ))}
@@ -273,7 +278,7 @@ export default function DonationsPage() {
               {/* Mobile Card View */}
               <div className="lg:hidden space-y-3">
                 {sortedDonations.map((donation) => (
-                  <Card key={donation._id} className="p-3 border-l-4 border-l-bhagva-600">
+                  <Card key={donation.id} className="p-3 border-l-4 border-l-bhagva-600">
                     <div className="space-y-2">
                       <div className="flex justify-between items-start">
                         <div className="flex-1 min-w-0 pr-2">
@@ -282,28 +287,28 @@ export default function DonationsPage() {
                         </div>
                         <div className="text-right flex-shrink-0">
                           <p className="font-bold text-sm text-bhagva-800">₹{donation.amount}</p>
-                          <div className="mt-1">{getStatusBadge(donation.paymentStatus)}</div>
+                          <div className="mt-1">{getStatusBadge(donation.payment_status)}</div>
                         </div>
                       </div>
 
                       <div className="grid grid-cols-2 gap-2 text-xs">
                         <div>
                           <span className="text-gray-500">Type:</span>
-                          <p className="font-medium">{donation.donationType === "oneTime" ? "One-time" : "Monthly"}</p>
+                          <p className="font-medium">{donation.donation_type === "oneTime" ? "One-time" : "Monthly"}</p>
                         </div>
                         <div>
                           <span className="text-gray-500">Date:</span>
                           <p className="font-medium">
-                            {donation.createdAt ? format(new Date(donation.createdAt), "dd MMM yyyy") : "N/A"}
+                            {donation.created_at ? format(new Date(donation.created_at), "dd MMM yyyy") : "N/A"}
                           </p>
                         </div>
                       </div>
 
-                      {donation.transactionId && (
+                      {donation.transaction_id && (
                         <div className="text-xs">
                           <span className="text-gray-500">Transaction ID:</span>
                           <p className="font-mono text-xs break-all bg-gray-50 p-1 rounded mt-1">
-                            {donation.transactionId}
+                            {donation.transaction_id}
                           </p>
                         </div>
                       )}
