@@ -60,7 +60,6 @@ export default function DonatePage() {
       message: data.message,
     }
 
-    console.log("User Info:", UserInfo)
 
     const request = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/payments/payments/initiate/`, {
       method: "POST",
@@ -70,12 +69,13 @@ export default function DonatePage() {
       body: JSON.stringify(UserInfo),
     })
 
-    if (!request.ok) {
-      console.log(request)
-      throw new Error("Network response was not ok")
-    }
+    // if (!request.ok) {
+    //   console.log(request)
+    //   throw new Error("Network response was not ok")
+    // }
 
     const response = await request.json()
+    console.log("Payment API response:", response)
     if (!response.success) throw new Error("Failed to process donation")
 
     setIsSuccess(true)
