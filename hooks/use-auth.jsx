@@ -71,16 +71,22 @@ export function AuthProvider({ children }) {
 
   const checkAuth = async () => {
     try {
+      let csrfToken = await fetchCsrfToken()
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/users/auth/me/`, {
         method: "GET",
         credentials: "include",
+        headers: {
+        "Content-Type": "application/json",
+        ...(csrfToken && { "X-CSRFToken": csrfToken }),
+      },
       })
       if (response.ok) {
         const userData = await response.json()
         setUser(userData)
       } else {
         setUser(null)
-        router.push("/admin/login")
+        console.log(response)
+        // router.push("/admin/login")
       }
     } catch (error) {
       console.error("Auth check error:", error)

@@ -18,7 +18,7 @@ import {
   X,
 } from "lucide-react"
 
-export default function AdminSidebar({ isOpen, onLinkClick }) {
+export default function MemberSidebar({ isOpen, onLinkClick }) {
   const pathname = usePathname()
 
   const isActive = (path) => {
@@ -52,32 +52,32 @@ export default function AdminSidebar({ isOpen, onLinkClick }) {
   const menuItems = [
     {
       name: "Dashboard",
-      href: "/members/dashboard",
+      href: "/member/dashboard",
       icon: <BarChart3 className="h-5 w-5" />,
     },
     {
       name: "Polls",
-      href: "/members/polls",
+      href: "/member/polls",
       icon: <Users className="h-5 w-5" />,
     },
-    {
-      name: "Events",
-      href: "/members/events",
-      icon: <Award className="h-5 w-5" />,
-    },
+    // {
+    //   name: "Events",
+    //   href: "/member/events",
+    //   icon: <Award className="h-5 w-5" />,
+    // },
     {
       name: "Certificates",
-      href: "/members/certificates",
+      href: "/member/certificates",
       icon: <FileText className="h-5 w-5" />,
     },
     {
       name: "Public Notices",
-      href: "/members/notices",
+      href: "/member/notices",
       icon: <FileText className="h-5 w-5" />,
     },
     {
       name: "Settings",
-      href: "/members/settings",
+      href: "/member/settings",
       icon: <Settings className="h-5 w-5" />,
     },
   ]
@@ -99,7 +99,7 @@ export default function AdminSidebar({ isOpen, onLinkClick }) {
           <div className="flex h-16 items-center justify-between border-b px-4">
             <Link href="/admin/dashboard" className="flex items-center font-semibold text-lg">
               <Home className="mr-2 h-5 w-5 text-bhagva-600" />
-              <span className="text-gray-900">Admin Panel</span>
+              <span className="text-gray-900">Members Panel</span>
             </Link>
             {/* Close button for mobile */}
             <button onClick={handleLinkClick} className="lg:hidden p-1 rounded-md hover:bg-gray-100">

@@ -20,7 +20,7 @@ const loginFormSchema = z.object({
 
 type LoginFormValues = z.infer<typeof loginFormSchema>
 
-export default function AdminLoginPage() {
+export default function MemberLoginPage() {
   const router = useRouter()
   const [error, setError] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
@@ -46,11 +46,11 @@ export default function AdminLoginPage() {
 
         toast({
           title: "Login Successful",
-          description: "Welcome to the admin dashboard",
+          description: "Welcome to the member's dashboard",
         })
 
-        // Redirect to admin dashboard
-        router.push("/admin/dashboard")
+        // Redirect to member dashboard
+        router.push("/member/dashboard")
       } else {
         setError("Invalid username or password")
       }

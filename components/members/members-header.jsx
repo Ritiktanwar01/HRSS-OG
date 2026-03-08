@@ -13,7 +13,7 @@ import {
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { useAuth } from "@/hooks/use-auth"
 
-export default function AdminHeader({ toggleSidebar }) {
+export default function MembersHeader({ toggleSidebar }) {
   const { user, logout } = useAuth()
 
   return (
