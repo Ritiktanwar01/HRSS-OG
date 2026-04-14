@@ -80,7 +80,7 @@ export default function AdminSettingsPage() {
           profileForm.reset({
             name: `${data?.first_name} ${data?.last_name}` || "",
             email: data.email || "",
-            profilePicture: `${process.env.NEXT_PUBLIC_API_URL}${data.profile_pic}` || "",
+            profilePicture: `${process.env.NEXT_PUBLIC_API_URL} ${data.profile.profile_pic}` || "",
           })
         }
       } catch (error) {
