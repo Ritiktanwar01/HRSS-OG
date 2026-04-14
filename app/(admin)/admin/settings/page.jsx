@@ -76,11 +76,11 @@ export default function AdminSettingsPage() {
 
         if (response.ok) {
           const data = await response.json()
-          console.log("User profile data:", data)
+
           profileForm.reset({
             name: `${data?.first_name} ${data?.last_name}` || "",
             email: data.email || "",
-            profilePicture: data.profilePicture || "",
+            profilePicture: `${process.env.NEXT_PUBLIC_API_URL}${data.profile_pic}` || "",
           })
         }
       } catch (error) {
