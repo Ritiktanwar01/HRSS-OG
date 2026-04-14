@@ -60,6 +60,24 @@ export default function AdminSettingsPage() {
     },
   })
 
+  const buildProfilePictureUrl = (value) => {
+    if (!value) return ""
+    if (value.startsWith("http://") || value.startsWith("https://")) {
+      return value
+    }
+    return `${process.env.NEXT_PUBLIC_API_URL}${value}`
+  }
+
+  const profilePictureValue = profileForm.watch("profilePicture")
+
+  const stripProfilePictureValue = (value) => {
+    if (!value || typeof value !== "string") return ""
+    if (value.startsWith(process.env.NEXT_PUBLIC_API_URL)) {
+      return value.replace(process.env.NEXT_PUBLIC_API_URL, "")
+    }
+    return value
+  }
+
   // Fetch user profile on component mount
   useEffect(() => {
     const fetchUserProfile = async () => {
@@ -80,7 +98,7 @@ export default function AdminSettingsPage() {
           profileForm.reset({
             name: `${data?.first_name} ${data?.last_name}` || "",
             email: data.email || "",
-            profilePicture: `${process.env.NEXT_PUBLIC_API_URL + data.profile.profile_pic}` || "",
+            profilePicture: data.profile?.profile_pic || "",
           })
         }
       } catch (error) {
@@ -101,7 +119,7 @@ export default function AdminSettingsPage() {
     try {
     
       const csrfToken = await fetchCsrfToken()
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/update-profile`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/users/auth/update-profile/`, {
         method: "PUT",
         credentials: "include",
         headers: {
@@ -186,22 +204,37 @@ export default function AdminSettingsPage() {
 
     try {
       const csrfToken = await fetchCsrfToken()
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/upload`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/trust/upload/`, {
         method: "POST",
         credentials: "include",
         headers: {
           ...(csrfToken && { "X-CSRFToken": csrfToken }),
-          Authorization: `Bearer ${localStorage.getItem("access_token")}`,
         },
         body: formData,
       })
 
       if (response.ok) {
         const data = await response.json()
-        profileForm.setValue("profilePicture", data.url)
+        const uploadedUrl = data.url
+        profileForm.setValue("profilePicture", stripProfilePictureValue(uploadedUrl))
+
+        const updateResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/users/auth/update-profile-pic/`, {
+          method: "PUT",
+          credentials: "include",
+          headers: {
+            "Content-Type": "application/json",
+            ...(csrfToken && { "X-CSRFToken": csrfToken }),
+          },
+          body: JSON.stringify({ profilePicture: uploadedUrl }),
+        })
+
+        if (!updateResponse.ok) {
+          throw new Error("Failed to save profile picture")
+        }
+
         toast({
           title: "Upload Successful",
-          description: "Profile picture has been uploaded successfully.",
+          description: "Profile picture has been uploaded and saved successfully.",
         })
       } else {
         throw new Error("Failed to upload profile picture")
@@ -243,9 +276,9 @@ export default function AdminSettingsPage() {
                   <div className="flex flex-col md:flex-row gap-6">
                     <div className="flex flex-col items-center space-y-4">
                       <div className="h-32 w-32 rounded-full bg-muted flex items-center justify-center overflow-hidden">
-                        {profileForm.watch("profilePicture") ? (
+                        {profilePictureValue ? (
                           <img
-                            src={profileForm.watch("profilePicture") || "/placeholder.svg"}
+                            src={buildProfilePictureUrl(profilePictureValue) || "/placeholder.svg"}
                             alt="Profile"
                             className="h-full w-full object-cover"
                           />
