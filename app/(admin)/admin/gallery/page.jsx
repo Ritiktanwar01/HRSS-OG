@@ -27,6 +27,7 @@ const [galleryItems, setGalleryItems] = useState({ images: [], videos: [] });
 const [activeTab, setActiveTab] = useState("images");
 const [isAddingItem, setIsAddingItem] = useState(false);
 const [editingItem, setEditingItem] = useState(null);
+const [isDialogOpen, setIsDialogOpen] = useState(false);
 const [isLoading, setIsLoading] = useState(false);
 
 const [newItem, setNewItem] = useState({
@@ -79,6 +80,7 @@ useEffect(() => {
 }, []);
 
 const handleAddItem = () => {
+  setIsDialogOpen(true);
   setIsAddingItem(true);
   setEditingItem(null);
   setNewItem({
@@ -117,6 +119,7 @@ const backendToFrontendCategory = (cat) => {
 };
 
 const handleEditItem = (item) => {
+  setIsDialogOpen(true);
   setIsAddingItem(false);
   setEditingItem(item);
   setNewItem({
@@ -244,7 +247,6 @@ const handleSubmit = async (e) => {
       credentials: "include",
       headers: {
         ...(csrfToken && { "X-CSRFToken": csrfToken }),
-        // ❌ no Content-Type here, browser sets it automatically
       },
       body: form,
     });
@@ -293,7 +295,9 @@ const handleSubmit = async (e) => {
       });
     }
 
-    document.querySelector("[data-radix-dialog-close]")?.click();
+    setIsDialogOpen(false);
+    setEditingItem(null);
+    setIsAddingItem(false);
   } catch (error) {
     console.error("Error saving gallery item:", error);
     toast({
@@ -333,7 +337,7 @@ const handleSubmit = async (e) => {
                 <CardTitle>Image Gallery</CardTitle>
                 <CardDescription>Manage images displayed in the gallery section</CardDescription>
               </div>
-              <Dialog>
+              <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                 <DialogTrigger asChild>
                   <Button className="bg-bhagva-700 hover:bg-bhagva-800" onClick={handleAddItem}>
                     <Plus className="mr-2 h-4 w-4" /> Add Image
@@ -449,18 +453,15 @@ const handleSubmit = async (e) => {
                       <h3 className="font-semibold text-lg">{item.title}</h3>
                       <p className="text-sm text-white/90">{item.description}</p>
                       <div className="absolute top-2 right-2 flex space-x-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <Dialog>
-                          <DialogTrigger asChild>
-                            <Button
-                              variant="secondary"
-                              size="icon"
-                              className="h-8 w-8"
-                              onClick={() => handleEditItem(item)}
-                            >
-                              <Edit className="h-4 w-4" />
-                            </Button>
-                          </DialogTrigger>
-                        </Dialog>
+                        <Button
+                          variant="secondary"
+                          size="icon"
+                          className="h-8 w-8"
+                          type="button"
+                          onClick={() => handleEditItem(item)}
+                        >
+                          <Edit className="h-4 w-4" />
+                        </Button>
                         <Button
                           variant="destructive"
                           size="icon"
@@ -485,7 +486,7 @@ const handleSubmit = async (e) => {
                 <CardTitle>Video Gallery</CardTitle>
                 <CardDescription>Manage videos displayed in the gallery section</CardDescription>
               </div>
-              <Dialog>
+              <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                 <DialogTrigger asChild>
                   <Button className="bg-bhagva-700 hover:bg-bhagva-800" onClick={handleAddItem}>
                     <Plus className="mr-2 h-4 w-4" /> Add Video
@@ -630,13 +631,14 @@ const handleSubmit = async (e) => {
                       <h3 className="font-semibold text-lg">{item.title}</h3>
                       <p className="text-sm text-muted-foreground">{item.description}</p>
                       <div className="mt-2 flex space-x-2">
-                        <Dialog>
-                          <DialogTrigger asChild>
-                            <Button variant="outline" size="sm" onClick={() => handleEditItem(item)}>
-                              <Edit className="mr-2 h-4 w-4" /> Edit
-                            </Button>
-                          </DialogTrigger>
-                        </Dialog>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          type="button"
+                          onClick={() => handleEditItem(item)}
+                        >
+                          <Edit className="mr-2 h-4 w-4" /> Edit
+                        </Button>
                         <Button
                           variant="outline"
                           size="sm"

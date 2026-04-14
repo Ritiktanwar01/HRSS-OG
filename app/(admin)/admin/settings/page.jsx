@@ -99,7 +99,7 @@ export default function AdminSettingsPage() {
   async function onProfileSubmit(data) {
     setIsLoading(true)
     try {
-      const token = getAuthToken()
+    
       const csrfToken = await fetchCsrfToken()
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/update-profile`, {
         method: "PUT",
