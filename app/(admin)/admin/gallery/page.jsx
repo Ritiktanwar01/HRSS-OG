@@ -398,7 +398,7 @@ const handleSubmit = async (e) => {
                         {newItem.url && (
                           <div className="relative w-full h-40 bg-muted rounded-md overflow-hidden">
                             <img
-                              src={newItem.url || "/placeholder.svg"}
+                              src={editingItem ? process.env.NEXT_PUBLIC_API_URL + newItem.url : newItem.url || "/placeholder.svg"}
                               alt="Preview"
                               className="w-full h-full object-cover"
                             />
