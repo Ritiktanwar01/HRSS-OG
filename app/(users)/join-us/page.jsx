@@ -114,7 +114,7 @@ export default function JoinUsPage() {
                   </li>
                   <li className="flex items-start">
                     <span className="text-bhagva-700 mr-3 font-bold">2.</span>
-                    <span>Pay ₹1,100 registration fee at HRSS headquarters</span>
+                    <span>Pay ₹2,100 registration fee at HRSS headquarters</span>
                   </li>
                   <li className="flex items-start">
                     <span className="text-bhagva-700 mr-3 font-bold">3.</span>
@@ -328,7 +328,7 @@ export default function JoinUsPage() {
                       <div className="flex items-start space-x-3">
                         <div className="text-bhagva-700 font-bold pt-1">3.</div>
                         <p className="text-gray-700">
-                          The applicant must pay ₹1,100 as a membership registration fee to be submitted in hard copy form at HRSS headquarters.
+                          The applicant must pay ₹2,100 as a membership registration fee to be submitted in hard copy form at HRSS headquarters.
                         </p>
                       </div>
 
@@ -402,7 +402,7 @@ export default function JoinUsPage() {
               <p className="text-gray-700 mb-4">
                 One-time membership registration fee to be paid at our headquarters.
               </p>
-              <div className="text-3xl font-bold text-bhagva-700">₹1,100</div>
+              <div className="text-3xl font-bold text-bhagva-700">₹2,100</div>
               <p className="text-sm text-gray-600 mt-2">Must be paid in cash at HRSS office</p>
             </CardContent>
           </Card>
@@ -415,7 +415,7 @@ export default function JoinUsPage() {
               <ol className="space-y-2 text-sm text-gray-700">
                 <li>1. Submit this online form</li>
                 <li>2. Download printed form</li>
-                <li>3. Pay ₹1,100 at HQ</li>
+                <li>3. Pay ₹2,100 at HQ</li>
                 <li>4. Submit documents</li>
                 <li>5. Receive confirmation</li>
               </ol>

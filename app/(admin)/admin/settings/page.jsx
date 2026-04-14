@@ -76,8 +76,9 @@ export default function AdminSettingsPage() {
 
         if (response.ok) {
           const data = await response.json()
+          console.log("User profile data:", data)
           profileForm.reset({
-            name: data.name || "",
+            name: `${data?.first_name} ${data?.last_name}` || "",
             email: data.email || "",
             profilePicture: data.profilePicture || "",
           })
